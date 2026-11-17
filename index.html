@@ -2048,6 +2048,10 @@
         if (msg.indexOf('WRONG_PASSWORD') !== -1) return 'รหัสผ่านปัจจุบันไม่ถูกต้อง';
         if (msg.indexOf('WRONG_CODE') !== -1) return 'รหัสยืนยันไม่ถูกต้อง';
         if (msg.indexOf('CODE_EXPIRED') !== -1) return 'รหัสยืนยันหมดอายุหรือใส่ผิดเกินกำหนด กรุณาขอรหัสใหม่';
+        if (msg.indexOf('CHAT_NOT_AUTHORIZED') !== -1) return 'สคริปต์ยังไม่ได้รับสิทธิ์ส่งข้อความออกนอกระบบ ให้เจ้าของเปิด Apps Script แล้วรันฟังก์ชัน authorizeLevelUp 1 ครั้ง';
+        if (msg.indexOf('CHAT_HTTP_404') !== -1) return 'Google Chat ไม่พบเว็บฮุคนี้ (404) ลิงก์อาจถูกลบหรือคัดลอกมาไม่ครบ';
+        if (msg.indexOf('CHAT_HTTP_') !== -1) return 'Google Chat ปฏิเสธข้อความ (รหัส ' + msg.split('CHAT_HTTP_')[1].slice(0, 3) + ') ตรวจว่าเว็บฮุคยังใช้ได้และผู้ดูแลโดเมนอนุญาตเว็บฮุคขาเข้า';
+        if (msg.indexOf('CHAT_FETCH_FAILED') !== -1) return 'ส่งไป Google Chat ไม่ได้ กรุณาลองใหม่อีกครั้ง';
         if (msg.indexOf('NO_API_URL') !== -1) return 'ยังไม่ได้ตั้งค่าลิงก์ /exec ในไฟล์ config.js';
         if ((typeof navigator !== 'undefined' && navigator.onLine === false) || (err && err.name === 'TypeError' && !IN_APPS_SCRIPT)) return 'ออฟไลน์หรือเชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
         if (msg.indexOf('BAD_SERVICE_ACCOUNT') !== -1) return 'คีย์ service account ไม่ถูกต้อง ต้องเป็นเนื้อหาไฟล์ JSON ที่มี client_email และ private_key';
