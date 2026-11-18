@@ -2347,7 +2347,7 @@
       function flushTeacherState() {
         if (!teacherAuthenticated || !saveDirty) return;
         if (saveInFlight) return;
-        if (!currentCourseId) {   // ยังไม่มีรายวิชา จึงไม่มีอะไรให้บันทึก
+        if (!currentCourseId && !legacyServer) {   // ยังไม่มีรายวิชา จึงไม่มีอะไรให้บันทึก
           saveDirty = false;
           setSaveStatus('ready');
           return;
@@ -3573,6 +3573,7 @@
 
       let aiReady = false;
       let currentCourseId = '';
+      let legacyServer = false;
       let isAdmin = false;
       let myTeacherId = '';
       const courses = [];
@@ -3582,6 +3583,8 @@
       function applyState(state) {
         aiReady = Boolean(state.aiReady);
         currentCourseId = state.courseId || '';
+        // เซิร์ฟเวอร์ที่ยังไม่ได้อัปเดต Code.gs ไม่ส่งรายการรายวิชามา: ทำงานแบบวิชาเดียวเหมือนเดิม
+        legacyServer = state.courses === undefined;
         isAdmin = Boolean(state.isAdmin);
         myTeacherId = state.teacherId || '';
         courses.length = 0;
@@ -3663,7 +3666,7 @@
         refreshDataBtn.hidden = !loggedIn;
         $('profileBtn').hidden = !loggedIn;
         $('chatSettingsBtn').hidden = !(loggedIn && role === 'teacher');
-        $('aiSettingsBtn').hidden = !(loggedIn && role === 'teacher' && isAdmin);
+        $('aiSettingsBtn').hidden = !(loggedIn && role === 'teacher' && (isAdmin || legacyServer));
         renderCourseBar(loggedIn, role);
         applyProfile();
         document.body.classList.toggle('is-logged-out', !loggedIn);
@@ -6245,8 +6248,9 @@
 
       function renderCourseBar(loggedIn, role) {
         const bar = $('courseBar');
-        bar.hidden = !loggedIn;
-        if (!loggedIn) return;
+        bar.hidden = !loggedIn || legacyServer;
+        document.body.classList.remove('no-course');
+        if (!loggedIn || legacyServer) return;
         const isTeacher = role === 'teacher';
         document.body.classList.toggle('no-course', isTeacher && !currentCourseId);
         courseSelect.innerHTML = '';
