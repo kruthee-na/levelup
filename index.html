@@ -4660,6 +4660,11 @@
         'ม28': [2, 1, 2, 'ตึก 2 ห้อง 226']
       };
 
+      /* ตารางสอนชุดนี้เป็นของรายวิชาแรกเท่านั้น รายวิชาอื่นยังไม่มีตารางสอน ครูเลือกคาบเองตอนเช็กชื่อ */
+      function artSlot(room) {
+        return legacyServer || currentCourseId === 'c1' ? ART_SLOTS[normRoom(room)] : undefined;
+      }
+
       function normRoom(rName) {
         return String(rName || '').trim().replace(/[^a-zA-Z0-9฀-๿]/g, '');
       }
@@ -4694,7 +4699,7 @@
           (eventsByDay[d.getDate()] = eventsByDay[d.getDate()] || []).push(a.title);
         });
 
-        const slot = ART_SLOTS[normRoom(roomFilter)];
+        const slot = artSlot(roomFilter);
         const artDayOfWeek = slot ? slot[0] + 1 : -1;
 
         for (let d = 1; d <= lastDate; d++) {
@@ -4744,7 +4749,7 @@
           grid.appendChild(header);
         });
 
-        const slot = ART_SLOTS[normRoom(room)];
+        const slot = artSlot(room);
         days.forEach(function (dayName, dIdx) {
           const label = document.createElement('div');
           label.className = 'timetable-row-label';
@@ -4860,7 +4865,7 @@
 
       /* เลือกคาบตามตารางสอนของห้องในวันที่เลือก */
       function attApplyTimetable() {
-        const slot = ART_SLOTS[normRoom(attRoomSelect.value)];
+        const slot = artSlot(attRoomSelect.value);
         const day = new Date(attDateInput.value + 'T00:00:00').getDay();
         if (slot && slot[0] + 1 === day) {
           attPeriodSelect.value = String(slot[1]);
