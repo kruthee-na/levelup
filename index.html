@@ -83,6 +83,7 @@
     .status-dot.is-busy { background: #2563eb; box-shadow: 0 0 0 3px rgba(124, 92, 214, 0.22); }
     .status-dot.is-offline { background: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2); }
 
+    .app-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 12px; padding: var(--space-2) var(--space-3); text-align: center; font-size: 0.8rem; font-weight: 500; color: var(--ink-secondary); }
     .container { max-width: 1180px; margin: 0 auto; padding: var(--space-6); display: grid; gap: var(--space-6); }
     .card { background: var(--surface); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: var(--space-6); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
     .card.is-editing { border-color: rgba(167, 139, 250, 0.7); box-shadow: 0 0 0 3px rgba(124, 92, 214, 0.16), var(--shadow); }
@@ -1814,6 +1815,10 @@
         </form>
       </section>
     </div>
+    <footer class="app-footer">
+      <span>© <span id="footerYear">2026</span> LevelUp • สงวนลิขสิทธิ์</span>
+      <span>Develop &amp; Design by Kruthee • โรงเรียนนิยมศิลป์อนุสรณ์</span>
+    </footer>
   </main>
   </div>
 
@@ -2405,6 +2410,7 @@
       let chartRoomComp = null;
 
       function $(id) { return document.getElementById(id); }
+      $('footerYear').textContent = String(new Date().getFullYear());   // ปีปัจจุบันของเครื่องผู้ใช้
 
       const classroomDatalist = $('classroomDatalist');
       const newClassroomInput = $('newClassroomInput');
