@@ -554,6 +554,12 @@
     .temp-pass { padding: 10px 14px; border-radius: 12px; background: rgba(245, 158, 11, 0.16); color: #7a4300; font-size: 0.9rem; line-height: 1.5; overflow-wrap: anywhere; }
     .temp-pass code { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.06em; }
 
+    /* ---------- แก้ไขตารางสอน ---------- */
+    .slot-list { display: flex; flex-direction: column; gap: 6px; }
+    .slot-row { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-input); font-size: 0.86rem; min-width: 0; }
+    .slot-row span { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+    .timetable-cell .room { font-size: 0.7rem; color: var(--brand); font-weight: 700; }
+
     /* ---------- กำหนดส่งและการหักคะแนนส่งช้า ---------- */
     .deadline-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); min-width: 0; }
     .deadline-grid .field { min-width: 0; }
@@ -1200,8 +1206,8 @@
       <section class="card" aria-labelledby="scheduleHeading">
         <div class="section-header">
           <div>
-            <h2 class="section-title" id="scheduleHeading">ปฏิทินและตารางสอนประจำห้องเรียน</h2>
-            <p class="section-subtitle">ดูตารางคาบเรียนประจำห้อง และปฏิทินกำหนดส่งงานของนักเรียน</p>
+            <h2 class="section-title" id="scheduleHeading">ปฏิทินและตารางสอนของรายวิชา</h2>
+            <p class="section-subtitle">ดูตารางคาบสอนของทุกห้องหรือรายห้อง และปฏิทินวันที่มอบหมายงาน</p>
           </div>
           <div style="min-width: 220px;">
             <select id="scheduleRoomFilter" class="select-input" aria-label="เลือกห้องเรียนสำหรับปฏิทินและตารางสอน"></select>
@@ -1230,6 +1236,41 @@
             <div class="timetable-grid" id="weeklyTimetableGrid"></div>
           </div>
         </div>
+      </section>
+
+      <section class="card" aria-labelledby="slotHeading" id="slotEditorCard">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title" id="slotHeading">แก้ไขตารางสอนของรายวิชานี้</h2>
+            <p class="section-subtitle">เพิ่มคาบสอนของแต่ละห้อง ระบบใช้ตารางนี้แสดงในปฏิทิน ตารางสอนของนักเรียน และเลือกคาบให้ตอนเช็กชื่อ</p>
+          </div>
+        </div>
+        <div class="deadline-grid">
+          <div class="field">
+            <label for="slotDaySelect">วัน</label>
+            <select id="slotDaySelect" class="select-input">
+              <option value="0">จันทร์</option><option value="1">อังคาร</option><option value="2">พุธ</option><option value="3">พฤหัสบดี</option><option value="4">ศุกร์</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="slotPeriodSelect">คาบ</label>
+            <select id="slotPeriodSelect" class="select-input"></select>
+          </div>
+          <div class="field">
+            <label for="slotRoomSelect">ห้องเรียน</label>
+            <select id="slotRoomSelect" class="select-input"></select>
+          </div>
+          <div class="field">
+            <label for="slotPlaceInput"><span>สถานที่</span><span class="max-hint">ไม่บังคับ</span></label>
+            <input type="text" id="slotPlaceInput" class="input" maxlength="40" placeholder="เช่น ห้อง 926" autocomplete="off">
+          </div>
+        </div>
+        <div class="btn-group" style="margin-top: var(--space-3);">
+          <button type="button" class="btn btn-secondary" id="slotAddBtn">เพิ่มคาบสอน</button>
+          <button type="button" class="btn btn-primary" id="slotSaveBtn">บันทึกตารางสอน</button>
+        </div>
+        <div class="inline-status-msg" id="slotMsg" aria-live="polite" style="margin-top: 8px;"></div>
+        <div class="slot-list" id="slotList" style="margin-top: var(--space-3);"></div>
       </section>
     </div>
 
@@ -3579,6 +3620,8 @@
       const courses = [];
       const allRooms = [];
       const teacherChoices = [];
+      const courseSchedule = [];   // ตารางสอนของรายวิชาที่เปิดอยู่: { d, p, room, place }
+      let scheduleDraft = null;    // ตารางที่ครูกำลังแก้และยังไม่ได้บันทึก
 
       function applyState(state) {
         aiReady = Boolean(state.aiReady);
@@ -3593,6 +3636,9 @@
         (state.allRooms || []).forEach(function (r) { allRooms.push(r); });
         teacherChoices.length = 0;
         (state.teachers || []).forEach(function (t) { teacherChoices.push(t); });
+        courseSchedule.length = 0;
+        (state.schedule || []).forEach(function (s) { courseSchedule.push(s); });
+        scheduleDraft = null;
         classrooms.length = 0;
         students.length = 0;
         assignments.length = 0;
@@ -4660,9 +4706,27 @@
         'ม28': [2, 1, 2, 'ตึก 2 ห้อง 226']
       };
 
-      /* ตารางสอนชุดนี้เป็นของรายวิชาแรกเท่านั้น รายวิชาอื่นยังไม่มีตารางสอน ครูเลือกคาบเองตอนเช็กชื่อ */
-      function artSlot(room) {
-        return legacyServer || currentCourseId === 'c1' ? ART_SLOTS[normRoom(room)] : undefined;
+      /*
+       * คาบสอนของห้อง (หรือ 'ALL' = ทุกห้อง) ในรายวิชาที่เปิดอยู่ เรียงตามวันและคาบ
+       * รายวิชาแรกที่ยังไม่ได้ตั้งตารางสอน ใช้ตารางศิลปะ 4 เดิมที่ฝังไว้
+       */
+      function slotsFor(room) {
+        let list = scheduleDraft || courseSchedule;
+        if (!scheduleDraft && list.length === 0 && (legacyServer || currentCourseId === 'c1')) {
+          list = [];
+          classrooms.forEach(function (r) {
+            const a = ART_SLOTS[normRoom(r)];
+            if (a) list.push({ d: a[0], p: a[1], room: r, place: a[3] }, { d: a[0], p: a[2], room: r, place: a[3] });
+          });
+        }
+        return list.filter(function (s) { return room === 'ALL' || s.room === room; })
+          .sort(function (x, y) { return x.d - y.d || x.p - y.p; });
+      }
+
+      function currentCourseLabel() {
+        const c = courses.find(function (x) { return x.id === currentCourseId; });
+        if (!c || (currentCourseId === 'c1' && courseSchedule.length === 0 && !scheduleDraft)) return 'ศิลปะ 4 (ศ22102)';
+        return (c.code ? c.code + ' ' : '') + c.name;
       }
 
       function normRoom(rName) {
@@ -4693,14 +4757,15 @@
         /* แสดงหัวข้องานในวันที่ครูสร้างหัวข้อ */
         const eventsByDay = {};
         assignments.forEach(function (a) {
-          if (a.classroom !== 'ALL' && a.classroom !== roomFilter) return;
+          if (roomFilter !== 'ALL' && a.classroom !== 'ALL' && a.classroom !== roomFilter) return;
           const d = new Date(a.createdAt);
           if (isNaN(d.getTime()) || d.getFullYear() !== calendarYear || d.getMonth() !== calendarMonth) return;
           (eventsByDay[d.getDate()] = eventsByDay[d.getDate()] || []).push(a.title);
         });
 
-        const slot = artSlot(roomFilter);
-        const artDayOfWeek = slot ? slot[0] + 1 : -1;
+        const teachDays = {};
+        slotsFor(roomFilter).forEach(function (s) { teachDays[s.d + 1] = true; });
+        const pillText = '📘 ' + currentCourseLabel();
 
         for (let d = 1; d <= lastDate; d++) {
           const cell = document.createElement('div');
@@ -4709,12 +4774,12 @@
           numSpan.textContent = String(d);
           cell.appendChild(numSpan);
 
-          if (new Date(calendarYear, calendarMonth, d).getDay() === artDayOfWeek) {
+          if (teachDays[new Date(calendarYear, calendarMonth, d).getDay()]) {
             cell.classList.add('has-event');
             cell.style.background = 'rgba(250, 204, 21, 0.12)';
             const artPill = document.createElement('span');
             artPill.className = 'calendar-event-pill';
-            artPill.textContent = '🎨 ศิลปะ 4';
+            artPill.textContent = pillText;
             cell.appendChild(artPill);
           }
           if (calendarYear === TODAY.getFullYear() && calendarMonth === TODAY.getMonth() && d === TODAY.getDate()) {
@@ -4749,7 +4814,8 @@
           grid.appendChild(header);
         });
 
-        const slot = artSlot(room);
+        const slots = slotsFor(room);
+        const label0 = currentCourseLabel();
         days.forEach(function (dayName, dIdx) {
           const label = document.createElement('div');
           label.className = 'timetable-row-label';
@@ -4758,18 +4824,30 @@
           for (let pIdx = 0; pIdx < 11; pIdx++) {
             const cell = document.createElement('div');
             cell.className = 'timetable-cell';
-            if (slot && slot[0] === dIdx && (slot[1] === pIdx || slot[2] === pIdx)) {
+            // คอลัมน์แรกคือโฮมรูม คาบที่ 1 จึงอยู่ที่ตำแหน่ง 1
+            const here = slots.filter(function (s) { return s.d === dIdx && s.p === pIdx; });
+            if (here.length) {
               cell.style.background = 'rgba(250, 204, 21, 0.1)';
               cell.style.borderColor = 'var(--accent)';
               const subject = document.createElement('span');
               subject.className = 'subject';
               subject.style.color = '#b45309';
-              subject.textContent = 'ศิลปะ 4 (ศ22102)';
-              const place = document.createElement('span');
-              place.className = 'time';
-              place.textContent = slot[3];
+              subject.textContent = label0;
               cell.appendChild(subject);
-              cell.appendChild(place);
+              here.forEach(function (s) {
+                if (room === 'ALL') {
+                  const roomEl = document.createElement('span');
+                  roomEl.className = 'room';
+                  roomEl.textContent = s.room;
+                  cell.appendChild(roomEl);
+                }
+                if (s.place) {
+                  const place = document.createElement('span');
+                  place.className = 'time';
+                  place.textContent = s.place;
+                  cell.appendChild(place);
+                }
+              });
             }
             grid.appendChild(cell);
           }
@@ -4778,10 +4856,96 @@
 
       const scheduleRoomFilter = $('scheduleRoomFilter');
       function renderScheduleView() {
-        syncRoomDropdown(scheduleRoomFilter, null);
-        renderCalendar('calendarDaysGrid', 'calendarMonthTitle', scheduleRoomFilter.value);
-        renderTimetable('weeklyTimetableGrid', scheduleRoomFilter.value);
+        syncRoomDropdown(scheduleRoomFilter, 'ทุกห้องของวิชานี้');
+        renderCalendar('calendarDaysGrid', 'calendarMonthTitle', scheduleRoomFilter.value || 'ALL');
+        renderTimetable('weeklyTimetableGrid', scheduleRoomFilter.value || 'ALL');
+        renderSlotEditor();
       }
+
+      /* ---------- แก้ไขตารางสอนของรายวิชา ---------- */
+      const DAY_NAMES = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์'];
+
+      function setSlotMsg(kind, text) {
+        $('slotMsg').className = 'inline-status-msg' + (kind ? ' is-' + kind : '');
+        $('slotMsg').textContent = text;
+      }
+
+      function renderSlotEditor() {
+        $('slotEditorCard').hidden = legacyServer || !currentCourseId;
+        if ($('slotEditorCard').hidden) return;
+        const periodSel = $('slotPeriodSelect');
+        if (periodSel.options.length === 0) {
+          PERIOD_TIMES.forEach(function (time, i) {
+            const opt = document.createElement('option');
+            opt.value = String(i + 1);
+            opt.textContent = 'คาบ ' + (i + 1) + ' (' + time + ' น.)';
+            periodSel.appendChild(opt);
+          });
+        }
+        syncRoomDropdown($('slotRoomSelect'), null);
+        const list = $('slotList');
+        list.innerHTML = '';
+        const slots = slotsFor('ALL');
+        if (slots.length === 0) {
+          const p = document.createElement('p');
+          p.className = 'subpanel-desc';
+          p.textContent = 'ยังไม่มีคาบสอนในตาราง';
+          list.appendChild(p);
+        }
+        slots.forEach(function (s) {
+          const row = document.createElement('div');
+          row.className = 'slot-row';
+          const text = document.createElement('span');
+          text.textContent = DAY_NAMES[s.d] + ' คาบ ' + s.p + ' (' + PERIOD_TIMES[s.p - 1] + ' น.) • ' + s.room + (s.place ? ' • ' + s.place : '');
+          const del = document.createElement('button');
+          del.type = 'button';
+          del.className = 'btn btn-sm btn-danger-ghost';
+          del.textContent = 'ลบ';
+          del.setAttribute('aria-label', 'ลบคาบ ' + text.textContent);
+          del.addEventListener('click', function () {
+            scheduleDraft = slotsFor('ALL').filter(function (x) { return !(x.d === s.d && x.p === s.p && x.room === s.room); });
+            setSlotMsg('', 'มีการแก้ไขที่ยังไม่ได้บันทึก');
+            renderScheduleView();
+          });
+          row.appendChild(text);
+          row.appendChild(del);
+          list.appendChild(row);
+        });
+      }
+
+      $('slotAddBtn').addEventListener('click', function () {
+        const room = $('slotRoomSelect').value;
+        if (!room) {
+          setSlotMsg('error', 'ยังไม่มีห้องเรียนในรายวิชานี้');
+          return;
+        }
+        const d = Number($('slotDaySelect').value);
+        const p = Number($('slotPeriodSelect').value);
+        const draft = slotsFor('ALL').slice();
+        if (draft.some(function (x) { return x.d === d && x.p === p && x.room === room; })) {
+          setSlotMsg('error', 'มีคาบนี้ของห้อง ' + room + ' อยู่แล้ว');
+          return;
+        }
+        const clash = draft.find(function (x) { return x.d === d && x.p === p; });
+        draft.push({ d: d, p: p, room: room, place: $('slotPlaceInput').value.trim() });
+        scheduleDraft = draft;
+        setSlotMsg('', clash ? 'เพิ่มแล้ว (คาบนี้มีห้อง ' + clash.room + ' อยู่ด้วย) ยังไม่ได้บันทึก' : 'เพิ่มแล้ว ยังไม่ได้บันทึก');
+        renderScheduleView();
+      });
+      $('slotSaveBtn').addEventListener('click', function () {
+        const btn = this;
+        btn.disabled = true;
+        setSlotMsg('', 'กำลังบันทึกตารางสอน...');
+        server('saveSchedule', sessionToken, slotsFor('ALL')).then(function (saved) {
+          courseSchedule.length = 0;
+          saved.forEach(function (s) { courseSchedule.push(s); });
+          scheduleDraft = null;
+          setSlotMsg('ok', 'บันทึกตารางสอนแล้ว ' + saved.length + ' คาบ');
+          renderScheduleView();
+        }).catch(function (err) {
+          setSlotMsg('error', handleServerError(err));
+        }).then(function () { btn.disabled = false; });
+      });
       scheduleRoomFilter.addEventListener('change', renderScheduleView);
 
       function shiftMonth(delta) {
@@ -4863,16 +5027,21 @@
         return attDrafts[key];
       }
 
-      /* เลือกคาบตามตารางสอนของห้องในวันที่เลือก */
+      /* เลือกคาบตามตารางสอนของห้องในวันที่เลือก (คาบแรกของวัน และติ๊ก 2 คาบต่อกันถ้าคาบถัดไปเป็นของห้องเดียวกัน) */
       function attApplyTimetable() {
-        const slot = artSlot(attRoomSelect.value);
         const day = new Date(attDateInput.value + 'T00:00:00').getDay();
-        if (slot && slot[0] + 1 === day) {
-          attPeriodSelect.value = String(slot[1]);
-          attDoubleCheck.checked = true;
+        const today = slotsFor(attRoomSelect.value).filter(function (s) { return s.d + 1 === day; });
+        if (today.length) {
+          const first = today[0];
+          const isDouble = today.some(function (s) { return s.p === first.p + 1; });
+          attPeriodSelect.value = String(first.p);
+          attDoubleCheck.checked = isDouble;
           attTimetableHint.className = 'inline-status-msg is-ok';
-          attTimetableHint.textContent = 'ตามตารางสอน: ศิลปะ 4 (ศ22102) คาบ ' + slot[1] + '–' + slot[2] + ' ' + slot[3];
+          attTimetableHint.textContent = 'ตามตารางสอน: ' + currentCourseLabel() + ' คาบ ' +
+            today.map(function (s) { return s.p; }).join(', ').replace(/^(\d+), (\d+)$/, function (m, a, b) { return Number(b) === Number(a) + 1 ? a + '–' + b : m; }) +
+            (first.place ? ' ' + first.place : '');
         } else {
+          attDoubleCheck.checked = false;
           attTimetableHint.className = 'inline-status-msg';
           attTimetableHint.textContent = 'วันที่เลือกไม่มีคาบสอนห้องนี้ในตารางสอน สามารถเลือกคาบเองได้';
         }
