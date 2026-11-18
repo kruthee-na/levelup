@@ -509,6 +509,39 @@
     .theme-peach { background: linear-gradient(135deg, #ffe3cf, #ffdfeb) !important; }
     .theme-sunny { background: linear-gradient(135deg, #fff1b8, #ffdcc8) !important; }
     .theme-rose { background: linear-gradient(135deg, #ffd3e2, #efdcff) !important; }
+    .theme-ocean { background: linear-gradient(135deg, #cdeef5, #d9e4ff) !important; }
+    .theme-sunset { background: linear-gradient(135deg, #ffd9c2, #ffc9dd 55%, #e3d3ff) !important; }
+    .theme-aurora { background: linear-gradient(135deg, #cdf5e4, #d3ecff 50%, #ecdcff) !important; }
+    .frame-neon::before { display: block; background: linear-gradient(145deg, #22d3ee, #a855f7 55%, #ec4899); box-shadow: 0 0 14px rgba(168, 85, 247, 0.6); }
+    .frame-diamond::before { display: block; background: conic-gradient(#e0f2fe, #7dd3fc, #f0f9ff, #a5b4fc, #e0f2fe, #67e8f9, #e0f2fe); box-shadow: 0 6px 14px rgba(56, 189, 248, 0.45); }
+    .shape-rounded > .avatar-slot, .shape-rounded::before { border-radius: 30%; }
+    .shape-square > .avatar-slot, .shape-square::before { border-radius: 14%; }
+    .shape-hex > .avatar-slot, .shape-hex::before { border-radius: 0; clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0 50%); }
+    .shape-shield > .avatar-slot, .shape-shield::before { border-radius: 0; clip-path: polygon(50% 0, 100% 14%, 100% 62%, 50% 100%, 0 62%, 0 14%); }
+    .sidebar-avatar.shape-rounded, .avatar-btn.shape-rounded, .sidebar-avatar.shape-hex, .avatar-btn.shape-hex, .sidebar-avatar.shape-shield, .avatar-btn.shape-shield { border-radius: 30%; }
+    .sidebar-avatar.shape-square, .avatar-btn.shape-square { border-radius: 14%; }
+    .profile-preview { padding: var(--space-4); border-radius: 22px; background: #f6f1fc; flex-wrap: wrap; }
+    .option-btn.is-locked { position: relative; opacity: 0.6; }
+    .option-btn.is-locked::after { content: "🔒"; position: absolute; top: -7px; right: -7px; font-size: 0.8rem; line-height: 1; }
+    .pf-crop { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; padding: var(--space-3); border-radius: 18px; background: #f6f1fc; }
+    .pf-crop-canvas { width: 160px; height: 160px; border-radius: 18px; background: #ffffff; cursor: grab; touch-action: none; box-shadow: 0 3px 0 rgba(124, 92, 214, 0.14); }
+    .pf-crop-canvas:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+    .pf-crop-controls { flex: 1 1 200px; display: grid; gap: 4px; font-size: 0.82rem; font-weight: 600; color: var(--ink-secondary); }
+    .pf-crop-controls input[type="range"], .pf-custom input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--brand); }
+    .pf-custom { display: grid; gap: var(--space-3); padding: var(--space-3); border-radius: 18px; background: #f6f1fc; }
+    .pf-custom-colors { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; font-size: 0.82rem; font-weight: 600; color: var(--ink-secondary); }
+    .pf-custom-colors input[type="color"] { width: 48px; height: 44px; padding: 2px; border: 2px solid #e4dcf5; border-radius: 12px; background: #ffffff; cursor: pointer; }
+    .pf-shop { display: grid; gap: var(--space-3); padding: var(--space-3); border-radius: 18px; background: linear-gradient(135deg, #f3edff, #fff3f8); }
+    .pf-shop-summary { font-size: 0.9rem; font-weight: 700; color: var(--brand-hover); }
+    .pf-pack { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.85); }
+    .pf-pack.is-owned { box-shadow: inset 0 0 0 2px rgba(52, 168, 110, 0.35); }
+    .pf-pack-info { flex: 1 1 220px; min-width: 0; }
+    .pf-pack-name { font-weight: 700; }
+    .pf-pack-items, .pf-pack-status, .pf-hint { font-size: 0.8rem; color: var(--ink-secondary); }
+    .pf-pack-status.is-owned { color: #1f7a4d; font-weight: 700; }
+    .pf-template { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 14px; background: #f6f1fc; }
+    .pf-template-add { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pf-template-add .input { flex: 1 1 160px; }
     .profile-dialog { max-width: 520px; text-align: left; }
     .profile-preview { display: flex; align-items: center; gap: var(--space-4); }
     .profile-preview .stu-avatar-box { cursor: default; }
@@ -2229,14 +2262,27 @@
         <button type="button" class="btn btn-secondary btn-sm" id="closeProfileBtn">ปิด</button>
       </div>
 
-      <div class="profile-preview">
+      <div class="profile-preview" id="pfPreviewWrap">
         <div class="stu-avatar-box" id="pfPreviewBox">
           <span class="avatar-slot"><span class="avatar-default" id="pfPreviewInitials"></span><img class="avatar-img" id="pfPreviewImg" alt="" hidden></span>
         </div>
         <div class="btn-group">
           <label class="btn btn-primary btn-sm" for="pfAvatarInput">เลือกรูปโปรไฟล์</label>
           <input type="file" id="pfAvatarInput" accept="image/*" class="sr-only">
+          <button type="button" class="btn btn-secondary btn-sm" id="pfAvatarAdjustBtn">ย่อ / ขยายรูป</button>
           <button type="button" class="btn btn-secondary btn-sm" id="pfAvatarClearBtn">ใช้รูปเริ่มต้น</button>
+        </div>
+      </div>
+      <div class="pf-crop" id="pfCropPanel" hidden>
+        <canvas class="pf-crop-canvas" id="pfCropCanvas" width="320" height="320" tabindex="0" role="img" aria-label="ตัวอย่างรูปโปรไฟล์ ลากเพื่อเลื่อนตำแหน่ง หรือใช้แถบเลื่อนด้านข้าง"></canvas>
+        <div class="pf-crop-controls">
+          <label for="pfZoom">ย่อ / ขยายรูป <span id="pfZoomVal">100%</span></label>
+          <input type="range" id="pfZoom" min="50" max="400" step="5" value="100">
+          <label for="pfPosX">เลื่อนซ้าย – ขวา</label>
+          <input type="range" id="pfPosX" min="0" max="100" value="50">
+          <label for="pfPosY">เลื่อนขึ้น – ลง</label>
+          <input type="range" id="pfPosY" min="0" max="100" value="50">
+          <span class="pf-hint">ลากบนรูปเพื่อเลื่อนตำแหน่งได้</span>
         </div>
       </div>
 
@@ -2252,9 +2298,39 @@
         <label for="pfEmailInput"><span>อีเมลสำหรับกู้รหัสผ่านครู</span><span class="max-hint">ใช้เมื่อลืมรหัสผ่าน</span></label>
         <input type="email" id="pfEmailInput" class="input" maxlength="120" placeholder="name@example.com" autocomplete="email">
       </div>
-      <fieldset class="field"><legend>สีพื้นหลังโปรไฟล์</legend><div class="option-row" id="pfThemeRow"></div></fieldset>
+      <fieldset class="field" id="pfShapeField"><legend>ทรงรูปโปรไฟล์</legend><div class="option-row" id="pfShapeRow"></div></fieldset>
+      <fieldset class="field"><legend>ธีมพื้นหลังโปรไฟล์</legend><div class="option-row" id="pfThemeRow"></div></fieldset>
+      <div class="pf-custom" id="pfCustomPanel" hidden>
+        <strong>ออกแบบธีมของฉัน</strong>
+        <div class="pf-custom-colors">
+          <label for="pfC1">สีที่ 1</label><input type="color" id="pfC1" value="#a78bfa">
+          <label for="pfC2">สีที่ 2</label><input type="color" id="pfC2" value="#f0a3c8">
+        </div>
+        <div>
+          <label for="pfAngle" class="pf-hint">ทิศทางการไล่สี <span id="pfAngleVal">135°</span></label>
+          <input type="range" id="pfAngle" min="0" max="360" step="15" value="135">
+        </div>
+        <fieldset class="field"><legend>ลวดลาย</legend><div class="option-row" id="pfPatternRow"></div></fieldset>
+        <span class="pf-hint">ระบบปรับสีให้อ่อนลงอัตโนมัติ เพื่อให้อ่านตัวหนังสือบนพื้นหลังได้ชัด</span>
+      </div>
       <fieldset class="field"><legend>กรอบรูป</legend><div class="option-row" id="pfFrameRow"></div></fieldset>
       <fieldset class="field"><legend>สติกเกอร์</legend><div class="option-row" id="pfStickerRow"></div></fieldset>
+      <fieldset class="field" id="pfTemplateField">
+        <legend>แม่แบบธีมของฉัน</legend>
+        <div id="pfTemplateList" style="display: grid; gap: 8px;"></div>
+        <div class="pf-template-add" id="pfTemplateAdd">
+          <label class="sr-only" for="pfTemplateName">ชื่อแม่แบบ</label>
+          <input type="text" id="pfTemplateName" class="input" maxlength="20" placeholder="ตั้งชื่อแม่แบบ เช่น ชุดสอบปลายภาค" autocomplete="off">
+          <button type="button" class="btn btn-secondary btn-sm" id="pfTemplateSaveBtn">เก็บการตกแต่งนี้เป็นแม่แบบ</button>
+        </div>
+        <span class="pf-hint" id="pfTemplateHint"></span>
+      </fieldset>
+      <section class="pf-shop" id="pfShopPanel" aria-labelledby="pfShopTitle" hidden>
+        <strong id="pfShopTitle">ชุดตกแต่งโปรไฟล์</strong>
+        <div class="pf-shop-summary" id="pfShopSummary"></div>
+        <span class="pf-hint">แต่ละชุดปลดล็อกให้เองเมื่อถึงเลเวล หรือใช้แต้มแลกก่อนได้ แต้มที่ใช้แล้วไม่คืน และไม่ทำให้เลเวลลดลง (XP นับรวมทุกรายวิชาที่เรียน)</span>
+        <div id="pfPackList" style="display: grid; gap: 8px;"></div>
+      </section>
 
       <div class="inline-status-msg" id="pfMsg" aria-live="polite"></div>
       <div class="btn-group" style="justify-content: flex-end;">
@@ -2475,6 +2551,8 @@
         if (msg.indexOf('BAD_SERVICE_ACCOUNT') !== -1) return 'คีย์ service account ไม่ถูกต้อง ต้องเป็นเนื้อหาไฟล์ JSON ที่มี client_email และ private_key';
         if (msg.indexOf('BAD_WEBHOOK') !== -1) return 'ลิงก์ Webhook ต้องขึ้นต้นด้วย https://chat.googleapis.com/v1/spaces/';
         if (msg.indexOf('BAD_EMAIL') !== -1) return 'รูปแบบอีเมลไม่ถูกต้อง';
+        if (msg.indexOf('NOT_ENOUGH_POINTS') !== -1) return 'แต้มไม่พอสำหรับชุดตกแต่งนี้';
+        if (msg.indexOf('LOCKED') !== -1) return 'ของตกแต่งที่เลือกยังไม่ปลดล็อก กรุณาเลือกชิ้นอื่น หรือปลดล็อกชุดตกแต่งก่อน';
         if (msg.indexOf('PASSWORD_CHANGE_REQUIRED') !== -1) return 'กรุณาตั้งรหัสผ่านก่อนใช้งาน';
         if (msg.indexOf('BAD_REQUEST') !== -1) return 'ข้อมูลไม่ครบถ้วน กรุณาตรวจสอบห้อง วันที่ และคาบ';
         if (msg.indexOf('FORBIDDEN') !== -1) return 'ไม่มีสิทธิ์ทำรายการนี้';
@@ -5785,7 +5863,9 @@
           ? pct(graded.reduce(function (a, w) { return a + w.awardedScore; }, 0), graded.reduce(function (a, w) { return a + (w.maxScore || 10); }, 0))
           : null;
         /* แข่งกับตัวเอง: XP = คะแนนรวม x10 + ส่งงานชิ้นละ 50 + เข้าเรียนคาบละ 5 */
-        const xp = Math.round((me.total || 0) * 10) + doneCount * 50 + attendedCount * 5;
+        /* ถ้าเซิร์ฟเวอร์ส่ง XP ของบัญชีมา (รวมทุกรายวิชา) ใช้ค่านั้น เพื่อให้เลเวลตรงกับชุดตกแต่งโปรไฟล์ที่ปลดล็อก */
+        const courseXp = Math.round((me.total || 0) * 10) + doneCount * 50 + attendedCount * 5;
+        const xp = profile.shop && !profile.shop.all ? profile.shop.xp : courseXp;
         const LEVELS = [[0, 'มือใหม่หัดส่ง'], [200, 'นักสู้'], [450, 'ดาวรุ่ง'], [750, 'ยอดฝีมือ'], [1100, 'ตำนาน']];
         let levelIdx = 0;
         LEVELS.forEach(function (lv, i) { if (xp >= lv[0]) levelIdx = i; });
@@ -6085,16 +6165,79 @@
        * โปรไฟล์ส่วนตัว: รูป ธีม กรอบ สติกเกอร์ คำประจำตัว (ครูและนักเรียน)
        * ========================================================= */
       const PF_THEMES = [['default', 'ค่าเริ่มต้น', '#ffffff'], ['lilac', 'ม่วง', '#d9c9ff'], ['sky', 'ฟ้า', '#c4e2ff'], ['mint', 'มินต์', '#bfeed5'],
-        ['peach', 'พีช', '#ffd3b8'], ['sunny', 'เหลือง', '#ffe98f'], ['rose', 'ชมพู', '#ffc2d8']];
-      const PF_FRAMES = [['none', 'ไม่มีกรอบ'], ['gold', 'กรอบทอง'], ['rainbow', 'กรอบรุ้ง'], ['pink', 'กรอบชมพู']];
-      const PF_STICKERS = ['', '⭐', '🔥', '🎨', '🎧', '🚀', '🌈', '🐱', '⚽', '🎮', '📚', '💜'];
+        ['peach', 'พีช', '#ffd3b8'], ['sunny', 'เหลือง', '#ffe98f'], ['rose', 'ชมพู', '#ffc2d8'], ['ocean', 'ทะเล', 'linear-gradient(135deg, #a9e2ee, #b9cbff)'],
+        ['sunset', 'อาทิตย์ตก', 'linear-gradient(135deg, #ffc49f, #ffa9c9 55%, #cdb4ff)'], ['aurora', 'ออโรรา', 'linear-gradient(135deg, #a8efd0, #b3dcff 50%, #dcc0ff)'],
+        ['custom', 'ออกแบบเอง', 'conic-gradient(#f87171, #fbbf24, #34d399, #60a5fa, #a78bfa, #f472b6, #f87171)']];
+      const PF_FRAMES = [['none', 'ไม่มีกรอบ'], ['gold', 'กรอบทอง'], ['rainbow', 'กรอบรุ้ง'], ['pink', 'กรอบชมพู'], ['neon', 'กรอบนีออน'], ['diamond', 'กรอบเพชร']];
+      const PF_STICKERS = ['', '⭐', '📚', '🔥', '🎨', '⚽', '🎧', '🐱', '🎮', '🚀', '🌈', '💜', '👑', '💎', '🏆', '🐉'];
+      const PF_SHAPES = [['circle', 'วงกลม'], ['rounded', 'มุมมน'], ['square', 'สี่เหลี่ยม'], ['hex', 'หกเหลี่ยม'], ['shield', 'โล่']];
+      const PF_PATTERNS = [['none', 'เรียบ'], ['dots', 'จุด'], ['stripes', 'ลายทาง'], ['check', 'ตาราง']];
+      const PF_KINDS = { theme: 'themes', frame: 'frames', sticker: 'stickers', shape: 'shapes' };
+      const PF_DEFAULTS = { theme: 'default', frame: 'none', sticker: '', shape: 'circle' };
+      /* ของตกแต่งที่เซิร์ฟเวอร์รุ่นก่อนมีระบบชุดตกแต่งรู้จัก */
+      const PF_LEGACY = { theme: ['default', 'lilac', 'sky', 'mint', 'peach', 'sunny', 'rose'], frame: ['none', 'gold', 'rainbow', 'pink'],
+        sticker: ['', '⭐', '🔥', '🎨', '🎧', '🚀', '🌈', '🐱', '⚽', '🎮', '📚', '💜'], shape: ['circle'] };
       const profileModal = $('profileModal');
       let profileDraft = {};
 
+      function pfMessage(text, isError) {
+        $('pfMsg').className = 'inline-status-msg' + (isError ? ' is-error' : '');
+        $('pfMsg').textContent = text;
+      }
+
+      /* ชุดตกแต่งที่มีของชิ้นนี้ (ไม่มีข้อมูลชุด = เซิร์ฟเวอร์รุ่นเก่า) */
+      function packOf(kind, value) {
+        const shop = profile.shop;
+        if (!shop || !shop.packs) return null;
+        return shop.packs.filter(function (pk) { return (pk[PF_KINDS[kind]] || []).indexOf(value) !== -1; })[0] || null;
+      }
+      function isUnlocked(kind, value) {
+        const shop = profile.shop;
+        if (!shop) return PF_LEGACY[kind].indexOf(value) !== -1;
+        if (shop.all || value === (profile[kind] || PF_DEFAULTS[kind])) return true;
+        const pk = packOf(kind, value);
+        return Boolean(pk && pk.owned);
+      }
+      function ownedPacks() {
+        const shop = profile.shop;
+        return shop && shop.packs ? shop.packs.filter(function (pk) { return pk.owned; }) : [];
+      }
+      function templateSlots() {
+        return ownedPacks().reduce(function (n, pk) { return Math.max(n, pk.templates || 0); }, 0);
+      }
+      function lockText(pk) {
+        return 'อยู่ใน' + pk.name + ' — ถึงเลเวล ' + pk.level + ' (' + pk.levelXp + ' XP) หรือใช้ ' + pk.price + ' แต้มแลก';
+      }
+
+      /* ธีมที่ออกแบบเอง: ผสมสีกับสีขาวให้อ่อนลง ตัวหนังสือบนพื้นหลังจึงยังอ่านได้ชัด */
+      function tintColor(hex) {
+        const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(String(hex || ''));
+        if (!m) return '#ece4ff';
+        return 'rgb(' + [1, 2, 3].map(function (i) {
+          const v = parseInt(m[i], 16);
+          return Math.round(v + (255 - v) * 0.55);
+        }).join(', ') + ')';
+      }
+      function customBackground(c) {
+        c = c || {};
+        const base = 'linear-gradient(' + (Number(c.angle) || 0) + 'deg, ' + tintColor(c.c1) + ', ' + tintColor(c.c2) + ')';
+        const patterns = {
+          dots: 'radial-gradient(rgba(255, 255, 255, 0.7) 2px, transparent 2.6px) 0 0 / 18px 18px, ',
+          stripes: 'repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.4) 0 8px, transparent 8px 18px), ',
+          check: 'linear-gradient(rgba(255, 255, 255, 0.5) 2px, transparent 2px) 0 0 / 22px 22px, linear-gradient(90deg, rgba(255, 255, 255, 0.5) 2px, transparent 2px) 0 0 / 22px 22px, '
+        };
+        return (patterns[c.pattern] || '') + base;
+      }
+
+      function setShape(el, shape) {
+        PF_SHAPES.forEach(function (sh) { el.classList.toggle('shape-' + sh[0], shape === sh[0] && sh[0] !== 'circle'); });
+      }
       function setFrameAndTheme(frameEl, themeEls, p) {
         PF_FRAMES.forEach(function (f) { frameEl.classList.toggle('frame-' + f[0], p.frame === f[0] && f[0] !== 'none'); });
         themeEls.forEach(function (el) {
-          PF_THEMES.forEach(function (t) { el.classList.toggle('theme-' + t[0], p.theme === t[0] && t[0] !== 'default'); });
+          PF_THEMES.forEach(function (t) { el.classList.toggle('theme-' + t[0], p.theme === t[0] && t[0] !== 'default' && t[0] !== 'custom'); });
+          if (p.theme === 'custom') el.style.setProperty('background', customBackground(p.custom), 'important');
+          else el.style.removeProperty('background');
         });
       }
 
@@ -6106,6 +6249,7 @@
           img.hidden = !profile.avatar;
           if (profile.avatar) img.src = profile.avatar;
           slot.querySelector('.avatar-default').style.visibility = profile.avatar ? 'hidden' : '';
+          setShape(slot.parentElement, profile.shape || 'circle');
         });
         setFrameAndTheme(document.querySelector('.js-frame'), Array.prototype.slice.call(document.querySelectorAll('.js-theme')), profile);
         $('stuHeroSticker').textContent = profile.sticker || '';
@@ -6122,41 +6266,328 @@
         img.hidden = !profileDraft.avatar;
         if (profileDraft.avatar) img.src = profileDraft.avatar;
         $('pfPreviewInitials').style.visibility = profileDraft.avatar ? 'hidden' : '';
-        setFrameAndTheme($('pfPreviewBox'), [], profileDraft);
-        [['pfThemeRow', 'theme'], ['pfFrameRow', 'frame'], ['pfStickerRow', 'sticker']].forEach(function (pair) {
+        $('pfAvatarAdjustBtn').hidden = !profileDraft.avatar;
+        setFrameAndTheme($('pfPreviewBox'), [$('pfPreviewWrap')], profileDraft);
+        setShape($('pfPreviewBox'), profileDraft.shape || 'circle');
+        [['pfThemeRow', 'theme'], ['pfFrameRow', 'frame'], ['pfStickerRow', 'sticker'], ['pfShapeRow', 'shape']].forEach(function (pair) {
           Array.prototype.forEach.call($(pair[0]).children, function (btn) {
             btn.setAttribute('aria-pressed', btn.dataset.value === (profileDraft[pair[1]] || '') ? 'true' : 'false');
           });
         });
+        const custom = profileDraft.custom || {};
+        $('pfCustomPanel').hidden = profileDraft.theme !== 'custom';
+        $('pfC1').value = custom.c1 || '#a78bfa';
+        $('pfC2').value = custom.c2 || '#f0a3c8';
+        $('pfAngle').value = custom.angle === undefined ? 135 : custom.angle;
+        $('pfAngleVal').textContent = $('pfAngle').value + '°';
+        Array.prototype.forEach.call($('pfPatternRow').children, function (btn) {
+          btn.setAttribute('aria-pressed', btn.dataset.value === (custom.pattern || 'none') ? 'true' : 'false');
+        });
       }
 
+      /* สร้างปุ่มตัวเลือกใหม่ทุกครั้งที่เปิด เพราะของที่ล็อกเปลี่ยนตามเลเวลและชุดที่แลกไว้ */
       function buildProfileOptions() {
         function add(rowId, key, value, label, extraClass, text, bg) {
+          const locked = !isUnlocked(key, value);
+          const pk = locked ? packOf(key, value) : null;
+          if (locked && !pk) return;   // เซิร์ฟเวอร์รุ่นเก่าไม่รู้จักของชิ้นนี้
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = 'option-btn' + (extraClass ? ' ' + extraClass : '');
+          btn.className = 'option-btn' + (extraClass ? ' ' + extraClass : '') + (locked ? ' is-locked' : '');
           btn.dataset.value = value;
-          btn.setAttribute('aria-label', label);
-          btn.title = label;
+          btn.setAttribute('aria-label', label + (locked ? ' (ล็อก: ' + lockText(pk) + ')' : ''));
+          btn.title = label + (locked ? ' 🔒 ' + lockText(pk) : '');
           btn.textContent = text;
           if (bg) btn.style.background = bg;
           btn.addEventListener('click', function () {
+            if (locked) {
+              pfMessage('🔒 ' + label + ' ' + lockText(pk), true);
+              return;
+            }
+            pfMessage('');
             profileDraft[key] = value;
             renderProfileDraft();
           });
           $(rowId).appendChild(btn);
         }
-        PF_THEMES.forEach(function (t) { add('pfThemeRow', 'theme', t[0], 'สี' + t[1], 'is-swatch', '', t[2]); });
+        ['pfThemeRow', 'pfFrameRow', 'pfStickerRow', 'pfShapeRow', 'pfPatternRow'].forEach(function (id) { $(id).innerHTML = ''; });
+        PF_THEMES.forEach(function (t) { add('pfThemeRow', 'theme', t[0], 'ธีม' + t[1], 'is-swatch', t[0] === 'custom' ? '✎' : '', t[2]); });
         PF_FRAMES.forEach(function (f) { add('pfFrameRow', 'frame', f[0], f[1], '', f[1]); });
         PF_STICKERS.forEach(function (s) { add('pfStickerRow', 'sticker', s, s ? 'สติกเกอร์ ' + s : 'ไม่ใช้สติกเกอร์', 'is-emoji', s || '✕'); });
+        PF_SHAPES.forEach(function (sh) { add('pfShapeRow', 'shape', sh[0], 'ทรง' + sh[1], '', sh[1]); });
+        $('pfShapeField').hidden = $('pfShapeRow').children.length < 2;
+        PF_PATTERNS.forEach(function (pt) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'option-btn';
+          btn.dataset.value = pt[0];
+          btn.textContent = pt[1];
+          btn.addEventListener('click', function () {
+            profileDraft.custom.pattern = pt[0];
+            renderProfileDraft();
+          });
+          $('pfPatternRow').appendChild(btn);
+        });
       }
-      buildProfileOptions();
+
+      function describePack(pk) {
+        const parts = [];
+        const label = function (list, id) { return (list.filter(function (x) { return x[0] === id; })[0] || [id, id])[1]; };
+        if (pk.themes.length) parts.push('ธีม ' + pk.themes.map(function (id) { return label(PF_THEMES, id); }).join(', '));
+        if (pk.frames.length) parts.push(pk.frames.map(function (id) { return label(PF_FRAMES, id); }).join(', '));
+        const stickers = pk.stickers.filter(Boolean);
+        if (stickers.length) parts.push('สติกเกอร์ ' + stickers.join(' '));
+        if (pk.shapes.length) parts.push('ทรง' + pk.shapes.map(function (id) { return label(PF_SHAPES, id); }).join(', '));
+        if (pk.templates) parts.push('บันทึกแม่แบบได้ ' + pk.templates + ' ชุด');
+        return parts.join(' • ');
+      }
+
+      /* ชุดตกแต่ง: แสดงเฉพาะนักเรียน (ครูใช้ได้ทุกชุด) */
+      function renderShop() {
+        const shop = profile.shop;
+        const panel = $('pfShopPanel');
+        panel.hidden = !shop || shop.all;
+        if (panel.hidden) return;
+        $('pfShopSummary').textContent = 'เลเวล ' + shop.level + ' • ' + shop.levelName + ' • ' + shop.xp + ' XP • แต้มคงเหลือ ' + shop.points + ' แต้ม';
+        const list = $('pfPackList');
+        list.innerHTML = '';
+        shop.packs.forEach(function (pk) {
+          const card = document.createElement('div');
+          card.className = 'pf-pack' + (pk.owned ? ' is-owned' : '');
+          const info = document.createElement('div');
+          info.className = 'pf-pack-info';
+          const name = document.createElement('div');
+          name.className = 'pf-pack-name';
+          name.textContent = (pk.owned ? '✅ ' : '🔒 ') + pk.name;
+          const items = document.createElement('div');
+          items.className = 'pf-pack-items';
+          items.textContent = describePack(pk);
+          const status = document.createElement('div');
+          status.className = 'pf-pack-status' + (pk.owned ? ' is-owned' : '');
+          status.textContent = pk.owned
+            ? (pk.how === 'points' ? 'แลกด้วยแต้มแล้ว' : 'ปลดล็อกแล้ว (เลเวล ' + pk.level + ')')
+            : 'ปลดล็อกเมื่อถึงเลเวล ' + pk.level + ' (' + pk.levelXp + ' XP) หรือใช้ ' + pk.price + ' แต้ม';
+          info.appendChild(name);
+          info.appendChild(items);
+          info.appendChild(status);
+          card.appendChild(info);
+          if (!pk.owned) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-primary btn-sm';
+            btn.textContent = 'แลก ' + pk.price + ' แต้ม';
+            btn.disabled = shop.points < pk.price;
+            if (btn.disabled) btn.title = 'แต้มไม่พอ ขาดอีก ' + (pk.price - shop.points) + ' แต้ม';
+            let armed = false;
+            btn.addEventListener('click', function () {
+              if (!armed) {   // กดครั้งแรกเป็นการถามยืนยัน
+                armed = true;
+                btn.textContent = 'ยืนยันแลก ' + pk.price + ' แต้ม';
+                pfMessage('กดอีกครั้งเพื่อยืนยันการแลก ' + pk.name + ' (แต้มที่ใช้แล้วไม่คืน)');
+                return;
+              }
+              btn.disabled = true;
+              pfMessage('กำลังแลกชุดตกแต่ง...');
+              server('buyPackage', sessionToken, pk.id).then(function (saved) {
+                profile = saved;
+                applyProfile();
+                buildProfileOptions();
+                renderProfileDraft();
+                renderTemplates();
+                renderShop();
+                pfMessage('แลก ' + pk.name + ' สำเร็จ เลือกของตกแต่งใหม่ได้เลย');
+              }).catch(function (err) {
+                renderShop();
+                pfMessage('แลกไม่สำเร็จ: ' + handleServerError(err), true);
+              });
+            });
+            card.appendChild(btn);
+          }
+          list.appendChild(card);
+        });
+      }
+
+      /* แม่แบบธีม: เก็บชุดการตกแต่ง (ธีม กรอบ สติกเกอร์ ทรง) ไว้เรียกใช้ซ้ำ บันทึกจริงเมื่อกด "บันทึกโปรไฟล์" */
+      function renderTemplates() {
+        const slots = templateSlots();
+        const field = $('pfTemplateField');
+        field.hidden = !profile.shop;
+        if (field.hidden) return;
+        const list = $('pfTemplateList');
+        list.innerHTML = '';
+        const saved = profileDraft.templates || [];
+        saved.forEach(function (t, i) {
+          const row = document.createElement('div');
+          row.className = 'pf-template';
+          const name = document.createElement('span');
+          name.textContent = (t.sticker ? t.sticker + ' ' : '') + t.name;
+          const group = document.createElement('div');
+          group.className = 'btn-group';
+          const useBtn = document.createElement('button');
+          useBtn.type = 'button';
+          useBtn.className = 'btn btn-primary btn-sm';
+          useBtn.textContent = 'ใช้แม่แบบนี้';
+          useBtn.addEventListener('click', function () {
+            ['theme', 'frame', 'sticker', 'shape'].forEach(function (k) {
+              if (isUnlocked(k, t[k])) profileDraft[k] = t[k];
+            });
+            if (t.custom) profileDraft.custom = { c1: t.custom.c1, c2: t.custom.c2, angle: t.custom.angle, pattern: t.custom.pattern };
+            pfMessage('ใช้แม่แบบ "' + t.name + '" แล้ว กดบันทึกโปรไฟล์เพื่อยืนยัน');
+            renderProfileDraft();
+          });
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'btn btn-secondary btn-sm';
+          delBtn.textContent = 'ลบ';
+          delBtn.setAttribute('aria-label', 'ลบแม่แบบ ' + t.name);
+          delBtn.addEventListener('click', function () {
+            saved.splice(i, 1);
+            renderTemplates();
+          });
+          group.appendChild(useBtn);
+          group.appendChild(delBtn);
+          row.appendChild(name);
+          row.appendChild(group);
+          list.appendChild(row);
+        });
+        $('pfTemplateAdd').hidden = slots === 0;
+        const lockedPack = slots === 0 ? profile.shop.packs.filter(function (pk) { return pk.templates; })[0] : null;
+        $('pfTemplateHint').textContent = slots === 0
+          ? (lockedPack ? '🔒 บันทึกแม่แบบได้เมื่อมี' + lockedPack.name + ' — ถึงเลเวล ' + lockedPack.level + ' หรือใช้ ' + lockedPack.price + ' แต้มแลก' : '')
+          : 'เก็บได้ ' + saved.length + ' / ' + slots + ' ชุด • แม่แบบจะถูกบันทึกเมื่อกด "บันทึกโปรไฟล์"';
+      }
+      $('pfTemplateSaveBtn').addEventListener('click', function () {
+        const slots = templateSlots();
+        const saved = profileDraft.templates;
+        if (saved.length >= slots) {
+          pfMessage('แม่แบบเต็มแล้ว (' + slots + ' ชุด) กรุณาลบแม่แบบเดิมก่อน', true);
+          return;
+        }
+        const c = profileDraft.custom;
+        saved.push({ name: $('pfTemplateName').value.trim().slice(0, 20) || 'แม่แบบที่ ' + (saved.length + 1), theme: profileDraft.theme, frame: profileDraft.frame,
+          sticker: profileDraft.sticker, shape: profileDraft.shape, custom: { c1: c.c1, c2: c.c2, angle: c.angle, pattern: c.pattern } });
+        $('pfTemplateName').value = '';
+        pfMessage('');
+        renderTemplates();
+      });
+
+      ['pfC1', 'pfC2', 'pfAngle'].forEach(function (id) {
+        $(id).addEventListener('input', function () {
+          profileDraft.custom.c1 = $('pfC1').value;
+          profileDraft.custom.c2 = $('pfC2').value;
+          profileDraft.custom.angle = Number($('pfAngle').value);
+          renderProfileDraft();
+        });
+      });
+
+      /* ---------- ย่อ / ขยาย และจัดตำแหน่งรูปโปรไฟล์ ---------- */
+      let cropState = null;   // { img, zoom (1 = พอดีกรอบ), x, y (0-1) }
+
+      /* ตำแหน่งและขนาดของรูปเมื่อวาดลงกรอบสี่เหลี่ยมจัตุรัสขนาด size */
+      function cropRect(iw, ih, size, zoom, x, y) {
+        const scale = Math.max(size / iw, size / ih) * zoom;
+        const w = iw * scale;
+        const h = ih * scale;
+        return { x: (size - w) * x, y: (size - h) * y, w: w, h: h };
+      }
+      function drawCrop(canvas) {
+        const ctx = canvas.getContext('2d');
+        const r = cropRect(cropState.img.width, cropState.img.height, canvas.width, cropState.zoom, cropState.x, cropState.y);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(cropState.img, r.x, r.y, r.w, r.h);
+      }
+      function renderCrop() {
+        $('pfZoom').value = Math.round(cropState.zoom * 100);
+        $('pfZoomVal').textContent = Math.round(cropState.zoom * 100) + '%';
+        $('pfPosX').value = Math.round(cropState.x * 100);
+        $('pfPosY').value = Math.round(cropState.y * 100);
+        try { drawCrop($('pfCropCanvas')); } catch (e) { /* เบราว์เซอร์วาดรูปไม่ได้: ข้ามตัวอย่าง */ }
+      }
+      /* นำรูปที่จัดแล้วมาเป็นรูปโปรไฟล์ (ลดขนาดจนพอดีกับที่เก็บได้) */
+      function commitCrop() {
+        if (!cropState) return;
+        try {
+          let result = '';
+          [256, 200, 144, 96].some(function (size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            drawCrop(canvas);
+            const url = canvas.toDataURL('image/jpeg', 0.8);
+            if (url.length > MAX_THUMB_LENGTH) return false;
+            result = url;
+            return true;
+          });
+          if (result) {
+            profileDraft.avatar = result;
+            renderProfileDraft();
+          }
+        } catch (e) { /* คงรูปเดิมไว้ */ }
+      }
+      function closeCrop() {
+        cropState = null;
+        $('pfCropPanel').hidden = true;
+      }
+      function openCrop(dataUrl, onError) {
+        const img = new Image();
+        img.onerror = function () { if (onError) onError(); };
+        img.onload = function () {
+          if (!img.width || !img.height) { if (onError) onError(); return; }
+          cropState = { img: img, zoom: 1, x: 0.5, y: 0.5 };
+          $('pfCropPanel').hidden = false;
+          renderCrop();
+          commitCrop();
+        };
+        img.src = dataUrl;
+      }
+      ['pfZoom', 'pfPosX', 'pfPosY'].forEach(function (id) {
+        $(id).addEventListener('input', function () {
+          if (!cropState) return;
+          cropState.zoom = Number($('pfZoom').value) / 100;
+          cropState.x = Number($('pfPosX').value) / 100;
+          cropState.y = Number($('pfPosY').value) / 100;
+          renderCrop();
+        });
+        $(id).addEventListener('change', commitCrop);
+      });
+      (function () {
+        const canvas = $('pfCropCanvas');
+        let drag = null;
+        canvas.addEventListener('pointerdown', function (e) {
+          if (!cropState) return;
+          drag = { px: e.clientX, py: e.clientY };
+          if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+        });
+        canvas.addEventListener('pointermove', function (e) {
+          if (!drag || !cropState) return;
+          const ratio = canvas.width / (canvas.getBoundingClientRect().width || canvas.width);
+          const r = cropRect(cropState.img.width, cropState.img.height, canvas.width, cropState.zoom, cropState.x, cropState.y);
+          const freeX = canvas.width - r.w;
+          const freeY = canvas.width - r.h;
+          if (Math.abs(freeX) > 0.5) cropState.x = Math.min(1, Math.max(0, (r.x + (e.clientX - drag.px) * ratio) / freeX));
+          if (Math.abs(freeY) > 0.5) cropState.y = Math.min(1, Math.max(0, (r.y + (e.clientY - drag.py) * ratio) / freeY));
+          drag = { px: e.clientX, py: e.clientY };
+          renderCrop();
+        });
+        ['pointerup', 'pointercancel'].forEach(function (name) {
+          canvas.addEventListener(name, function () {
+            if (!drag) return;
+            drag = null;
+            commitCrop();
+          });
+        });
+      })();
 
       function openProfileModal() {
         if (!sessionToken) return;
+        const c = profile.custom || {};
         profileDraft = {
           displayName: profile.displayName || '', motto: profile.motto || '', theme: profile.theme || 'default',
-          frame: profile.frame || 'none', sticker: profile.sticker || '', avatar: profile.avatar || ''
+          frame: profile.frame || 'none', sticker: profile.sticker || '', avatar: profile.avatar || '',
+          shape: profile.shape || 'circle',
+          custom: { c1: c.c1 || '#a78bfa', c2: c.c2 || '#f0a3c8', angle: c.angle === undefined ? 135 : c.angle, pattern: c.pattern || 'none' },
+          templates: (profile.templates || []).map(function (t) { return JSON.parse(JSON.stringify(t)); })
         };
         $('pfNameField').hidden = !teacherAuthenticated;
         $('pfEmailField').hidden = !(teacherAuthenticated && isAdmin);
@@ -6164,12 +6595,19 @@
         $('pfNameInput').value = profileDraft.displayName;
         $('pfMottoInput').value = profileDraft.motto;
         $('pfPreviewInitials').textContent = teacherAuthenticated ? 'ครู' : getInitials(currentStudentSession && currentStudentSession.studentName);
-        $('pfMsg').textContent = '';
+        pfMessage('');
+        closeCrop();
+        buildProfileOptions();
         renderProfileDraft();
+        renderTemplates();
+        renderShop();
         profileModal.hidden = false;
         $('closeProfileBtn').focus();
       }
-      function closeProfileModal() { profileModal.hidden = true; }
+      function closeProfileModal() {
+        closeCrop();
+        profileModal.hidden = true;
+      }
 
       document.querySelectorAll('.js-open-profile').forEach(function (el) { el.addEventListener('click', openProfileModal); });
       $('closeProfileBtn').addEventListener('click', closeProfileModal);
@@ -6183,26 +6621,25 @@
         if (!f) return;
         const reader = new FileReader();
         reader.onload = function (e) {
-          createImageThumbnail(String(e.target.result || ''), function (thumbUrl) {
-            if (!thumbUrl) {
-              $('pfMsg').className = 'inline-status-msg is-error';
-              $('pfMsg').textContent = 'ไม่สามารถใช้ไฟล์นี้เป็นรูปโปรไฟล์ได้ กรุณาเลือกไฟล์รูปภาพ';
-              return;
-            }
-            $('pfMsg').textContent = '';
-            profileDraft.avatar = thumbUrl;
-            renderProfileDraft();
+          pfMessage('');
+          openCrop(String(e.target.result || ''), function () {
+            pfMessage('ไม่สามารถใช้ไฟล์นี้เป็นรูปโปรไฟล์ได้ กรุณาเลือกไฟล์รูปภาพ', true);
           });
         };
         reader.readAsDataURL(f);
       });
+      $('pfAvatarAdjustBtn').addEventListener('click', function () {
+        if (profileDraft.avatar) openCrop(profileDraft.avatar);
+      });
       $('pfAvatarClearBtn').addEventListener('click', function () {
+        closeCrop();
         profileDraft.avatar = '';
         renderProfileDraft();
       });
 
       $('pfSaveBtn').addEventListener('click', function () {
         const btn = this;
+        commitCrop();
         profileDraft.displayName = $('pfNameInput').value.trim();
         profileDraft.motto = $('pfMottoInput').value.trim();
         if (teacherAuthenticated && isAdmin) profileDraft.recoveryEmail = $('pfEmailInput').value.trim();
