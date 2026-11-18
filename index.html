@@ -554,6 +554,19 @@
     .temp-pass { padding: 10px 14px; border-radius: 12px; background: rgba(245, 158, 11, 0.16); color: #7a4300; font-size: 0.9rem; line-height: 1.5; overflow-wrap: anywhere; }
     .temp-pass code { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.06em; }
 
+    /* ---------- ศูนย์จัดการระบบของผู้ดูแล ---------- */
+    .admin-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: rgba(124, 92, 214, 0.1); }
+    @media (max-width: 480px) { .admin-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .admin-tabs button { flex: 1 1 auto; border: 0; background: transparent; font: inherit; font-size: 0.86rem; font-weight: 700; color: var(--ink-secondary); padding: 8px 10px; border-radius: 10px; cursor: pointer; min-height: 40px; }
+    .admin-tabs button[aria-selected="true"] { background: #ffffff; color: var(--brand); box-shadow: var(--shadow-sm); }
+    .admin-tabs button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+    .admin-list { display: flex; flex-direction: column; gap: 8px; max-height: 46vh; overflow: auto; padding: 2px; }
+    .admin-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-width: 0; }
+    .admin-toolbar .input { flex: 1 1 160px; min-width: 0; min-height: 40px; }
+    .admin-toolbar .select-input { flex: 0 1 150px; width: auto; min-width: 0; min-height: 40px; }
+    .teacher-row .row-actions { flex-wrap: wrap; white-space: normal; justify-content: flex-start; }
+    .badge-muted { display: inline-flex; padding: 1px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: rgba(100, 116, 139, 0.16); color: #475569; margin-left: 6px; }
+
     /* ---------- มุมมองตารางสอน: รายวิชานี้ / ภาพรวมทุกวิชา ---------- */
     .view-switch { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(124, 92, 214, 0.1); }
     .view-switch button { border: 0; background: transparent; font: inherit; font-size: 0.84rem; font-weight: 700; color: var(--ink-secondary); padding: 7px 14px; border-radius: 999px; cursor: pointer; min-height: 36px; }
@@ -818,7 +831,7 @@
       <select id="courseSelect" class="select-input" aria-label="เลือกรายวิชา"></select>
       <button type="button" class="btn btn-secondary btn-sm" id="courseEditBtn" hidden>⚙️ แก้ไขวิชานี้</button>
       <button type="button" class="btn btn-primary btn-sm" id="courseNewBtn" hidden>＋ วิชาใหม่</button>
-      <button type="button" class="btn btn-secondary btn-sm" id="teachersBtn" hidden>👩‍🏫 จัดการครู</button>
+      <button type="button" class="btn btn-secondary btn-sm" id="teachersBtn" hidden>🛠 จัดการระบบ</button>
       <div class="inline-status-msg" id="courseBarMsg" aria-live="polite"></div>
     </div>
 
@@ -1361,6 +1374,7 @@
 
         <div class="att-footer">
           <div class="inline-status-msg" id="attSaveMsg" aria-live="polite"></div>
+          <button type="button" class="btn btn-danger-ghost btn-sm" id="attClearBtn">ลบการเช็กชื่อคาบนี้</button>
           <button type="button" class="btn btn-primary att-save-btn">บันทึกการเช็กชื่อ</button>
         </div>
       </section>
@@ -1893,39 +1907,110 @@
     </div>
   </div>
 
-  <!-- ผู้ดูแล: จัดการบัญชีครู -->
+  <!-- ผู้ดูแล: ศูนย์จัดการระบบ (ครู นักเรียน ห้องเรียน รายวิชา) -->
   <div class="modal-backdrop" id="teachersModal" role="dialog" aria-modal="true" aria-labelledby="teachersTitle" hidden>
-    <div class="modal-dialog form-dialog" style="max-width: 600px;">
+    <div class="modal-dialog form-dialog" style="max-width: 680px;">
       <div class="modal-header">
         <div>
-          <h2 class="modal-title" id="teachersTitle">จัดการบัญชีครู</h2>
-          <p class="section-subtitle">เพิ่มครูแล้วส่งชื่อผู้ใช้กับรหัสผ่านชั่วคราวให้ครูท่านนั้น ครูจะตั้งรหัสผ่านของตัวเองเมื่อเข้าใช้ครั้งแรก และสร้างรายวิชาของตัวเองได้</p>
+          <h2 class="modal-title" id="teachersTitle">ศูนย์จัดการระบบ</h2>
+          <p class="section-subtitle" id="adminIntro">เพิ่ม แก้ไข และลบผู้ใช้ ห้องเรียน และรายวิชาทั้งหมดของ LevelUp</p>
         </div>
         <button type="button" class="btn btn-secondary btn-sm" id="teachersCloseBtn">ปิด</button>
       </div>
-      <div id="teachersList" style="display: flex; flex-direction: column; gap: 8px;"></div>
-      <div class="temp-pass" id="teacherTempPass" hidden></div>
-      <fieldset class="field">
-        <legend>เพิ่มครูใหม่</legend>
-        <div class="deadline-grid">
-          <div class="field">
-            <label for="teacherKeyInput"><span>ชื่อผู้ใช้</span><span class="max-hint">a-z ตัวเลข . _ -</span></label>
-            <input type="text" id="teacherKeyInput" class="input" maxlength="30" placeholder="เช่น kru.somchai" autocomplete="off" autocapitalize="none" spellcheck="false">
-          </div>
-          <div class="field">
-            <label for="teacherNameInput">ชื่อที่แสดง</label>
-            <input type="text" id="teacherNameInput" class="input" maxlength="60" placeholder="เช่น ครูสมชาย ใจดี" autocomplete="off">
-          </div>
-        </div>
-        <div class="field">
-          <label for="teacherEmailInput"><span>อีเมลโรงเรียน</span><span class="max-hint">ไม่บังคับ ใช้กับบอต Google Chat</span></label>
-          <input type="email" id="teacherEmailInput" class="input" maxlength="120" placeholder="name@na.ac.th" autocomplete="off">
-        </div>
-        <div class="btn-group" style="justify-content: flex-end;">
-          <button type="button" class="btn btn-primary" id="teacherAddBtn">เพิ่มครู</button>
-        </div>
-      </fieldset>
+      <div class="admin-tabs" role="tablist" aria-label="หมวดการจัดการ">
+        <button type="button" role="tab" data-admin-tab="teachers" aria-selected="true">👩‍🏫 ครู</button>
+        <button type="button" role="tab" data-admin-tab="students" aria-selected="false">🎒 นักเรียน</button>
+        <button type="button" role="tab" data-admin-tab="rooms" aria-selected="false">🏫 ห้องเรียน</button>
+        <button type="button" role="tab" data-admin-tab="courses" aria-selected="false">📚 รายวิชา</button>
+      </div>
       <div class="inline-status-msg" id="teachersMsg" aria-live="polite"></div>
+
+      <!-- ครู -->
+      <div data-admin-panel="teachers" style="display: flex; flex-direction: column; gap: var(--space-3);">
+        <div id="teachersList" class="admin-list"></div>
+        <div class="temp-pass" id="teacherTempPass" hidden></div>
+        <fieldset class="field">
+          <legend id="teacherFormLegend">เพิ่มครูใหม่</legend>
+          <div class="deadline-grid">
+            <div class="field">
+              <label for="teacherKeyInput"><span>ชื่อผู้ใช้</span><span class="max-hint">a-z ตัวเลข . _ -</span></label>
+              <input type="text" id="teacherKeyInput" class="input" maxlength="30" placeholder="เช่น kru.somchai" autocomplete="off" autocapitalize="none" spellcheck="false">
+            </div>
+            <div class="field">
+              <label for="teacherNameInput">ชื่อที่แสดง</label>
+              <input type="text" id="teacherNameInput" class="input" maxlength="60" placeholder="เช่น ครูสมชาย ใจดี" autocomplete="off">
+            </div>
+          </div>
+          <div class="field">
+            <label for="teacherEmailInput"><span>อีเมลโรงเรียน</span><span class="max-hint">ไม่บังคับ ใช้กับบอต Google Chat</span></label>
+            <input type="email" id="teacherEmailInput" class="input" maxlength="120" placeholder="name@na.ac.th" autocomplete="off">
+          </div>
+          <div class="btn-group" style="justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" id="teacherCancelBtn" hidden>ยกเลิกการแก้ไข</button>
+            <button type="button" class="btn btn-primary" id="teacherAddBtn">เพิ่มครู</button>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- นักเรียน -->
+      <div data-admin-panel="students" style="display: flex; flex-direction: column; gap: var(--space-3);" hidden>
+        <div class="admin-toolbar">
+          <input type="search" id="adminStuSearch" class="input" placeholder="ค้นหาเลขประจำตัวหรือชื่อ" aria-label="ค้นหานักเรียน" autocomplete="off">
+          <select id="adminStuRoom" class="select-input" aria-label="กรองตามห้องเรียน"></select>
+        </div>
+        <p class="subpanel-desc" id="adminStuCount"></p>
+        <div id="adminStuList" class="admin-list"></div>
+        <fieldset class="field">
+          <legend id="adminStuLegend">เพิ่มนักเรียนในทะเบียน</legend>
+          <div class="deadline-grid">
+            <div class="field">
+              <label for="adminStuId"><span>เลขประจำตัว</span><span class="max-hint">แก้ภายหลังไม่ได้</span></label>
+              <input type="text" id="adminStuId" class="input" maxlength="20" autocomplete="off" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="adminStuRoomInput">ห้องเรียน</label>
+              <select id="adminStuRoomInput" class="select-input"></select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="adminStuName">ชื่อ-นามสกุล (รวมคำนำหน้า)</label>
+            <input type="text" id="adminStuName" class="input" maxlength="120" placeholder="เช่น เด็กชายสมชาย ใจดี" autocomplete="off">
+          </div>
+          <div class="btn-group" style="justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" id="adminStuCancel" hidden>ยกเลิกการแก้ไข</button>
+            <button type="button" class="btn btn-primary" id="adminStuSave">เพิ่มนักเรียน</button>
+          </div>
+        </fieldset>
+        <p class="subpanel-desc">เพิ่มทีละหลายคน: เปิดรายวิชาแล้วนำเข้าไฟล์รายชื่อที่หน้า "ป้อนและส่งคะแนน" นักเรียนใหม่จะเข้าทะเบียนให้อัตโนมัติ</p>
+      </div>
+
+      <!-- ห้องเรียน -->
+      <div data-admin-panel="rooms" style="display: flex; flex-direction: column; gap: var(--space-3);" hidden>
+        <div id="adminRoomList" class="admin-list"></div>
+        <fieldset class="field">
+          <legend id="adminRoomLegend">เพิ่มห้องเรียน</legend>
+          <div class="deadline-grid">
+            <div class="field">
+              <label for="adminRoomName">ชื่อห้อง</label>
+              <input type="text" id="adminRoomName" class="input" maxlength="30" placeholder="เช่น ม.3/1" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="adminRoomAdvisor"><span>ครูที่ปรึกษา</span><span class="max-hint">ไม่บังคับ</span></label>
+              <input type="text" id="adminRoomAdvisor" class="input" maxlength="200" autocomplete="off">
+            </div>
+          </div>
+          <div class="btn-group" style="justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" id="adminRoomCancel" hidden>ยกเลิกการแก้ไข</button>
+            <button type="button" class="btn btn-primary" id="adminRoomSave">เพิ่มห้องเรียน</button>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- รายวิชา -->
+      <div data-admin-panel="courses" style="display: flex; flex-direction: column; gap: var(--space-3);" hidden>
+        <div id="adminCourseList" class="admin-list"></div>
+        <p class="subpanel-desc">สร้างรายวิชาใหม่ได้จากปุ่ม "＋ วิชาใหม่" วิชาที่เก็บเข้าคลังแล้วกู้คืนหรือลบถาวรได้ที่นี่ การลบถาวรจะลบคะแนน งาน การเช็กชื่อ และไฟล์ของวิชานั้นทั้งหมด</p>
+      </div>
     </div>
   </div>
 
@@ -2361,7 +2446,11 @@
         if (msg.indexOf('CHAT_HTTP_') !== -1) return 'Google Chat ปฏิเสธข้อความ (รหัส ' + msg.split('CHAT_HTTP_')[1].slice(0, 3) + ') ตรวจว่าเว็บฮุคยังใช้ได้และผู้ดูแลโดเมนอนุญาตเว็บฮุคขาเข้า';
         if (msg.indexOf('CHAT_FETCH_FAILED') !== -1) return 'ส่งไป Google Chat ไม่ได้ กรุณาลองใหม่อีกครั้ง';
         if (msg.indexOf('COURSE_MISMATCH') !== -1 || msg.indexOf('COURSE_GONE') !== -1) return 'รายวิชาที่เปิดอยู่เปลี่ยนไปแล้ว ระบบกำลังโหลดข้อมูลล่าสุด';
-        if (msg.indexOf('DUPLICATE') !== -1) return 'ชื่อผู้ใช้นี้มีอยู่แล้ว กรุณาใช้ชื่ออื่น';
+        if (msg.indexOf('DUPLICATE') !== -1) return 'ชื่อหรือรหัสนี้มีอยู่แล้ว กรุณาใช้ค่าอื่น';
+        if (msg.indexOf('TEACHER_HAS_COURSES') !== -1) return 'ครูท่านนี้ยังมีรายวิชาที่ใช้งานอยู่ ย้ายวิชาให้ครูท่านอื่นหรือเก็บเข้าคลังก่อนจึงจะลบบัญชีได้';
+        if (msg.indexOf('ROOM_NOT_EMPTY') !== -1) return 'ห้องนี้ยังมีนักเรียนในทะเบียน ย้ายหรือลบนักเรียนก่อนจึงจะลบห้องได้';
+        if (msg.indexOf('COURSE_NOT_ARCHIVED') !== -1) return 'ต้องเก็บรายวิชาเข้าคลังก่อน จึงจะลบถาวรได้';
+        if (msg.indexOf('NOT_FOUND') !== -1) return 'ไม่พบรายการนี้ อาจถูกลบไปแล้ว กรุณารีเฟรชข้อมูล';
         if (msg.indexOf('SUBMISSION_CLOSED') !== -1) return 'งานนี้ปิดรับแล้ว หากมีเหตุจำเป็นกรุณาติดต่อครูผู้สอน';
         if (msg.indexOf('AI_NOT_CONFIGURED') !== -1) return 'ยังไม่ได้ตั้งค่า AI (ผู้ให้บริการ ชื่อโมเดล และ API Key)';
         if (msg.indexOf('AI_NOT_ENABLED') !== -1) return 'งานนี้ไม่ได้เปิดการวิเคราะห์ด้วย AI';
@@ -4488,6 +4577,17 @@
         gradeBox.appendChild(fbInput);
         gradeBox.appendChild(saveGradeBtn);
         gradeBox.appendChild(applyBtn);
+        gradeBox.appendChild(dangerButton('ลบงานนี้', 'ยืนยันลบงานและไฟล์แนบ', function (btn) {
+          server('deleteSubmission', sessionToken, sub.id).then(function () {
+            const at = submissions.indexOf(sub);
+            if (at !== -1) submissions.splice(at, 1);
+            renderTeacherAssignmentsView();
+          }).catch(function (err) {
+            btn.disabled = false;
+            msgSpan.className = 'inline-status-msg is-error';
+            msgSpan.textContent = handleServerError(err);
+          });
+        }));
         gradeBox.appendChild(msgSpan);
         card.appendChild(gradeBox);
         return card;
@@ -5355,6 +5455,39 @@
           attSaveButtons.forEach(function (b) { b.disabled = false; });
         });
       }
+
+      let attClearArmed = false;
+      $('attClearBtn').addEventListener('click', function () {
+        const btn = this;
+        const room = attRoomSelect.value;
+        const date = attDateInput.value;
+        const periods = attPeriods();
+        if (!room || !date) return;
+        if (!attClearArmed) {
+          attClearArmed = true;
+          btn.textContent = 'ยืนยันลบการเช็กชื่อคาบ ' + periods.join('–');
+          setTimeout(function () {
+            attClearArmed = false;
+            btn.textContent = 'ลบการเช็กชื่อคาบนี้';
+          }, 6000);
+          return;
+        }
+        attClearArmed = false;
+        btn.textContent = 'ลบการเช็กชื่อคาบนี้';
+        btn.disabled = true;
+        server('clearAttendance', sessionToken, { classroom: room, date: date, periods: periods }).then(function (removed) {
+          if (attLoadedKey === room + '|' + date) {
+            attServerRecords = attServerRecords.filter(function (r) { return periods.indexOf(r.period) === -1; });
+            periods.forEach(function (p) { delete attDrafts[room + '|' + date + '|' + p]; });
+          }
+          attSaveMsg.className = 'inline-status-msg is-ok';
+          attSaveMsg.textContent = removed ? 'ลบการเช็กชื่อห้อง ' + room + ' คาบ ' + periods.join('–') + ' แล้ว (' + removed + ' รายการ)' : 'คาบนี้ยังไม่มีการเช็กชื่อที่บันทึกไว้';
+          renderAttendanceTable();
+        }).catch(function (err) {
+          attSaveMsg.className = 'inline-status-msg is-error';
+          attSaveMsg.textContent = handleServerError(err);
+        }).then(function () { btn.disabled = false; });
+      });
 
       attRoomSelect.addEventListener('change', function () { loadAttendance(true); });
       attDateInput.addEventListener('change', function () { loadAttendance(true); });
@@ -6742,6 +6875,16 @@
       $('courseCloseBtn').addEventListener('click', function () { courseModal.hidden = true; });
       courseModal.addEventListener('click', function (e) { if (e.target === courseModal) courseModal.hidden = true; });
 
+      /* =========================================================
+       * ผู้ดูแล: ศูนย์จัดการระบบ (ครู นักเรียน ห้องเรียน รายวิชา)
+       * ========================================================= */
+      let adminData = { teachers: [], students: [], rooms: [], courses: [] };
+      let adminTab = 'teachers';
+      let adminDirty = false;        // มีการแก้ไขที่กระทบหน้าหลัก: โหลดข้อมูลใหม่เมื่อปิดหน้าต่าง
+      let teacherEditing = '';
+      let adminStuEditing = '';
+      let adminRoomEditing = '';
+
       function setTeachersMsg(kind, text) {
         $('teachersMsg').className = 'inline-status-msg' + (kind ? ' is-' + kind : '');
         $('teachersMsg').textContent = text;
@@ -6762,80 +6905,165 @@
         box.appendChild(document.createTextNode(' — จดหรือส่งให้ครูท่านนั้นตอนนี้ รหัสนี้แสดงเพียงครั้งเดียว'));
       }
 
-      function renderTeachers(list) {
-        const wrap = $('teachersList');
-        wrap.innerHTML = '';
-        if (list.length === 0) {
-          const p = document.createElement('p');
-          p.className = 'subpanel-desc';
-          p.textContent = 'ยังไม่มีบัญชีครูท่านอื่น';
-          wrap.appendChild(p);
+      /* ปุ่มที่ต้องกดสองครั้งเพื่อยืนยันการลบ */
+      function dangerButton(label, confirmLabel, onConfirm) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-sm btn-danger-ghost';
+        btn.textContent = label;
+        let armed = false;
+        btn.addEventListener('click', function () {
+          if (!armed) {
+            armed = true;
+            btn.textContent = confirmLabel;
+            setTimeout(function () {
+              armed = false;
+              btn.textContent = label;
+            }, 6000);
+            return;
+          }
+          btn.disabled = true;
+          onConfirm(btn);
+        });
+        return btn;
+      }
+
+      function smallButton(label, onClick) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-sm btn-secondary';
+        btn.textContent = label;
+        btn.addEventListener('click', function () { onClick(btn); });
+        return btn;
+      }
+
+      function adminRow(title, metaText, buttons, isOff, badge) {
+        const row = document.createElement('div');
+        row.className = 'teacher-row' + (isOff ? ' is-off' : '');
+        const info = document.createElement('div');
+        info.className = 'teacher-row-info';
+        const name = document.createElement('strong');
+        name.textContent = title;
+        info.appendChild(name);
+        if (badge) {
+          const b = document.createElement('span');
+          b.className = 'badge-muted';
+          b.textContent = badge;
+          info.appendChild(b);
         }
-        teacherChoices.length = 0;
-        list.forEach(function (t) {
-          if (t.active) teacherChoices.push({ key: t.key, displayName: t.displayName });
-          const row = document.createElement('div');
-          row.className = 'teacher-row' + (t.active ? '' : ' is-off');
-          const info = document.createElement('div');
-          info.className = 'teacher-row-info';
-          const name = document.createElement('strong');
-          name.textContent = t.displayName;
-          const meta = document.createElement('div');
-          meta.className = 'submission-meta';
-          meta.textContent = 'ชื่อผู้ใช้: ' + t.key + (t.email ? ' • ' + t.email : '') + ' • ' + t.courses + ' วิชา' + (t.active ? '' : ' • ปิดบัญชีอยู่');
-          info.appendChild(name);
-          info.appendChild(meta);
-          const actions = document.createElement('div');
-          actions.className = 'row-actions';
-          actions.style.flexWrap = 'wrap';
-          const resetBtn = document.createElement('button');
-          resetBtn.type = 'button';
-          resetBtn.className = 'btn btn-sm btn-secondary';
-          resetBtn.textContent = 'ออกรหัสผ่านใหม่';
-          resetBtn.addEventListener('click', function () {
-            resetBtn.disabled = true;
-            server('resetTeacherLogin', sessionToken, t.key).then(function (res) {
-              showTempPass(t.key, res.tempPassword);
-              setTeachersMsg('ok', 'ออกรหัสผ่านชั่วคราวใหม่ให้ ' + t.displayName + ' แล้ว');
-            }).catch(function (err) { setTeachersMsg('error', handleServerError(err)); })
-              .then(function () { resetBtn.disabled = false; });
-          });
-          const toggleBtn = document.createElement('button');
-          toggleBtn.type = 'button';
-          toggleBtn.className = 'btn btn-sm ' + (t.active ? 'btn-danger-ghost' : 'btn-secondary');
-          toggleBtn.textContent = t.active ? 'ปิดบัญชี' : 'เปิดบัญชี';
-          toggleBtn.addEventListener('click', function () {
-            toggleBtn.disabled = true;
-            server('saveTeacher', sessionToken, { key: t.key, displayName: t.displayName, email: t.email, active: !t.active }).then(function (res) {
-              renderTeachers(res.teachers);
-              setTeachersMsg('ok', (t.active ? 'ปิดบัญชี ' : 'เปิดบัญชี ') + t.displayName + ' แล้ว');
-            }).catch(function (err) {
-              toggleBtn.disabled = false;
-              setTeachersMsg('error', handleServerError(err));
-            });
-          });
-          actions.appendChild(resetBtn);
-          actions.appendChild(toggleBtn);
-          row.appendChild(info);
-          row.appendChild(actions);
-          wrap.appendChild(row);
+        const meta = document.createElement('div');
+        meta.className = 'submission-meta';
+        meta.textContent = metaText;
+        info.appendChild(meta);
+        const actions = document.createElement('div');
+        actions.className = 'row-actions';
+        buttons.forEach(function (btn) { if (btn) actions.appendChild(btn); });
+        row.appendChild(info);
+        row.appendChild(actions);
+        return row;
+      }
+
+      function emptyNote(text) {
+        const p = document.createElement('p');
+        p.className = 'subpanel-desc';
+        p.textContent = text;
+        return p;
+      }
+
+      /* เรียกคำสั่งของผู้ดูแลแล้วแสดงข้อมูลชุดใหม่ที่เซิร์ฟเวอร์ส่งกลับ */
+      function adminCall(fn, args, okText, btn) {
+        setTeachersMsg('', 'กำลังดำเนินการ...');
+        return server.apply(null, [fn, sessionToken].concat(args)).then(function (res) {
+          adminDirty = true;
+          applyAdminData(res && res.admin ? res.admin : res);
+          setTeachersMsg('ok', okText);
+          return res;
+        }).catch(function (err) {
+          if (btn) btn.disabled = false;
+          setTeachersMsg('error', handleServerError(err));
+          throw err;
         });
       }
 
-      $('teachersBtn').addEventListener('click', function () {
-        $('teacherTempPass').hidden = true;
-        $('teachersList').innerHTML = '';
-        setTeachersMsg('', 'กำลังโหลดรายชื่อครู...');
-        teachersModal.hidden = false;
-        server('getTeachers', sessionToken).then(function (list) {
-          renderTeachers(list);
-          setTeachersMsg('', '');
-        }).catch(function (err) { setTeachersMsg('error', handleServerError(err)); });
-      });
+      function applyAdminData(data) {
+        if (!data || !Array.isArray(data.teachers)) return;
+        adminData = data;
+        teacherChoices.length = 0;
+        data.teachers.forEach(function (t) { if (t.active) teacherChoices.push({ key: t.key, displayName: t.displayName }); });
+        allRooms.length = 0;
+        data.rooms.forEach(function (r) { allRooms.push(r.classroom); });
+        renderAdmin();
+      }
+
+      function renderAdmin() {
+        document.querySelectorAll('[data-admin-tab]').forEach(function (btn) {
+          btn.setAttribute('aria-selected', btn.getAttribute('data-admin-tab') === adminTab ? 'true' : 'false');
+        });
+        document.querySelectorAll('[data-admin-panel]').forEach(function (panel) {
+          panel.hidden = panel.getAttribute('data-admin-panel') !== adminTab;
+        });
+        if (adminTab === 'teachers') renderTeachers(adminData.teachers);
+        if (adminTab === 'students') renderAdminStudents();
+        if (adminTab === 'rooms') renderAdminRooms();
+        if (adminTab === 'courses') renderAdminCourses();
+      }
+
+      /* ---------- ครู ---------- */
+      function resetTeacherForm() {
+        teacherEditing = '';
+        $('teacherFormLegend').textContent = 'เพิ่มครูใหม่';
+        $('teacherAddBtn').textContent = 'เพิ่มครู';
+        $('teacherCancelBtn').hidden = true;
+        $('teacherKeyInput').disabled = false;
+        $('teacherKeyInput').value = '';
+        $('teacherNameInput').value = '';
+        $('teacherEmailInput').value = '';
+      }
+
+      function renderTeachers(list) {
+        const wrap = $('teachersList');
+        wrap.innerHTML = '';
+        wrap.appendChild(adminRow('ผู้ดูแลระบบ', 'ชื่อผู้ใช้: ' + (adminData.adminLogin || adminLogin) + ' • แก้ชื่อที่แสดงและรหัสผ่านได้ที่โปรไฟล์ของตัวเอง', [], false, 'ผู้ดูแล'));
+        if (list.length === 0) wrap.appendChild(emptyNote('ยังไม่มีบัญชีครูท่านอื่น'));
+        list.forEach(function (t) {
+          wrap.appendChild(adminRow(t.displayName,
+            'ชื่อผู้ใช้: ' + t.key + (t.email ? ' • ' + t.email : '') + ' • ' + t.courses + ' วิชา' + (t.active ? '' : ' • ปิดบัญชีอยู่'), [
+              smallButton('แก้ไข', function () {
+                teacherEditing = t.key;
+                $('teacherFormLegend').textContent = 'แก้ไขครู ' + t.key;
+                $('teacherAddBtn').textContent = 'บันทึกการแก้ไข';
+                $('teacherCancelBtn').hidden = false;
+                $('teacherKeyInput').value = t.key;
+                $('teacherKeyInput').disabled = true;
+                $('teacherNameInput').value = t.displayName;
+                $('teacherEmailInput').value = t.email || '';
+                $('teacherNameInput').focus();
+              }),
+              smallButton('ออกรหัสผ่านใหม่', function (btn) {
+                btn.disabled = true;
+                server('resetTeacherLogin', sessionToken, t.key).then(function (res) {
+                  showTempPass(t.key, res.tempPassword);
+                  setTeachersMsg('ok', 'ออกรหัสผ่านชั่วคราวใหม่ให้ ' + t.displayName + ' แล้ว');
+                }).catch(function (err) { setTeachersMsg('error', handleServerError(err)); })
+                  .then(function () { btn.disabled = false; });
+              }),
+              smallButton(t.active ? 'ปิดบัญชี' : 'เปิดบัญชี', function (btn) {
+                btn.disabled = true;
+                adminCall('saveTeacher', [{ key: t.key, displayName: t.displayName, email: t.email, active: !t.active }],
+                  (t.active ? 'ปิดบัญชี ' : 'เปิดบัญชี ') + t.displayName + ' แล้ว', btn).catch(function () {});
+              }),
+              dangerButton('ลบ', 'ยืนยันลบบัญชี', function (btn) {
+                adminCall('deleteTeacher', [t.key], 'ลบบัญชี ' + t.displayName + ' แล้ว', btn).catch(function () {});
+              })
+            ], !t.active));
+        });
+      }
+
+      $('teacherCancelBtn').addEventListener('click', resetTeacherForm);
       $('teacherAddBtn').addEventListener('click', function () {
         const key = $('teacherKeyInput').value.trim().toLowerCase();
         const name = $('teacherNameInput').value.trim();
-        if (!/^[a-z][a-z0-9._-]{2,29}$/.test(key) || key === 'teacher' || key === 'admin' || key === adminLogin) {
+        if (!teacherEditing && (!/^[a-z][a-z0-9._-]{2,29}$/.test(key) || key === 'teacher' || key === 'admin' || key === adminLogin)) {
           setTeachersMsg('error', 'ชื่อผู้ใช้ต้องขึ้นต้นด้วยตัวอักษรอังกฤษ ยาว 3 ถึง 30 ตัว ใช้ได้เฉพาะ a-z ตัวเลข จุด ขีดล่าง และขีดกลาง');
           return;
         }
@@ -6845,24 +7073,241 @@
         }
         const btn = this;
         btn.disabled = true;
-        setTeachersMsg('', 'กำลังเพิ่มครู...');
-        server('saveTeacher', sessionToken, { key: key, displayName: name, email: $('teacherEmailInput').value.trim(), isNew: true }).then(function (res) {
-          renderTeachers(res.teachers);
-          showTempPass(key, res.tempPassword);
-          setTeachersMsg('ok', 'เพิ่ม ' + name + ' แล้ว');
-          $('teacherKeyInput').value = '';
-          $('teacherNameInput').value = '';
-          $('teacherEmailInput').value = '';
-        }).catch(function (err) {
-          setTeachersMsg('error', handleServerError(err));
-        }).then(function () { btn.disabled = false; });
+        const editing = teacherEditing;
+        const old = adminData.teachers.find(function (t) { return t.key === editing; });
+        adminCall('saveTeacher', [{ key: editing || key, displayName: name, email: $('teacherEmailInput').value.trim(), isNew: !editing, active: old ? old.active : true }],
+          editing ? 'บันทึกการแก้ไข ' + name + ' แล้ว' : 'เพิ่ม ' + name + ' แล้ว').then(function (res) {
+          if (!editing) showTempPass(key, res.tempPassword);
+          resetTeacherForm();
+        }).catch(function () {}).then(function () { btn.disabled = false; });
       });
-      $('teachersCloseBtn').addEventListener('click', function () { teachersModal.hidden = true; });
-      teachersModal.addEventListener('click', function (e) { if (e.target === teachersModal) teachersModal.hidden = true; });
+
+      /* ---------- นักเรียน ---------- */
+      function fillRoomSelect(select, firstLabel) {
+        const current = select.value;
+        select.innerHTML = '';
+        if (firstLabel) {
+          const all = document.createElement('option');
+          all.value = '';
+          all.textContent = firstLabel;
+          select.appendChild(all);
+        }
+        adminData.rooms.forEach(function (r) {
+          const opt = document.createElement('option');
+          opt.value = r.classroom;
+          opt.textContent = r.classroom;
+          select.appendChild(opt);
+        });
+        if ([].some.call(select.options, function (o) { return o.value === current; })) select.value = current;
+      }
+
+      function resetStudentForm() {
+        adminStuEditing = '';
+        $('adminStuLegend').textContent = 'เพิ่มนักเรียนในทะเบียน';
+        $('adminStuSave').textContent = 'เพิ่มนักเรียน';
+        $('adminStuCancel').hidden = true;
+        $('adminStuId').disabled = false;
+        $('adminStuId').value = '';
+        $('adminStuName').value = '';
+      }
+
+      function renderAdminStudents() {
+        fillRoomSelect($('adminStuRoom'), 'ทุกห้อง');
+        fillRoomSelect($('adminStuRoomInput'), '');
+        const q = $('adminStuSearch').value.trim().toLowerCase();
+        const room = $('adminStuRoom').value;
+        const matches = adminData.students.filter(function (s) {
+          return (!room || s.classroom === room) && (!q || s.studentId.toLowerCase().indexOf(q) !== -1 || s.studentName.toLowerCase().indexOf(q) !== -1);
+        });
+        const LIMIT = 60;
+        $('adminStuCount').textContent = 'พบ ' + matches.length + ' คน จากทั้งหมด ' + adminData.students.length + ' คน' +
+          (matches.length > LIMIT ? ' • แสดง ' + LIMIT + ' คนแรก พิมพ์ค้นหาหรือเลือกห้องเพื่อดูคนอื่น' : '');
+        const wrap = $('adminStuList');
+        wrap.innerHTML = '';
+        if (matches.length === 0) wrap.appendChild(emptyNote('ไม่พบนักเรียนตามเงื่อนไข'));
+        const accountText = { never: 'ยังไม่เคยเข้าใช้', 'default': 'ใช้รหัสผ่านเริ่มต้น', custom: 'ตั้งรหัสผ่านเองแล้ว' };
+        matches.slice(0, LIMIT).forEach(function (s) {
+          wrap.appendChild(adminRow(s.studentName, s.studentId + ' • ห้อง ' + s.classroom + ' • ' + accountText[s.account], [
+            smallButton('แก้ไข', function () {
+              adminStuEditing = s.studentId;
+              $('adminStuLegend').textContent = 'แก้ไขนักเรียน ' + s.studentId;
+              $('adminStuSave').textContent = 'บันทึกการแก้ไข';
+              $('adminStuCancel').hidden = false;
+              $('adminStuId').value = s.studentId;
+              $('adminStuId').disabled = true;
+              $('adminStuName').value = s.studentName;
+              $('adminStuRoomInput').value = s.classroom;
+              $('adminStuName').focus();
+            }),
+            smallButton('รีเซ็ตรหัสผ่าน', function (btn) {
+              btn.disabled = true;
+              server('resetStudentPassword', sessionToken, s.studentId).then(function () {
+                s.account = 'never';
+                setTeachersMsg('ok', 'รีเซ็ตรหัสผ่านของ ' + s.studentName + ' เป็นเลขประจำตัวแล้ว');
+                renderAdminStudents();
+              }).catch(function (err) {
+                btn.disabled = false;
+                setTeachersMsg('error', handleServerError(err));
+              });
+            }),
+            dangerButton('ลบ', 'ยืนยันลบออกจากทะเบียน', function (btn) {
+              adminCall('deleteStudent', [s.studentId], 'ลบ ' + s.studentName + ' ออกจากทะเบียนแล้ว', btn).catch(function () {});
+            })
+          ]));
+        });
+      }
+
+      $('adminStuSearch').addEventListener('input', renderAdminStudents);
+      $('adminStuRoom').addEventListener('change', renderAdminStudents);
+      $('adminStuCancel').addEventListener('click', resetStudentForm);
+      $('adminStuSave').addEventListener('click', function () {
+        const id = $('adminStuId').value.trim();
+        const name = $('adminStuName').value.trim();
+        const room = $('adminStuRoomInput').value;
+        if (!id || /\s/.test(id) || !name) {
+          setTeachersMsg('error', 'กรุณาระบุเลขประจำตัว (ไม่มีช่องว่าง) และชื่อ-นามสกุล');
+          return;
+        }
+        if (!room) {
+          setTeachersMsg('error', 'ยังไม่มีห้องเรียน กรุณาเพิ่มห้องที่แท็บ "ห้องเรียน" ก่อน');
+          return;
+        }
+        const btn = this;
+        btn.disabled = true;
+        const editing = adminStuEditing;
+        adminCall('saveStudent', [{ studentId: editing || id, studentName: name, classroom: room, isNew: !editing }],
+          editing ? 'บันทึกการแก้ไข ' + name + ' แล้ว' : 'เพิ่ม ' + name + ' เข้าทะเบียนห้อง ' + room + ' แล้ว')
+          .then(resetStudentForm).catch(function () {}).then(function () { btn.disabled = false; });
+      });
+
+      /* ---------- ห้องเรียน ---------- */
+      function resetRoomForm() {
+        adminRoomEditing = '';
+        $('adminRoomLegend').textContent = 'เพิ่มห้องเรียน';
+        $('adminRoomSave').textContent = 'เพิ่มห้องเรียน';
+        $('adminRoomCancel').hidden = true;
+        $('adminRoomName').value = '';
+        $('adminRoomAdvisor').value = '';
+      }
+
+      function renderAdminRooms() {
+        const wrap = $('adminRoomList');
+        wrap.innerHTML = '';
+        if (adminData.rooms.length === 0) wrap.appendChild(emptyNote('ยังไม่มีห้องเรียนในทะเบียน'));
+        adminData.rooms.forEach(function (r) {
+          wrap.appendChild(adminRow(r.classroom, r.students + ' คน' + (r.advisor ? ' • ' + r.advisor : ''), [
+            smallButton('แก้ไข', function () {
+              adminRoomEditing = r.classroom;
+              $('adminRoomLegend').textContent = 'แก้ไขห้อง ' + r.classroom + ' (เปลี่ยนชื่อห้องได้)';
+              $('adminRoomSave').textContent = 'บันทึกการแก้ไข';
+              $('adminRoomCancel').hidden = false;
+              $('adminRoomName').value = r.classroom;
+              $('adminRoomAdvisor').value = r.advisor || '';
+              $('adminRoomName').focus();
+            }),
+            r.students === 0
+              ? dangerButton('ลบ', 'ยืนยันลบห้อง', function (btn) {
+                adminCall('deleteRoom', [r.classroom], 'ลบห้อง ' + r.classroom + ' แล้ว', btn).catch(function () {});
+              })
+              : null
+          ]));
+        });
+      }
+
+      $('adminRoomCancel').addEventListener('click', resetRoomForm);
+      $('adminRoomSave').addEventListener('click', function () {
+        const name = $('adminRoomName').value.trim();
+        if (!name) {
+          setTeachersMsg('error', 'กรุณาระบุชื่อห้อง');
+          return;
+        }
+        const btn = this;
+        btn.disabled = true;
+        const editing = adminRoomEditing;
+        const payload = editing
+          ? { classroom: editing, newName: name, advisor: $('adminRoomAdvisor').value.trim() }
+          : { classroom: name, advisor: $('adminRoomAdvisor').value.trim(), isNew: true };
+        adminCall('saveRoom', [payload], editing
+          ? (editing === name ? 'บันทึกห้อง ' + name + ' แล้ว' : 'เปลี่ยนชื่อห้อง ' + editing + ' เป็น ' + name + ' ในทุกรายวิชาแล้ว')
+          : 'เพิ่มห้อง ' + name + ' แล้ว')
+          .then(resetRoomForm).catch(function () {}).then(function () { btn.disabled = false; });
+      });
+
+      /* ---------- รายวิชา ---------- */
+      function renderAdminCourses() {
+        const wrap = $('adminCourseList');
+        wrap.innerHTML = '';
+        if (adminData.courses.length === 0) wrap.appendChild(emptyNote('ยังไม่มีรายวิชา'));
+        adminData.courses.forEach(function (c) {
+          const label = (c.code ? c.code + ' ' : '') + c.name;
+          const buttons = c.archived ? [
+            smallButton('กู้คืน', function (btn) {
+              btn.disabled = true;
+              adminCall('restoreCourse', [c.id], 'กู้คืนวิชา ' + label + ' แล้ว', btn).catch(function () {});
+            }),
+            dangerButton('ลบถาวร', 'ยืนยันลบข้อมูลทั้งหมดของวิชา', function (btn) {
+              adminCall('deleteCourse', [c.id], 'ลบวิชา ' + label + ' และข้อมูลทั้งหมดของวิชาแล้ว', btn).catch(function () {});
+            })
+          ] : [
+            smallButton('เปิดวิชานี้', function (btn) {
+              if (saveDirty || saveInFlight) {
+                setTeachersMsg('error', 'กำลังบันทึกข้อมูลของวิชาที่เปิดอยู่ กรุณากดอีกครั้งในอีกสักครู่');
+                return;
+              }
+              btn.disabled = true;
+              server('selectCourse', sessionToken, c.id).then(function (res) {
+                adminDirty = false;
+                teachersModal.hidden = true;
+                useCourseResult(res);
+              }).catch(function (err) {
+                btn.disabled = false;
+                setTeachersMsg('error', handleServerError(err));
+              });
+            }),
+            smallButton('แก้ไข / เก็บเข้าคลัง', function () {
+              closeAdminModal().then(function () { openCourseModal(c.id); });
+            })
+          ];
+          wrap.appendChild(adminRow(label, 'ครู: ' + c.teacherName + ' • ' + (c.rooms.length ? c.rooms.join(', ') : 'ยังไม่มีห้อง') + ' • ' + c.students + ' คน',
+            buttons, c.archived, c.archived ? 'อยู่ในคลัง' : ''));
+        });
+      }
+
+      document.querySelectorAll('[data-admin-tab]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          adminTab = btn.getAttribute('data-admin-tab');
+          setTeachersMsg('', '');
+          renderAdmin();
+        });
+      });
+
+      /* ปิดหน้าต่าง: ถ้ามีการแก้ไข โหลดข้อมูลหน้าหลักใหม่ให้ตรงกับที่แก้ */
+      function closeAdminModal() {
+        teachersModal.hidden = true;
+        if (!adminDirty) return Promise.resolve();
+        adminDirty = false;
+        return reloadFromServer() || Promise.resolve();
+      }
+
+      $('teachersBtn').addEventListener('click', function () {
+        $('teacherTempPass').hidden = true;
+        resetTeacherForm();
+        resetStudentForm();
+        resetRoomForm();
+        $('adminStuSearch').value = '';
+        setTeachersMsg('', 'กำลังโหลดข้อมูล...');
+        teachersModal.hidden = false;
+        server('getAdminData', sessionToken).then(function (data) {
+          applyAdminData(data);
+          setTeachersMsg('', '');
+        }).catch(function (err) { setTeachersMsg('error', handleServerError(err)); });
+      });
+      $('teachersCloseBtn').addEventListener('click', closeAdminModal);
+      teachersModal.addEventListener('click', function (e) { if (e.target === teachersModal) closeAdminModal(); });
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
         courseModal.hidden = true;
-        teachersModal.hidden = true;
+        if (!teachersModal.hidden) closeAdminModal();
       });
 
       /* =========================================================
