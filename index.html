@@ -538,6 +538,17 @@
     .mini-list li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; padding: 8px 12px; border-radius: 14px; background: #ffffff; box-shadow: 0 3px 8px rgba(124, 92, 214, 0.08); }
     .mini-list .is-empty { color: var(--muted); background: transparent; box-shadow: none; padding: 4px 0; }
 
+    /* ---------- AI วิเคราะห์ผลงาน ---------- */
+    .ai-box { background: linear-gradient(135deg, rgba(245, 240, 255, 0.96), rgba(253, 238, 247, 0.92)); border: 1px solid rgba(124, 92, 214, 0.28); border-radius: 12px; padding: 12px 14px; font-size: 0.86rem; color: var(--ink); line-height: 1.55; display: flex; flex-direction: column; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+    .ai-box-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; color: #5b3fb8; }
+    .ai-box h5 { margin: 4px 0 0; font-size: 0.84rem; font-weight: 700; color: #5b3fb8; }
+    .ai-box h5.is-fix { color: #b0447a; }
+    .ai-box ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+    .ai-box p { margin: 0; }
+    .ai-box .ai-note { font-size: 0.76rem; color: var(--muted); }
+    .ai-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; font-size: 0.74rem; font-weight: 700; background: rgba(124, 92, 214, 0.14); color: #5b3fb8; white-space: nowrap; }
+    .ai-slot { border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
     /* ---------- PWA: พื้นที่ปลอดภัยของจอ และปุ่มติดตั้ง ---------- */
     .app-header { padding-top: env(safe-area-inset-top, 0px); }
     body.is-logged-out .container { padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px)); }
@@ -727,6 +738,7 @@
             </div>
             <div class="notification-list" id="notificationsList"></div>
             <button type="button" class="btn btn-secondary btn-sm" id="chatSettingsBtn" hidden>💬 ตั้งค่าแจ้งเตือน Google Chat</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="aiSettingsBtn" hidden>🎨 ตั้งค่า AI วิเคราะห์ผลงาน</button>
           </div>
         </div>
 
@@ -1297,6 +1309,10 @@
                 <label for="assignDescInput"><span>คำชี้แจงเพิ่มเติม</span><span class="max-hint">ไม่บังคับ</span></label>
                 <input type="text" id="assignDescInput" class="input" placeholder="เช่น ส่งเป็นรูปภาพหรือไฟล์ PDF" autocomplete="off">
               </div>
+              <div class="field">
+                <label class="att-check"><input type="checkbox" id="assignAiCheck"><span>🎨 ให้ AI วิเคราะห์ผลงานที่ส่งในงานนี้ (องค์ประกอบศิลป์ การใช้สี ทฤษฎีสี)</span></label>
+                <p class="subpanel-desc" id="assignAiHint">ปิดไว้เป็นค่าเริ่มต้น เปิดเฉพาะงานที่ต้องการ ใช้กับไฟล์รูปภาพเท่านั้น</p>
+              </div>
               <button type="submit" class="btn btn-primary">เพิ่มหัวข้องาน</button>
             </form>
 
@@ -1706,6 +1722,91 @@
     </div>
   </div>
 
+  <!-- ครู: ตั้งค่า AI วิเคราะห์ผลงาน -->
+  <div class="modal-backdrop" id="aiModal" role="dialog" aria-modal="true" aria-labelledby="aiTitle" hidden>
+    <div class="modal-dialog form-dialog" style="max-width: 620px;">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="aiTitle">AI วิเคราะห์ผลงานศิลปะ</h2>
+          <p class="section-subtitle">AI จะชี้จุดเด่นและจุดที่ควรแก้ไขตามหลักการจัดองค์ประกอบ หลักการใช้สี และทฤษฎีสี เฉพาะงานที่ครูเปิดไว้ตอนสั่งงาน ครูยังเป็นผู้ให้คะแนนเอง</p>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="aiCloseBtn">ปิด</button>
+      </div>
+      <p class="subpanel-desc" id="aiStatusLine"></p>
+      <div class="ai-slot" data-ai-slot="0">
+        <strong>ผู้ให้บริการหลัก</strong>
+        <p class="subpanel-desc">ระบบเรียกตัวนี้ก่อนเสมอ</p>
+        <div class="field">
+          <label for="aiProvider0">ผู้ให้บริการ</label>
+          <select id="aiProvider0" class="select-input">
+            <option value="openrouter">OpenRouter</option>
+            <option value="custom">ThaiLLM หรือรายอื่น (API แบบเข้ากันได้กับ OpenAI)</option>
+          </select>
+        </div>
+        <div class="field" id="aiBaseField0" hidden>
+          <label for="aiBase0"><span>Base URL ของ API</span><span class="max-hint">ไม่ต้องใส่ /chat/completions</span></label>
+          <input type="url" id="aiBase0" class="input" placeholder="https://ที่อยู่ API/v1" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="aiModel0"><span>ชื่อโมเดล</span><span class="max-hint">ต้องเป็นโมเดลที่อ่านภาพได้</span></label>
+          <div class="inline-row">
+            <input type="text" id="aiModel0" class="input" list="aiModelList0" placeholder="พิมพ์ชื่อโมเดล หรือกดดึงรายชื่อ" autocomplete="off">
+            <button type="button" class="btn btn-secondary" data-ai-models="0">ดึงรายชื่อ</button>
+          </div>
+          <datalist id="aiModelList0"></datalist>
+        </div>
+        <div class="field">
+          <label for="aiKey0"><span>API Key</span><span class="max-hint" id="aiKeyHint0">ยังไม่ได้ตั้งค่า</span></label>
+          <input type="password" id="aiKey0" class="input" placeholder="วาง API Key (เว้นว่าง = ใช้ค่าเดิม)" autocomplete="off">
+          <label class="att-check"><input type="checkbox" id="aiClearKey0"><span>ลบ API Key ที่บันทึกไว้</span></label>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary btn-sm" data-ai-test="0">ทดสอบ (หลังบันทึก)</button>
+        </div>
+      </div>
+      <div class="ai-slot" data-ai-slot="1">
+        <strong>ผู้ให้บริการสำรอง (ไม่บังคับ)</strong>
+        <p class="subpanel-desc">ใช้เมื่อตัวหลักเรียกไม่สำเร็จ</p>
+        <div class="field">
+          <label for="aiProvider1">ผู้ให้บริการ</label>
+          <select id="aiProvider1" class="select-input">
+            <option value="openrouter">OpenRouter</option>
+            <option value="custom">ThaiLLM หรือรายอื่น (API แบบเข้ากันได้กับ OpenAI)</option>
+          </select>
+        </div>
+        <div class="field" id="aiBaseField1" hidden>
+          <label for="aiBase1"><span>Base URL ของ API</span><span class="max-hint">ไม่ต้องใส่ /chat/completions</span></label>
+          <input type="url" id="aiBase1" class="input" placeholder="https://ที่อยู่ API/v1" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="aiModel1"><span>ชื่อโมเดล</span><span class="max-hint">ต้องเป็นโมเดลที่อ่านภาพได้</span></label>
+          <div class="inline-row">
+            <input type="text" id="aiModel1" class="input" list="aiModelList1" placeholder="พิมพ์ชื่อโมเดล หรือกดดึงรายชื่อ" autocomplete="off">
+            <button type="button" class="btn btn-secondary" data-ai-models="1">ดึงรายชื่อ</button>
+          </div>
+          <datalist id="aiModelList1"></datalist>
+        </div>
+        <div class="field">
+          <label for="aiKey1"><span>API Key</span><span class="max-hint" id="aiKeyHint1">ยังไม่ได้ตั้งค่า</span></label>
+          <input type="password" id="aiKey1" class="input" placeholder="วาง API Key (เว้นว่าง = ใช้ค่าเดิม)" autocomplete="off">
+          <label class="att-check"><input type="checkbox" id="aiClearKey1"><span>ลบ API Key ที่บันทึกไว้</span></label>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary btn-sm" data-ai-test="1">ทดสอบ (หลังบันทึก)</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="aiDailyLimit"><span>จำนวนครั้งวิเคราะห์สูงสุดต่อวัน</span><span class="max-hint">กันค่าใช้จ่ายเกิน</span></label>
+        <input type="number" id="aiDailyLimit" class="input" min="1" max="5000" step="1" value="300">
+      </div>
+      <p class="subpanel-desc">ข้อมูลที่ส่งให้ผู้ให้บริการ AI: ภาพผลงาน หัวข้อและคำชี้แจงของงาน และคำอธิบายที่นักเรียนพิมพ์ ไม่ส่งชื่อ เลขประจำตัว หรือห้องของนักเรียน API Key เก็บไว้ฝั่งเซิร์ฟเวอร์และไม่แสดงกลับมาที่หน้านี้</p>
+      <div class="inline-status-msg" id="aiMsg" aria-live="polite"></div>
+      <div class="btn-group" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-primary" id="aiSaveBtn">บันทึกการตั้งค่า</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ตั้ง/เปลี่ยนรหัสผ่าน -->
   <div class="modal-backdrop" id="passwordModal" role="dialog" aria-modal="true" aria-labelledby="pwTitle" hidden>
     <form class="modal-dialog form-dialog" id="pwForm" novalidate>
@@ -2052,6 +2153,19 @@
         if (msg.indexOf('CHAT_HTTP_404') !== -1) return 'Google Chat ไม่พบเว็บฮุคนี้ (404) ลิงก์อาจถูกลบหรือคัดลอกมาไม่ครบ';
         if (msg.indexOf('CHAT_HTTP_') !== -1) return 'Google Chat ปฏิเสธข้อความ (รหัส ' + msg.split('CHAT_HTTP_')[1].slice(0, 3) + ') ตรวจว่าเว็บฮุคยังใช้ได้และผู้ดูแลโดเมนอนุญาตเว็บฮุคขาเข้า';
         if (msg.indexOf('CHAT_FETCH_FAILED') !== -1) return 'ส่งไป Google Chat ไม่ได้ กรุณาลองใหม่อีกครั้ง';
+        if (msg.indexOf('AI_NOT_CONFIGURED') !== -1) return 'ยังไม่ได้ตั้งค่า AI (ผู้ให้บริการ ชื่อโมเดล และ API Key)';
+        if (msg.indexOf('AI_NOT_ENABLED') !== -1) return 'งานนี้ไม่ได้เปิดการวิเคราะห์ด้วย AI';
+        if (msg.indexOf('AI_NO_IMAGE') !== -1) return 'AI วิเคราะห์ได้เฉพาะไฟล์รูปภาพ (JPG, PNG, WEBP, GIF)';
+        if (msg.indexOf('AI_IMAGE_TOO_LARGE') !== -1) return 'ไฟล์ภาพใหญ่เกินไปสำหรับ AI กรุณาส่งภาพที่เล็กกว่า 4 MB';
+        if (msg.indexOf('AI_DAILY_LIMIT') !== -1) return 'วันนี้ใช้ AI ครบจำนวนที่ครูกำหนดแล้ว ลองใหม่พรุ่งนี้';
+        if (msg.indexOf('AI_TOO_MANY_TRIES') !== -1) return 'ลองวิเคราะห์งานชิ้นนี้หลายครั้งแล้ว กรุณาแจ้งครูผู้สอน';
+        if (msg.indexOf('AI_HTTP_401') !== -1 || msg.indexOf('AI_HTTP_403') !== -1) return 'ผู้ให้บริการ AI ปฏิเสธ API Key (รหัส ' + msg.split('AI_HTTP_')[1].slice(0, 3) + ') ตรวจว่า Key ถูกต้องและยังใช้ได้';
+        if (msg.indexOf('AI_HTTP_402') !== -1) return 'เครดิตของบัญชีผู้ให้บริการ AI ไม่พอ (รหัส 402)';
+        if (msg.indexOf('AI_HTTP_404') !== -1) return 'ผู้ให้บริการ AI ไม่พบโมเดลหรือที่อยู่ API นี้ (รหัส 404) ตรวจชื่อโมเดลและ Base URL และโมเดลต้องอ่านภาพได้';
+        if (msg.indexOf('AI_HTTP_429') !== -1) return 'ผู้ให้บริการ AI จำกัดจำนวนคำขอชั่วคราว (รหัส 429) ลองใหม่ในอีกสักครู่';
+        if (msg.indexOf('AI_HTTP_') !== -1) return 'ผู้ให้บริการ AI ตอบกลับด้วยข้อผิดพลาด (รหัส ' + msg.split('AI_HTTP_')[1].slice(0, 3) + ') โมเดลอาจไม่รองรับการอ่านภาพ';
+        if (msg.indexOf('AI_BAD_RESPONSE') !== -1) return 'ผู้ให้บริการ AI ตอบกลับในรูปแบบที่อ่านไม่ได้ ลองเปลี่ยนโมเดล';
+        if (msg.indexOf('AI_FETCH_FAILED') !== -1) return 'เชื่อมต่อผู้ให้บริการ AI ไม่ได้ ตรวจ Base URL แล้วลองใหม่';
         if (msg.indexOf('NO_API_URL') !== -1) return 'ยังไม่ได้ตั้งค่าลิงก์ /exec ในไฟล์ config.js';
         if ((typeof navigator !== 'undefined' && navigator.onLine === false) || (err && err.name === 'TypeError' && !IN_APPS_SCRIPT)) return 'ออฟไลน์หรือเชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
         if (msg.indexOf('BAD_SERVICE_ACCOUNT') !== -1) return 'คีย์ service account ไม่ถูกต้อง ต้องเป็นเนื้อหาไฟล์ JSON ที่มี client_email และ private_key';
@@ -3306,7 +3420,10 @@
         drive: $('viewTeacherDrive')
       };
 
+      let aiReady = false;
+
       function applyState(state) {
+        aiReady = Boolean(state.aiReady);
         classrooms.length = 0;
         students.length = 0;
         assignments.length = 0;
@@ -3380,6 +3497,7 @@
         refreshDataBtn.hidden = !loggedIn;
         $('profileBtn').hidden = !loggedIn;
         $('chatSettingsBtn').hidden = !(loggedIn && role === 'teacher');
+        $('aiSettingsBtn').hidden = !(loggedIn && role === 'teacher');
         applyProfile();
         document.body.classList.toggle('is-logged-out', !loggedIn);
         document.body.classList.toggle('has-sidebar', loggedIn && role === 'teacher');
@@ -3762,6 +3880,9 @@
       function renderTeacherAssignmentsView() {
         syncRoomDropdown(assignRoomSelect, 'ทุกห้องเรียน');
         syncRoomDropdown(subFilterRoomSelect, 'ทุกห้องเรียน');
+        $('assignAiHint').textContent = aiReady
+          ? 'ปิดไว้เป็นค่าเริ่มต้น เปิดเฉพาะงานที่ต้องการ ใช้กับไฟล์รูปภาพเท่านั้น'
+          : 'ยังไม่ได้ตั้งค่า AI: กดกระดิ่ง > "ตั้งค่า AI วิเคราะห์ผลงาน" เพื่อใส่ API Key ก่อน งานที่เปิดไว้จะเริ่มวิเคราะห์หลังตั้งค่าแล้ว';
 
         teacherAssignList.innerHTML = '';
         if (assignments.length === 0) {
@@ -3785,6 +3906,13 @@
           meta.textContent = 'หมวด: คะแนนเก็บ' + (periodOf(a) === 'pre_mid' ? 'ก่อน' : 'หลัง') + 'กลางภาค • ห้อง: ' +
             (a.classroom === 'ALL' ? 'ทุกห้องเรียน' : a.classroom) + (a.desc ? ' • ' + a.desc : '');
           info.appendChild(strong);
+          if (a.aiReview === '1') {
+            const aiTag = document.createElement('span');
+            aiTag.className = 'ai-tag';
+            aiTag.style.marginLeft = '6px';
+            aiTag.textContent = '🎨 AI วิเคราะห์';
+            info.appendChild(aiTag);
+          }
           info.appendChild(meta);
           top.appendChild(info);
 
@@ -3835,7 +3963,18 @@
             const actions = document.createElement('div');
             actions.className = 'row-actions';
             actions.style.flexWrap = 'wrap';
+            const aiToggleBtn = document.createElement('button');
+            aiToggleBtn.type = 'button';
+            aiToggleBtn.className = 'btn btn-sm btn-secondary';
+            aiToggleBtn.textContent = a.aiReview === '1' ? '🎨 ปิด AI' : '🎨 เปิด AI';
+            aiToggleBtn.setAttribute('aria-pressed', a.aiReview === '1' ? 'true' : 'false');
+            aiToggleBtn.addEventListener('click', function () {
+              a.aiReview = a.aiReview === '1' ? '' : '1';
+              persistStateBestEffort();
+              renderTeacherAssignmentsView();
+            });
             actions.appendChild(remindBtn);
+            actions.appendChild(aiToggleBtn);
             actions.appendChild(delBtn);
             top.appendChild(actions);
             box.appendChild(top);
@@ -3889,6 +4028,8 @@
           card.appendChild(detailBox);
         }
         if (sub.fileName) card.appendChild(buildAttachmentRow(sub, true));
+        const aiBoxT = buildAiBox(sub, true, renderTeacherAssignmentsView);
+        if (aiBoxT) card.appendChild(aiBoxT);
 
         const gradeBox = document.createElement('div');
         gradeBox.className = 'submission-grade-box';
@@ -3985,6 +4126,99 @@
         return card;
       }
 
+      /* ---------- AI วิเคราะห์ผลงาน: กล่องผลวิเคราะห์ ใช้ทั้งฝั่งครูและนักเรียน ---------- */
+      const aiRunning = {};
+
+      function isImageName(name) {
+        return /\.(jpe?g|png|webp|gif)$/i.test(String(name || ''));
+      }
+
+      function runAiAnalysis(sub, rerender) {
+        if (aiRunning[sub.id]) return;
+        aiRunning[sub.id] = true;
+        rerender();
+        server('analyzeSubmission', sessionToken, sub.id).then(function (out) {
+          sub.aiStatus = out.aiStatus;
+          sub.aiFeedback = out.aiFeedback;
+          sub.aiAt = out.aiAt;
+        }).catch(function (err) {
+          sub.aiStatus = 'error';
+          sub.aiFeedback = String((err && err.message) || err);
+          if (String(sub.aiFeedback).indexOf('SESSION_EXPIRED') !== -1) handleServerError(err);
+        }).then(function () {
+          delete aiRunning[sub.id];
+          rerender();
+        });
+      }
+
+      function buildAiBox(sub, isTeacher, rerender) {
+        const running = Boolean(aiRunning[sub.id]);
+        const canAsk = isTeacher ? Boolean(sub.fileId) && isImageName(sub.fileName) : (sub.aiStatus === 'pending' || sub.aiStatus === 'error');
+        if (!sub.aiStatus && !running && !canAsk) return null;
+
+        const box = document.createElement('div');
+        box.className = 'ai-box';
+        const head = document.createElement('div');
+        head.className = 'ai-box-head';
+        const headText = document.createElement('span');
+        headText.textContent = '🎨 ผลวิเคราะห์ผลงานโดย AI';
+        head.appendChild(headText);
+        if (canAsk && !running) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn btn-sm btn-secondary';
+          btn.textContent = sub.aiStatus === 'done' ? 'วิเคราะห์ใหม่' : (sub.aiStatus === 'error' ? 'ลองอีกครั้ง' : 'วิเคราะห์ด้วย AI');
+          btn.addEventListener('click', function () { runAiAnalysis(sub, rerender); });
+          head.appendChild(btn);
+        }
+        box.appendChild(head);
+
+        const addText = function (tag, text, className) {
+          const el = document.createElement(tag);
+          if (className) el.className = className;
+          el.textContent = text;
+          box.appendChild(el);
+          return el;
+        };
+        if (running) {
+          addText('p', 'AI กำลังวิเคราะห์ผลงาน อาจใช้เวลาไม่เกิน 1 นาที...');
+          return box;
+        }
+        if (sub.aiStatus === 'error') {
+          addText('p', 'วิเคราะห์ไม่สำเร็จ: ' + errorText(new Error(sub.aiFeedback || 'SERVER_ERROR')));
+          return box;
+        }
+        if (sub.aiStatus === 'pending') {
+          addText('p', 'งานนี้เปิดการวิเคราะห์ด้วย AI ไว้ แต่ยังไม่มีผล กดปุ่มเพื่อเริ่มวิเคราะห์');
+          return box;
+        }
+        if (sub.aiStatus !== 'done') {
+          addText('p', 'ยังไม่ได้วิเคราะห์งานชิ้นนี้', 'ai-note');
+          return box;
+        }
+        let fb = null;
+        try { fb = JSON.parse(sub.aiFeedback); } catch (e) { fb = { summary: String(sub.aiFeedback || '') }; }
+        if (fb.summary) addText('p', fb.summary);
+        const addList = function (title, items, className) {
+          if (!Array.isArray(items) || items.length === 0) return;
+          addText('h5', title, className);
+          const ul = document.createElement('ul');
+          items.forEach(function (item) {
+            const li = document.createElement('li');
+            li.textContent = String(item);
+            ul.appendChild(li);
+          });
+          box.appendChild(ul);
+        };
+        addList('✨ จุดเด่น', fb.strengths, '');
+        addList('🛠 จุดที่ควรแก้ไข', fb.improvements, 'is-fix');
+        if (fb.composition) { addText('h5', '📐 การจัดองค์ประกอบ'); addText('p', fb.composition); }
+        if (fb.color) { addText('h5', '🌈 การใช้สีและทฤษฎีสี'); addText('p', fb.color); }
+        if (fb.nextStep) { addText('h5', '🚀 ลองทำในงานถัดไป'); addText('p', fb.nextStep); }
+        addText('p', 'คำแนะนำจาก AI อาจคลาดเคลื่อนได้ ใช้ประกอบการพัฒนางาน ครูผู้สอนเป็นผู้ให้คะแนน', 'ai-note');
+        return box;
+      }
+
       function buildAttachmentRow(sub, withDriveLink) {
         const row = document.createElement('div');
         row.className = 'sub-item-file-link';
@@ -4018,8 +4252,10 @@
           title: title,
           maxScore: (maxParsed.valid && !maxParsed.empty && maxParsed.value > 0) ? maxParsed.value : 10,
           desc: assignDescInput.value.trim(),
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          aiReview: $('assignAiCheck').checked ? '1' : ''
         });
+        $('assignAiCheck').checked = false;
         assignTitleInput.value = '';
         assignDescInput.value = '';
         persistStateBestEffort();
@@ -4573,6 +4809,8 @@
             fbBox.appendChild(document.createTextNode(w.feedback));
             card.appendChild(fbBox);
           }
+          const aiBoxS = buildAiBox(w, false, renderStudentPortal);
+          if (aiBoxS) card.appendChild(aiBoxS);
           list.appendChild(card);
         });
 
@@ -4953,7 +5191,9 @@
           renderStudentPortal();
           generateSystemNotifications();
           stuSubmitWorkMsg.className = 'inline-status-msg is-ok';
-          stuSubmitWorkMsg.textContent = 'ส่งงาน "' + sub.assignmentTitle + '" เรียบร้อยแล้ว สถานะรอครูผู้สอนตรวจให้คะแนน';
+          stuSubmitWorkMsg.textContent = 'ส่งงาน "' + sub.assignmentTitle + '" เรียบร้อยแล้ว สถานะรอครูผู้สอนตรวจให้คะแนน' +
+            (sub.aiStatus === 'pending' ? ' • AI กำลังวิเคราะห์ผลงาน ดูผลได้ในประวัติการส่งงาน' : '');
+          if (sub.aiStatus === 'pending') runAiAnalysis(sub, renderStudentPortal);
         }).catch(function (err) {
           stuSubmitWorkMsg.className = 'inline-status-msg is-error';
           stuSubmitWorkMsg.textContent = 'ส่งงานไม่สำเร็จ: ' + handleServerError(err);
@@ -5595,6 +5835,109 @@
           }
         });
       });
+      /* =========================================================
+       * ครู: ตั้งค่า AI วิเคราะห์ผลงาน
+       * ========================================================= */
+      const aiModal = $('aiModal');
+      const aiMsg = $('aiMsg');
+
+      function setAiMsg(kind, text) {
+        aiMsg.className = 'inline-status-msg' + (kind ? ' is-' + kind : '');
+        aiMsg.textContent = text;
+      }
+
+      function syncAiSlot(i) {
+        $('aiBaseField' + i).hidden = $('aiProvider' + i).value !== 'custom';
+      }
+
+      function fillAiSettings(s) {
+        [0, 1].forEach(function (i) {
+          const slot = (s.slots || [])[i] || {};
+          $('aiProvider' + i).value = slot.provider === 'custom' ? 'custom' : 'openrouter';
+          $('aiBase' + i).value = slot.baseUrl || '';
+          $('aiModel' + i).value = slot.model || '';
+          $('aiKey' + i).value = '';
+          $('aiClearKey' + i).checked = false;
+          $('aiKeyHint' + i).textContent = slot.hasKey ? 'ตั้งค่าแล้ว' : 'ยังไม่ได้ตั้งค่า';
+          syncAiSlot(i);
+        });
+        $('aiDailyLimit').value = s.dailyLimit || 300;
+        aiReady = Boolean(s.ready);
+        $('aiStatusLine').textContent = (s.ready ? 'สถานะ: พร้อมใช้งาน' : 'สถานะ: ยังไม่พร้อม ต้องมีผู้ให้บริการ ชื่อโมเดล และ API Key อย่างน้อย 1 ชุด') +
+          ' • วันนี้ใช้ไป ' + (s.usedToday || 0) + ' ครั้ง';
+      }
+
+      $('aiSettingsBtn').addEventListener('click', function () {
+        notificationDropdown.hidden = true;
+        fillAiSettings({ slots: [] });
+        setAiMsg('', 'กำลังโหลดการตั้งค่า...');
+        $('aiSaveBtn').disabled = true;
+        aiModal.hidden = false;
+        server('getAiSettings', sessionToken).then(function (s) {
+          fillAiSettings(s);
+          setAiMsg('', '');
+          $('aiSaveBtn').disabled = false;
+        }).catch(function (err) { setAiMsg('error', handleServerError(err)); });
+      });
+      [0, 1].forEach(function (i) {
+        $('aiProvider' + i).addEventListener('change', function () { syncAiSlot(i); });
+      });
+      $('aiSaveBtn').addEventListener('click', function () {
+        const btn = this;
+        btn.disabled = true;
+        setAiMsg('', 'กำลังบันทึก...');
+        server('saveAiSettings', sessionToken, {
+          slots: [0, 1].map(function (i) {
+            return {
+              provider: $('aiProvider' + i).value, baseUrl: $('aiBase' + i).value.trim(), model: $('aiModel' + i).value.trim(),
+              apiKey: $('aiKey' + i).value.trim(), clearKey: $('aiClearKey' + i).checked
+            };
+          }),
+          dailyLimit: Number($('aiDailyLimit').value) || 300
+        }).then(function (saved) {
+          fillAiSettings(saved);
+          setAiMsg('ok', 'บันทึกการตั้งค่า AI แล้ว');
+          if (teacherAuthenticated) renderTeacherAssignmentsView();
+        }).catch(function (err) {
+          setAiMsg('error', handleServerError(err));
+        }).then(function () { btn.disabled = false; });
+      });
+      document.querySelectorAll('[data-ai-test]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          btn.disabled = true;
+          setAiMsg('', 'กำลังส่งภาพทดสอบให้ AI...');
+          server('testAi', sessionToken, Number(btn.getAttribute('data-ai-test'))).then(function (res) {
+            setAiMsg('ok', 'ใช้งานได้ โมเดลอ่านภาพทดสอบแล้วตอบว่า: ' + res.reply);
+          }).catch(function (err) {
+            setAiMsg('error', handleServerError(err));
+          }).then(function () { btn.disabled = false; });
+        });
+      });
+      document.querySelectorAll('[data-ai-models]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const i = Number(btn.getAttribute('data-ai-models'));
+          btn.disabled = true;
+          setAiMsg('', 'กำลังดึงรายชื่อโมเดล...');
+          server('listAiModels', sessionToken, i, $('aiProvider' + i).value, $('aiBase' + i).value.trim(), $('aiKey' + i).value.trim()).then(function (res) {
+            const list = $('aiModelList' + i);
+            list.innerHTML = '';
+            res.models.forEach(function (id) {
+              const opt = document.createElement('option');
+              opt.value = id;
+              list.appendChild(opt);
+            });
+            setAiMsg(res.models.length ? 'ok' : 'error', res.models.length
+              ? 'พบ ' + res.models.length + ' โมเดล' + (res.visionOnly ? 'ที่อ่านภาพได้' : ' (ผู้ให้บริการไม่ได้บอกว่าโมเดลใดอ่านภาพได้)') + ' คลิกช่องชื่อโมเดลเพื่อเลือก'
+              : 'ไม่พบรายชื่อโมเดล กรุณาพิมพ์ชื่อโมเดลเอง');
+          }).catch(function (err) {
+            setAiMsg('error', handleServerError(err));
+          }).then(function () { btn.disabled = false; });
+        });
+      });
+      $('aiCloseBtn').addEventListener('click', function () { aiModal.hidden = true; });
+      aiModal.addEventListener('click', function (e) { if (e.target === aiModal) aiModal.hidden = true; });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') aiModal.hidden = true; });
+
       $('chatCloseBtn').addEventListener('click', function () { chatModal.hidden = true; });
       chatModal.addEventListener('click', function (e) { if (e.target === chatModal) chatModal.hidden = true; });
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape') chatModal.hidden = true; });
