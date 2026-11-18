@@ -538,6 +538,15 @@
     .mini-list li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; padding: 8px 12px; border-radius: 14px; background: #ffffff; box-shadow: 0 3px 8px rgba(124, 92, 214, 0.08); }
     .mini-list .is-empty { color: var(--muted); background: transparent; box-shadow: none; padding: 4px 0; }
 
+    /* ---------- กำหนดส่งและการหักคะแนนส่งช้า ---------- */
+    .deadline-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); min-width: 0; }
+    .deadline-grid .field { min-width: 0; }
+    .deadline-note { margin-top: 6px; padding: 8px 12px; border-radius: 10px; font-size: 0.82rem; line-height: 1.5; background: rgba(124, 92, 214, 0.09); color: var(--ink-secondary); overflow-wrap: anywhere; }
+    .deadline-note.is-late { background: rgba(245, 158, 11, 0.16); color: #8a4b00; }
+    .deadline-note.is-closed { background: rgba(220, 38, 38, 0.12); color: #9b1c1c; }
+    .late-tag { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; font-size: 0.74rem; font-weight: 700; background: rgba(245, 158, 11, 0.18); color: #8a4b00; }
+    .deadline-edit { border-top: 1px dashed var(--border-line); margin-top: 8px; padding-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+
     /* ---------- AI วิเคราะห์ผลงาน ---------- */
     .ai-box { background: linear-gradient(135deg, rgba(245, 240, 255, 0.96), rgba(253, 238, 247, 0.92)); border: 1px solid rgba(124, 92, 214, 0.28); border-radius: 12px; padding: 12px 14px; font-size: 0.86rem; color: var(--ink); line-height: 1.55; display: flex; flex-direction: column; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
     .ai-box-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; color: #5b3fb8; }
@@ -1309,6 +1318,35 @@
                 <label for="assignDescInput"><span>คำชี้แจงเพิ่มเติม</span><span class="max-hint">ไม่บังคับ</span></label>
                 <input type="text" id="assignDescInput" class="input" placeholder="เช่น ส่งเป็นรูปภาพหรือไฟล์ PDF" autocomplete="off">
               </div>
+              <div class="deadline-grid">
+                <div class="field">
+                  <label for="assignDueInput"><span>กำหนดส่ง</span><span class="max-hint">ไม่บังคับ</span></label>
+                  <input type="datetime-local" id="assignDueInput" class="input">
+                </div>
+                <div class="field">
+                  <label for="assignCloseInput"><span>ปิดรับงาน</span><span class="max-hint">หลังเวลานี้ส่งไม่ได้</span></label>
+                  <input type="datetime-local" id="assignCloseInput" class="input">
+                </div>
+              </div>
+              <div class="field">
+                <label for="assignLateType">เงื่อนไขหักคะแนนเมื่อส่งเลยกำหนด</label>
+                <select id="assignLateType" class="select-input">
+                  <option value="">ไม่หักคะแนน</option>
+                  <option value="fixed">หักครั้งเดียว (% ของคะแนนที่ได้)</option>
+                  <option value="perDay">หักต่อวันที่ส่งช้า (% ของคะแนนที่ได้)</option>
+                </select>
+              </div>
+              <div class="deadline-grid" id="assignLateFields" hidden>
+                <div class="field">
+                  <label for="assignLateValue" id="assignLateValueLabel">หัก (%)</label>
+                  <input type="number" id="assignLateValue" class="input" min="1" max="100" step="1" value="10">
+                </div>
+                <div class="field" id="assignLateMaxField">
+                  <label for="assignLateMax">หักรวมสูงสุด (%)</label>
+                  <input type="number" id="assignLateMax" class="input" min="1" max="100" step="1" value="50">
+                </div>
+              </div>
+              <div class="field-error" id="errAssignDeadline" aria-live="polite"></div>
               <div class="field">
                 <label class="att-check"><input type="checkbox" id="assignAiCheck"><span>🎨 ให้ AI วิเคราะห์ผลงานที่ส่งในงานนี้ (องค์ประกอบศิลป์ การใช้สี ทฤษฎีสี)</span></label>
                 <p class="subpanel-desc" id="assignAiHint">ปิดไว้เป็นค่าเริ่มต้น เปิดเฉพาะงานที่ต้องการ ใช้กับไฟล์รูปภาพเท่านั้น</p>
@@ -1601,6 +1639,7 @@
           <div class="field">
             <label for="stuAssignSelect">หัวข้องานที่ต้องการส่ง</label>
             <select id="stuAssignSelect" class="select-input"></select>
+            <div class="deadline-note" id="stuAssignInfo" aria-live="polite" hidden></div>
           </div>
           <div class="field" id="stuCustomTitleWrap" hidden>
             <label for="stuCustomTitleInput">ระบุชื่อชิ้นงาน / การบ้าน</label>
@@ -2153,6 +2192,7 @@
         if (msg.indexOf('CHAT_HTTP_404') !== -1) return 'Google Chat ไม่พบเว็บฮุคนี้ (404) ลิงก์อาจถูกลบหรือคัดลอกมาไม่ครบ';
         if (msg.indexOf('CHAT_HTTP_') !== -1) return 'Google Chat ปฏิเสธข้อความ (รหัส ' + msg.split('CHAT_HTTP_')[1].slice(0, 3) + ') ตรวจว่าเว็บฮุคยังใช้ได้และผู้ดูแลโดเมนอนุญาตเว็บฮุคขาเข้า';
         if (msg.indexOf('CHAT_FETCH_FAILED') !== -1) return 'ส่งไป Google Chat ไม่ได้ กรุณาลองใหม่อีกครั้ง';
+        if (msg.indexOf('SUBMISSION_CLOSED') !== -1) return 'งานนี้ปิดรับแล้ว หากมีเหตุจำเป็นกรุณาติดต่อครูผู้สอน';
         if (msg.indexOf('AI_NOT_CONFIGURED') !== -1) return 'ยังไม่ได้ตั้งค่า AI (ผู้ให้บริการ ชื่อโมเดล และ API Key)';
         if (msg.indexOf('AI_NOT_ENABLED') !== -1) return 'งานนี้ไม่ได้เปิดการวิเคราะห์ด้วย AI';
         if (msg.indexOf('AI_NO_IMAGE') !== -1) return 'AI วิเคราะห์ได้เฉพาะไฟล์รูปภาพ (JPG, PNG, WEBP, GIF)';
@@ -3877,6 +3917,97 @@
 
       function periodOf(x) { return x.period || 'pre_mid'; }
 
+      let editingDeadlineId = null;
+
+      /* แก้กำหนดส่งของหัวข้องานที่สร้างไว้แล้ว (เช่น ขยายเวลา) งานที่ส่งไปแล้วใช้เงื่อนไขตอนที่ส่ง */
+      function buildDeadlineEditor(a) {
+        const wrap = document.createElement('div');
+        wrap.className = 'deadline-edit';
+        const field = function (labelText, el) {
+          const f = document.createElement('div');
+          f.className = 'field';
+          const label = document.createElement('label');
+          label.textContent = labelText;
+          label.appendChild(el);
+          label.style.flexDirection = 'column';
+          label.style.alignItems = 'stretch';
+          label.style.gap = '4px';
+          f.appendChild(label);
+          return f;
+        };
+        const input = function (type, value) {
+          const el = document.createElement('input');
+          el.type = type;
+          el.className = 'input';
+          el.value = value;
+          return el;
+        };
+        const dueEl = input('datetime-local', toLocalInput(a.dueAt));
+        const closeEl = input('datetime-local', toLocalInput(a.closeAt));
+        const typeEl = document.createElement('select');
+        typeEl.className = 'select-input';
+        [['', 'ไม่หักคะแนน'], ['fixed', 'หักครั้งเดียว (%)'], ['perDay', 'หักต่อวันที่ส่งช้า (%)']].forEach(function (pair) {
+          const opt = document.createElement('option');
+          opt.value = pair[0];
+          opt.textContent = pair[1];
+          typeEl.appendChild(opt);
+        });
+        typeEl.value = a.lateType || '';
+        const valueEl = input('number', a.lateValue || '10');
+        const maxEl = input('number', a.lateMax || '50');
+        [valueEl, maxEl].forEach(function (el) { el.min = '1'; el.max = '100'; el.step = '1'; });
+        const grid1 = document.createElement('div');
+        grid1.className = 'deadline-grid';
+        grid1.appendChild(field('กำหนดส่ง', dueEl));
+        grid1.appendChild(field('ปิดรับงาน', closeEl));
+        const grid2 = document.createElement('div');
+        grid2.className = 'deadline-grid';
+        const valueField = field('หัก (%)', valueEl);
+        const maxField = field('หักรวมสูงสุด (%)', maxEl);
+        grid2.appendChild(field('เงื่อนไขส่งช้า', typeEl));
+        grid2.appendChild(valueField);
+        grid2.appendChild(maxField);
+        const sync = function () {
+          valueField.hidden = !typeEl.value;
+          maxField.hidden = typeEl.value !== 'perDay';
+        };
+        typeEl.addEventListener('change', sync);
+        sync();
+        const err = document.createElement('div');
+        err.className = 'field-error';
+        err.setAttribute('aria-live', 'polite');
+        const saveBtn = document.createElement('button');
+        saveBtn.type = 'button';
+        saveBtn.className = 'btn btn-primary btn-sm';
+        saveBtn.textContent = 'บันทึกกำหนดส่ง';
+        saveBtn.addEventListener('click', function () {
+          const v = readDeadlineFields(dueEl, closeEl, typeEl, valueEl, maxEl);
+          err.textContent = v.error || '';
+          if (v.error) return;
+          a.dueAt = v.dueAt; a.closeAt = v.closeAt; a.lateType = v.lateType; a.lateValue = v.lateValue; a.lateMax = v.lateMax;
+          editingDeadlineId = null;
+          persistStateBestEffort();
+          renderTeacherAssignmentsView();
+        });
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'btn btn-secondary btn-sm';
+        cancelBtn.textContent = 'ยกเลิก';
+        cancelBtn.addEventListener('click', function () {
+          editingDeadlineId = null;
+          renderTeacherAssignmentsView();
+        });
+        const btns = document.createElement('div');
+        btns.className = 'btn-group';
+        btns.appendChild(saveBtn);
+        btns.appendChild(cancelBtn);
+        wrap.appendChild(grid1);
+        wrap.appendChild(grid2);
+        wrap.appendChild(err);
+        wrap.appendChild(btns);
+        return wrap;
+      }
+
       function renderTeacherAssignmentsView() {
         syncRoomDropdown(assignRoomSelect, 'ทุกห้องเรียน');
         syncRoomDropdown(subFilterRoomSelect, 'ทุกห้องเรียน');
@@ -3904,7 +4035,8 @@
           const meta = document.createElement('div');
           meta.className = 'submission-meta';
           meta.textContent = 'หมวด: คะแนนเก็บ' + (periodOf(a) === 'pre_mid' ? 'ก่อน' : 'หลัง') + 'กลางภาค • ห้อง: ' +
-            (a.classroom === 'ALL' ? 'ทุกห้องเรียน' : a.classroom) + (a.desc ? ' • ' + a.desc : '');
+            (a.classroom === 'ALL' ? 'ทุกห้องเรียน' : a.classroom) + (a.desc ? ' • ' + a.desc : '') +
+            (deadlineText(a) ? ' • ⏰ ' + deadlineText(a) : '') + (isClosed(a) ? ' • ปิดรับแล้ว' : '');
           info.appendChild(strong);
           if (a.aiReview === '1') {
             const aiTag = document.createElement('span');
@@ -3973,12 +4105,23 @@
               persistStateBestEffort();
               renderTeacherAssignmentsView();
             });
+            const dueBtn = document.createElement('button');
+            dueBtn.type = 'button';
+            dueBtn.className = 'btn btn-sm btn-secondary';
+            dueBtn.textContent = '📅 กำหนดส่ง';
+            dueBtn.setAttribute('aria-expanded', editingDeadlineId === a.id ? 'true' : 'false');
+            dueBtn.addEventListener('click', function () {
+              editingDeadlineId = editingDeadlineId === a.id ? null : a.id;
+              renderTeacherAssignmentsView();
+            });
             actions.appendChild(remindBtn);
+            actions.appendChild(dueBtn);
             actions.appendChild(aiToggleBtn);
             actions.appendChild(delBtn);
             top.appendChild(actions);
             box.appendChild(top);
             box.appendChild(remindMsg);
+            if (editingDeadlineId === a.id) box.appendChild(buildDeadlineEditor(a));
           }
           box.appendChild(top);
           teacherAssignList.appendChild(box);
@@ -4012,6 +4155,12 @@
           ' • ' + formatThaiDateTime(sub.submittedAt);
         leftInfo.appendChild(titleEl);
         leftInfo.appendChild(stuMeta);
+        if (lateTagText(sub)) {
+          const lateTag = document.createElement('span');
+          lateTag.className = 'late-tag';
+          lateTag.textContent = '⏰ ' + lateTagText(sub);
+          leftInfo.appendChild(lateTag);
+        }
         const stBadge = document.createElement('span');
         stBadge.className = 'publish-pill ' + (sub.status === 'graded' ? 'is-published' : 'is-draft');
         stBadge.textContent = sub.status === 'graded'
@@ -4043,7 +4192,8 @@
         scoreInput.step = '0.5';
         scoreInput.placeholder = '0 - ' + sub.maxScore;
         scoreInput.setAttribute('aria-label', 'ให้คะแนนชิ้นงานของ ' + sub.studentName);
-        scoreInput.value = isBlank(sub.awardedScore) ? '' : String(sub.awardedScore);
+        scoreInput.value = !isBlank(sub.rawScore) ? String(sub.rawScore) : (isBlank(sub.awardedScore) ? '' : String(sub.awardedScore));
+        if (sub.penaltyPct) scoreInput.title = 'ใส่คะแนนก่อนหัก ระบบจะหัก ' + formatScore(sub.penaltyPct) + '% ให้อัตโนมัติ';
 
         const fbInput = document.createElement('input');
         fbInput.type = 'text';
@@ -4065,6 +4215,10 @@
         const msgSpan = document.createElement('span');
         msgSpan.className = 'inline-status-msg';
         msgSpan.style.width = '100%';
+        if (sub.penaltyPct) {
+          msgSpan.textContent = 'ใส่คะแนนก่อนหัก ระบบหัก ' + formatScore(sub.penaltyPct) + '% เพราะส่งช้า ' + sub.lateDays + ' วัน' +
+            (!isBlank(sub.rawScore) ? ' • ครูให้ ' + formatScore(sub.rawScore) + ' คะแนนสุทธิ ' + formatScore(sub.awardedScore) : '');
+        }
 
         function saveGrade() {
           const parsed = parseScoreField(scoreInput.value, sub.maxScore);
@@ -4075,11 +4229,12 @@
             return false;
           }
           scoreInput.classList.remove('is-invalid');
-          sub.awardedScore = parsed.value;
+          sub.rawScore = parsed.value;
+          sub.awardedScore = netScore(parsed.value, sub.penaltyPct);
           sub.feedback = fbInput.value.trim();
           sub.status = 'graded';
           setSaveStatus('saving');
-          server('gradeSubmission', sessionToken, sub.id, sub.awardedScore, sub.feedback).then(function () {
+          server('gradeSubmission', sessionToken, sub.id, sub.rawScore, sub.feedback).then(function () {
             if (!saveDirty && !saveInFlight) setSaveStatus('saved');
           }).catch(handleServerError);
           return true;
@@ -4124,6 +4279,78 @@
         gradeBox.appendChild(msgSpan);
         card.appendChild(gradeBox);
         return card;
+      }
+
+      /* ---------- กำหนดส่ง วันปิดรับ และการหักคะแนนส่งช้า (กติกาเดียวกับฝั่งเซิร์ฟเวอร์) ---------- */
+      function toLocalInput(iso) {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        const pad = function (n) { return String(n).padStart(2, '0'); };
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+      }
+
+      function fromLocalInput(value) {
+        if (!value) return '';
+        const d = new Date(value);
+        return isNaN(d.getTime()) ? '' : d.toISOString();
+      }
+
+      function lateRuleText(a) {
+        if (a.lateType === 'fixed') return 'ส่งช้าหัก ' + formatScore(Number(a.lateValue)) + '% ของคะแนนที่ได้';
+        if (a.lateType === 'perDay') return 'ส่งช้าหักวันละ ' + formatScore(Number(a.lateValue)) + '% (สูงสุด ' + formatScore(Number(a.lateMax) || 100) + '%)';
+        return '';
+      }
+
+      function deadlineText(a) {
+        const parts = [];
+        if (a.dueAt) parts.push('กำหนดส่ง ' + formatThaiDateTime(a.dueAt));
+        if (a.closeAt) parts.push('ปิดรับงาน ' + formatThaiDateTime(a.closeAt));
+        if (lateRuleText(a)) parts.push(lateRuleText(a));
+        return parts.join(' • ');
+      }
+
+      function latePenaltyNow(a) {
+        if (!a || !a.dueAt) return { lateDays: 0, penaltyPct: 0 };
+        const ms = Date.now() - new Date(a.dueAt).getTime();
+        if (!(ms > 0)) return { lateDays: 0, penaltyPct: 0 };
+        const days = Math.ceil(ms / 86400000);
+        const value = Number(a.lateValue) || 0;
+        let pct = 0;
+        if (a.lateType === 'fixed') pct = value;
+        if (a.lateType === 'perDay') pct = Math.min(Number(a.lateMax) || 100, value * days);
+        return { lateDays: days, penaltyPct: Math.round(Math.min(100, Math.max(0, pct)) * 100) / 100 };
+      }
+
+      function isClosed(a) {
+        return Boolean(a && a.closeAt) && Date.now() > new Date(a.closeAt).getTime();
+      }
+
+      function netScore(raw, penaltyPct) {
+        return Math.round(raw * (100 - (Number(penaltyPct) || 0))) / 100;
+      }
+
+      function lateTagText(sub) {
+        if (!sub.lateDays) return '';
+        return 'ส่งช้า ' + sub.lateDays + ' วัน' + (sub.penaltyPct ? ' • หัก ' + formatScore(sub.penaltyPct) + '%' : ' • ไม่หักคะแนน');
+      }
+
+      /** อ่านและตรวจค่ากำหนดส่งจากช่องกรอก คืน { error } หรือค่าที่พร้อมบันทึก */
+      function readDeadlineFields(dueEl, closeEl, typeEl, valueEl, maxEl) {
+        const out = { dueAt: fromLocalInput(dueEl.value), closeAt: fromLocalInput(closeEl.value), lateType: typeEl.value, lateValue: '', lateMax: '' };
+        if (out.dueAt && out.closeAt && out.closeAt < out.dueAt) return { error: 'วันปิดรับงานต้องไม่ก่อนกำหนดส่ง' };
+        if (out.lateType) {
+          if (!out.dueAt) return { error: 'ต้องระบุกำหนดส่งก่อน จึงจะตั้งเงื่อนไขหักคะแนนได้' };
+          const value = Number(valueEl.value);
+          if (!(value > 0 && value <= 100)) return { error: 'เปอร์เซ็นต์ที่หักต้องอยู่ระหว่าง 1 ถึง 100' };
+          out.lateValue = String(value);
+          if (out.lateType === 'perDay') {
+            const max = Number(maxEl.value);
+            if (!(max > 0 && max <= 100)) return { error: 'เปอร์เซ็นต์สูงสุดต้องอยู่ระหว่าง 1 ถึง 100' };
+            out.lateMax = String(max);
+          }
+        }
+        return out;
       }
 
       /* ---------- AI วิเคราะห์ผลงาน: กล่องผลวิเคราะห์ ใช้ทั้งฝั่งครูและนักเรียน ---------- */
@@ -4244,8 +4471,12 @@
         const title = assignTitleInput.value.trim();
         setFieldError(assignTitleInput, errAssignTitle, title ? '' : 'กรุณาระบุหัวข้อชิ้นงาน');
         if (!title) return;
+        const deadline = readDeadlineFields($('assignDueInput'), $('assignCloseInput'), $('assignLateType'), $('assignLateValue'), $('assignLateMax'));
+        $('errAssignDeadline').textContent = deadline.error || '';
+        if (deadline.error) return;
         const maxParsed = parseScoreField(assignMaxScoreInput.value, 100);
         assignments.unshift({
+          dueAt: deadline.dueAt, closeAt: deadline.closeAt, lateType: deadline.lateType, lateValue: deadline.lateValue, lateMax: deadline.lateMax,
           id: newId(),
           classroom: assignRoomSelect.value || 'ALL',
           period: assignPeriodSelect.value,
@@ -4256,11 +4487,22 @@
           aiReview: $('assignAiCheck').checked ? '1' : ''
         });
         $('assignAiCheck').checked = false;
+        $('assignDueInput').value = '';
+        $('assignCloseInput').value = '';
+        $('assignLateType').value = '';
+        syncAssignLateFields();
         assignTitleInput.value = '';
         assignDescInput.value = '';
         persistStateBestEffort();
         renderTeacherAssignmentsView();
       });
+      function syncAssignLateFields() {
+        const type = $('assignLateType').value;
+        $('assignLateFields').hidden = !type;
+        $('assignLateMaxField').hidden = type !== 'perDay';
+        $('assignLateValueLabel').textContent = type === 'perDay' ? 'หักวันละ (%)' : 'หัก (%)';
+      }
+      $('assignLateType').addEventListener('change', syncAssignLateFields);
       assignTitleInput.addEventListener('input', function () { setFieldError(assignTitleInput, errAssignTitle, ''); });
       subFilterRoomSelect.addEventListener('change', renderTeacherAssignmentsView);
       subFilterStatusSelect.addEventListener('change', renderTeacherAssignmentsView);
@@ -4701,7 +4943,7 @@
         assignments.forEach(function (a) {
           const opt = document.createElement('option');
           opt.value = a.id;
-          opt.textContent = a.title + ' (เต็ม ' + formatScore(a.maxScore) + ' คะแนน)';
+          opt.textContent = a.title + ' (เต็ม ' + formatScore(a.maxScore) + ' คะแนน)' + (isClosed(a) ? ' • ปิดรับแล้ว' : '');
           stuAssignSelect.appendChild(opt);
         });
         const customOpt = document.createElement('option');
@@ -4710,6 +4952,25 @@
         stuAssignSelect.appendChild(customOpt);
         if (previous && stuAssignSelect.querySelector('option[value="' + previous + '"]')) stuAssignSelect.value = previous;
         stuCustomTitleWrap.hidden = stuAssignSelect.value !== '__CUSTOM__';
+        updateStudentAssignInfo();
+      }
+
+      /* บอกกำหนดส่งของงานที่เลือก และปิดปุ่มส่งเมื่อเลยวันปิดรับ */
+      function updateStudentAssignInfo() {
+        const info = $('stuAssignInfo');
+        const a = assignments.find(function (x) { return x.id === stuAssignSelect.value; });
+        const closed = isClosed(a);
+        $('stuSubmitWorkBtn').disabled = closed;
+        if (!a || (!a.dueAt && !a.closeAt)) {
+          info.hidden = true;
+          return;
+        }
+        const late = latePenaltyNow(a);
+        info.hidden = false;
+        info.className = 'deadline-note' + (closed ? ' is-closed' : (late.lateDays ? ' is-late' : ''));
+        info.textContent = '⏰ ' + deadlineText(a) + (closed
+          ? ' — ปิดรับงานนี้แล้ว หากมีเหตุจำเป็นกรุณาติดต่อครูผู้สอน'
+          : (late.lateDays ? ' — ตอนนี้เลยกำหนด ' + late.lateDays + ' วัน' + (late.penaltyPct ? ' ถ้าส่งตอนนี้จะถูกหัก ' + formatScore(late.penaltyPct) + '% ของคะแนนที่ได้' : ' (ไม่หักคะแนน)') : ''));
       }
 
       function setScoreBox(valId, barId, value, max) {
@@ -4767,7 +5028,7 @@
           titleEl.textContent = w.assignmentTitle + ' (เต็ม ' + formatScore(w.maxScore) + ' คะแนน)';
           const dateEl = document.createElement('div');
           dateEl.className = 'sub-item-date';
-          dateEl.textContent = 'ส่งเมื่อ: ' + formatThaiDateTime(w.submittedAt);
+          dateEl.textContent = 'ส่งเมื่อ: ' + formatThaiDateTime(w.submittedAt) + (lateTagText(w) ? ' • ⏰ ' + lateTagText(w) : '');
           titleBox.appendChild(titleEl);
           titleBox.appendChild(dateEl);
           const statusBadge = document.createElement('span');
@@ -4794,7 +5055,8 @@
           const scoreVal = document.createElement('span');
           scoreVal.className = 'sub-item-score-val';
           scoreVal.textContent = w.status === 'graded'
-            ? 'ได้ ' + formatScore(w.awardedScore) + ' / ' + formatScore(w.maxScore) + ' คะแนน'
+            ? 'ได้ ' + formatScore(w.awardedScore) + ' / ' + formatScore(w.maxScore) + ' คะแนน' +
+              (w.penaltyPct && !isBlank(w.rawScore) ? ' (ครูให้ ' + formatScore(w.rawScore) + ' หัก ' + formatScore(w.penaltyPct) + '% เพราะส่งช้า)' : '')
             : 'รอการให้คะแนนจากครู';
           scoreRow.appendChild(scoreLabel);
           scoreRow.appendChild(scoreVal);
@@ -5138,6 +5400,7 @@
 
       stuAssignSelect.addEventListener('change', function () {
         stuCustomTitleWrap.hidden = stuAssignSelect.value !== '__CUSTOM__';
+        updateStudentAssignInfo();
       });
       stuCustomTitleInput.addEventListener('input', function () { setFieldError(stuCustomTitleInput, errStuCustomTitle, ''); });
 
@@ -5199,6 +5462,7 @@
           stuSubmitWorkMsg.textContent = 'ส่งงานไม่สำเร็จ: ' + handleServerError(err);
         }).then(function () {
           stuSubmitWorkBtn.disabled = false;
+          updateStudentAssignInfo();
         });
       });
 
