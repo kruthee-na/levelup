@@ -538,6 +538,22 @@
     .mini-list li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; padding: 8px 12px; border-radius: 14px; background: #ffffff; box-shadow: 0 3px 8px rgba(124, 92, 214, 0.08); }
     .mini-list .is-empty { color: var(--muted); background: transparent; box-shadow: none; padding: 4px 0; }
 
+    /* ---------- รายวิชา ---------- */
+    .course-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 16px; margin-bottom: var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg, 18px); box-shadow: var(--shadow-sm); min-width: 0; }
+    .course-bar-label { font-weight: 700; color: var(--ink); font-size: 0.9rem; white-space: nowrap; }
+    .course-bar .select-input { flex: 1 1 200px; min-width: 0; width: auto; min-height: 42px; font-weight: 600; }
+    .course-bar .inline-status-msg { flex: 1 1 100%; }
+    .course-bar .inline-status-msg:empty { display: none; }
+    body.is-logged-out .course-bar { display: none; }
+    body.no-course [id^="viewTeacher"] { display: none !important; }
+    .room-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; max-height: 220px; overflow: auto; padding: 4px; }
+    .room-pick .att-check { min-height: 38px; padding: 0 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-input); }
+    .teacher-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; min-width: 0; }
+    .teacher-row.is-off { opacity: 0.6; }
+    .teacher-row-info { min-width: 0; flex: 1 1 180px; overflow-wrap: anywhere; }
+    .temp-pass { padding: 10px 14px; border-radius: 12px; background: rgba(245, 158, 11, 0.16); color: #7a4300; font-size: 0.9rem; line-height: 1.5; overflow-wrap: anywhere; }
+    .temp-pass code { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.06em; }
+
     /* ---------- กำหนดส่งและการหักคะแนนส่งช้า ---------- */
     .deadline-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); min-width: 0; }
     .deadline-grid .field { min-width: 0; }
@@ -777,6 +793,16 @@
   <main class="container">
     <datalist id="classroomDatalist"></datalist>
 
+    <!-- รายวิชาที่กำลังเปิดอยู่ (ครู: วิชาที่สอน, นักเรียน: วิชาที่เรียน) -->
+    <div class="course-bar" id="courseBar" hidden>
+      <label for="courseSelect" class="course-bar-label">📚 รายวิชา</label>
+      <select id="courseSelect" class="select-input" aria-label="เลือกรายวิชา"></select>
+      <button type="button" class="btn btn-secondary btn-sm" id="courseEditBtn" hidden>⚙️ แก้ไขวิชานี้</button>
+      <button type="button" class="btn btn-primary btn-sm" id="courseNewBtn" hidden>＋ วิชาใหม่</button>
+      <button type="button" class="btn btn-secondary btn-sm" id="teachersBtn" hidden>👩‍🏫 จัดการครู</button>
+      <div class="inline-status-msg" id="courseBarMsg" aria-live="polite"></div>
+    </div>
+
     <!-- หน้าเข้าสู่ระบบ -->
     <div id="viewUnifiedLogin">
       <div class="login-scene">
@@ -828,7 +854,7 @@
 
           <button type="button" class="btn btn-secondary login-install" id="installLoginBtn" hidden>📲 ติดตั้ง LevelUp ลงเครื่องนี้</button>
           <p class="login-hint" id="iosInstallHint" style="text-align: center; margin-top: 12px;" hidden>ติดตั้งบน iPhone/iPad: แตะปุ่มแชร์ของ Safari แล้วเลือก "เพิ่มไปยังหน้าจอโฮม"</p>
-          <p class="login-foot">ครูผู้สอนใช้ชื่อผู้ใช้ <strong>teacher</strong> • <button type="button" class="link-btn" id="forgotBtn">ครูลืมรหัสผ่าน?</button></p>
+          <p class="login-foot">ครูใช้ชื่อผู้ใช้ที่ผู้ดูแลกำหนดให้ • <button type="button" class="link-btn" id="forgotBtn">ผู้ดูแลลืมรหัสผ่าน?</button></p>
         </section>
       </div>
     </div>
@@ -1704,7 +1730,7 @@
         </div>
       </div>
 
-      <fieldset class="field">
+      <fieldset class="field" data-chat-admin>
         <legend>เหตุการณ์ที่ต้องการแจ้งเตือน</legend>
         <label class="att-check"><input type="checkbox" id="chatEvSubmit"><span>นักเรียนส่งงาน (แจ้งครู)</span></label>
         <label class="att-check"><input type="checkbox" id="chatEvSecurity"><span>มีการขอรีเซ็ตรหัสผ่านครู (แจ้งครู)</span></label>
@@ -1714,12 +1740,12 @@
         <label class="att-check"><input type="checkbox" id="chatEvEmail"><span>ถ้านักเรียนยังไม่เคยทักบอต ให้ส่งอีเมลโรงเรียนแทน</span></label>
       </fieldset>
 
-      <fieldset class="field">
+      <fieldset class="field" data-chat-admin>
         <legend>ลิงก์ Webhook ของแต่ละห้อง (เว้นว่างได้ ใช้ลิงก์เดียวกันหลายห้องได้)</legend>
         <div id="chatRoomsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
       </fieldset>
 
-      <fieldset class="field">
+      <fieldset class="field" data-chat-admin>
         <legend>บอต LevelUp ใน Google Chat (ถามตอบ ลิงก์ส่งงาน แจ้งเตือนรายบุคคล)</legend>
         <p class="subpanel-desc" id="chatBotStatus"></p>
         <div class="field">
@@ -1758,6 +1784,77 @@
       <div class="btn-group" style="justify-content: flex-end;">
         <button type="button" class="btn btn-primary" id="chatSaveBtn">บันทึกการตั้งค่า</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ครู: สร้างหรือแก้ไขรายวิชา -->
+  <div class="modal-backdrop" id="courseModal" role="dialog" aria-modal="true" aria-labelledby="courseTitle" hidden>
+    <div class="modal-dialog form-dialog" style="max-width: 560px;">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="courseTitle">รายวิชา</h2>
+          <p class="section-subtitle">เลือกห้องที่เรียนวิชานี้ทั้งห้อง จากนั้นเพิ่มหรือตัดนักเรียนรายคนได้ที่หน้า "ป้อนและส่งคะแนน"</p>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="courseCloseBtn">ปิด</button>
+      </div>
+      <div class="field">
+        <label for="courseNameInput">ชื่อรายวิชา</label>
+        <input type="text" id="courseNameInput" class="input" maxlength="80" placeholder="เช่น ทัศนศิลป์ 3" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="courseCodeInput"><span>รหัสวิชา</span><span class="max-hint">ไม่บังคับ</span></label>
+        <input type="text" id="courseCodeInput" class="input" maxlength="20" placeholder="เช่น ศ22101" autocomplete="off">
+      </div>
+      <div class="field" id="courseTeacherField" hidden>
+        <label for="courseTeacherSelect">ครูผู้สอน</label>
+        <select id="courseTeacherSelect" class="select-input"></select>
+      </div>
+      <fieldset class="field">
+        <legend>ห้องที่เรียนวิชานี้ทั้งห้อง</legend>
+        <div class="room-pick" id="courseRoomPick"></div>
+        <p class="subpanel-desc" id="courseRoomHint"></p>
+      </fieldset>
+      <div class="inline-status-msg" id="courseMsg" aria-live="polite"></div>
+      <div class="btn-group" style="justify-content: space-between;">
+        <button type="button" class="btn btn-danger-ghost" id="courseArchiveBtn" hidden>เก็บรายวิชานี้เข้าคลัง</button>
+        <button type="button" class="btn btn-primary" id="courseSaveBtn">บันทึกรายวิชา</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ผู้ดูแล: จัดการบัญชีครู -->
+  <div class="modal-backdrop" id="teachersModal" role="dialog" aria-modal="true" aria-labelledby="teachersTitle" hidden>
+    <div class="modal-dialog form-dialog" style="max-width: 600px;">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="teachersTitle">จัดการบัญชีครู</h2>
+          <p class="section-subtitle">เพิ่มครูแล้วส่งชื่อผู้ใช้กับรหัสผ่านชั่วคราวให้ครูท่านนั้น ครูจะตั้งรหัสผ่านของตัวเองเมื่อเข้าใช้ครั้งแรก และสร้างรายวิชาของตัวเองได้</p>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="teachersCloseBtn">ปิด</button>
+      </div>
+      <div id="teachersList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+      <div class="temp-pass" id="teacherTempPass" hidden></div>
+      <fieldset class="field">
+        <legend>เพิ่มครูใหม่</legend>
+        <div class="deadline-grid">
+          <div class="field">
+            <label for="teacherKeyInput"><span>ชื่อผู้ใช้</span><span class="max-hint">a-z ตัวเลข . _ -</span></label>
+            <input type="text" id="teacherKeyInput" class="input" maxlength="30" placeholder="เช่น kru.somchai" autocomplete="off" autocapitalize="none" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="teacherNameInput">ชื่อที่แสดง</label>
+            <input type="text" id="teacherNameInput" class="input" maxlength="60" placeholder="เช่น ครูสมชาย ใจดี" autocomplete="off">
+          </div>
+        </div>
+        <div class="field">
+          <label for="teacherEmailInput"><span>อีเมลโรงเรียน</span><span class="max-hint">ไม่บังคับ ใช้กับบอต Google Chat</span></label>
+          <input type="email" id="teacherEmailInput" class="input" maxlength="120" placeholder="name@na.ac.th" autocomplete="off">
+        </div>
+        <div class="btn-group" style="justify-content: flex-end;">
+          <button type="button" class="btn btn-primary" id="teacherAddBtn">เพิ่มครู</button>
+        </div>
+      </fieldset>
+      <div class="inline-status-msg" id="teachersMsg" aria-live="polite"></div>
     </div>
   </div>
 
@@ -2192,6 +2289,8 @@
         if (msg.indexOf('CHAT_HTTP_404') !== -1) return 'Google Chat ไม่พบเว็บฮุคนี้ (404) ลิงก์อาจถูกลบหรือคัดลอกมาไม่ครบ';
         if (msg.indexOf('CHAT_HTTP_') !== -1) return 'Google Chat ปฏิเสธข้อความ (รหัส ' + msg.split('CHAT_HTTP_')[1].slice(0, 3) + ') ตรวจว่าเว็บฮุคยังใช้ได้และผู้ดูแลโดเมนอนุญาตเว็บฮุคขาเข้า';
         if (msg.indexOf('CHAT_FETCH_FAILED') !== -1) return 'ส่งไป Google Chat ไม่ได้ กรุณาลองใหม่อีกครั้ง';
+        if (msg.indexOf('COURSE_MISMATCH') !== -1 || msg.indexOf('COURSE_GONE') !== -1) return 'รายวิชาที่เปิดอยู่เปลี่ยนไปแล้ว ระบบกำลังโหลดข้อมูลล่าสุด';
+        if (msg.indexOf('DUPLICATE') !== -1) return 'ชื่อผู้ใช้นี้มีอยู่แล้ว กรุณาใช้ชื่ออื่น';
         if (msg.indexOf('SUBMISSION_CLOSED') !== -1) return 'งานนี้ปิดรับแล้ว หากมีเหตุจำเป็นกรุณาติดต่อครูผู้สอน';
         if (msg.indexOf('AI_NOT_CONFIGURED') !== -1) return 'ยังไม่ได้ตั้งค่า AI (ผู้ให้บริการ ชื่อโมเดล และ API Key)';
         if (msg.indexOf('AI_NOT_ENABLED') !== -1) return 'งานนี้ไม่ได้เปิดการวิเคราะห์ด้วย AI';
@@ -2220,6 +2319,11 @@
       function handleServerError(err) {
         const text = errorText(err);
         setSaveStatus('error', text);
+        if (/COURSE_MISMATCH|COURSE_GONE/.test(String((err && err.message) || err))) {
+          // ข้อมูลบนจอเป็นของรายวิชาที่ไม่ตรงกับเซสชันแล้ว: ทิ้งการแก้ไขที่ค้างและโหลดใหม่
+          saveDirty = false;
+          setTimeout(reloadFromServer, 50);
+        }
         if (String((err && err.message) || err).indexOf('SESSION_EXPIRED') !== -1) {
           endSession();
           setFieldError(loginUsernameInput, errLoginUsername, text);
@@ -2243,9 +2347,15 @@
       function flushTeacherState() {
         if (!teacherAuthenticated || !saveDirty) return;
         if (saveInFlight) return;
+        if (!currentCourseId) {   // ยังไม่มีรายวิชา จึงไม่มีอะไรให้บันทึก
+          saveDirty = false;
+          setSaveStatus('ready');
+          return;
+        }
         saveInFlight = true;
         saveDirty = false;
         server('saveTeacherState', sessionToken, {
+          courseId: currentCourseId,
           classrooms: classrooms,
           publishedRooms: publishedRooms,
           assignments: assignments,
@@ -2256,9 +2366,10 @@
               total: s.total, grade: s.grade
             };
           })
-        }).then(function () {
+        }).then(function (res) {
           saveInFlight = false;
           if (saveDirty) flushTeacherState();
+          else if (res && res.reload) reloadFromServer();   // ผู้เรียนของวิชาเปลี่ยน (เช่น เพิ่มห้องที่มีนักเรียนอยู่แล้ว)
           else setSaveStatus('saved');
         }).catch(function (err) {
           saveInFlight = false;
@@ -3461,9 +3572,24 @@
       };
 
       let aiReady = false;
+      let currentCourseId = '';
+      let isAdmin = false;
+      let myTeacherId = '';
+      const courses = [];
+      const allRooms = [];
+      const teacherChoices = [];
 
       function applyState(state) {
         aiReady = Boolean(state.aiReady);
+        currentCourseId = state.courseId || '';
+        isAdmin = Boolean(state.isAdmin);
+        myTeacherId = state.teacherId || '';
+        courses.length = 0;
+        (state.courses || []).forEach(function (c) { courses.push(c); });
+        allRooms.length = 0;
+        (state.allRooms || []).forEach(function (r) { allRooms.push(r); });
+        teacherChoices.length = 0;
+        (state.teachers || []).forEach(function (t) { teacherChoices.push(t); });
         classrooms.length = 0;
         students.length = 0;
         assignments.length = 0;
@@ -3511,7 +3637,7 @@
         saveDirty = false;
         sessionToken = '';
         try { tokenStore.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ }
-        ['reportModal', 'profileModal', 'passwordModal', 'imagePreviewModal', 'chatModal'].forEach(function (id) { $(id).hidden = true; });
+        ['reportModal', 'profileModal', 'passwordModal', 'imagePreviewModal', 'chatModal', 'aiModal', 'courseModal', 'teachersModal'].forEach(function (id) { $(id).hidden = true; });
         applyState({ role: 'none' });
         stagedStudentFile = null;
         loginUsernameInput.value = '';
@@ -3537,7 +3663,8 @@
         refreshDataBtn.hidden = !loggedIn;
         $('profileBtn').hidden = !loggedIn;
         $('chatSettingsBtn').hidden = !(loggedIn && role === 'teacher');
-        $('aiSettingsBtn').hidden = !(loggedIn && role === 'teacher');
+        $('aiSettingsBtn').hidden = !(loggedIn && role === 'teacher' && isAdmin);
+        renderCourseBar(loggedIn, role);
         applyProfile();
         document.body.classList.toggle('is-logged-out', !loggedIn);
         document.body.classList.toggle('has-sidebar', loggedIn && role === 'teacher');
@@ -4013,7 +4140,9 @@
         syncRoomDropdown(subFilterRoomSelect, 'ทุกห้องเรียน');
         $('assignAiHint').textContent = aiReady
           ? 'ปิดไว้เป็นค่าเริ่มต้น เปิดเฉพาะงานที่ต้องการ ใช้กับไฟล์รูปภาพเท่านั้น'
-          : 'ยังไม่ได้ตั้งค่า AI: กดกระดิ่ง > "ตั้งค่า AI วิเคราะห์ผลงาน" เพื่อใส่ API Key ก่อน งานที่เปิดไว้จะเริ่มวิเคราะห์หลังตั้งค่าแล้ว';
+          : (isAdmin
+            ? 'ยังไม่ได้ตั้งค่า AI: กดกระดิ่ง > "ตั้งค่า AI วิเคราะห์ผลงาน" เพื่อใส่ API Key ก่อน งานที่เปิดไว้จะเริ่มวิเคราะห์หลังตั้งค่าแล้ว'
+            : 'ผู้ดูแลระบบยังไม่ได้ตั้งค่า AI งานที่เปิดไว้จะเริ่มวิเคราะห์หลังผู้ดูแลตั้งค่าแล้ว');
 
         teacherAssignList.innerHTML = '';
         if (assignments.length === 0) {
@@ -5544,7 +5673,7 @@
           frame: profile.frame || 'none', sticker: profile.sticker || '', avatar: profile.avatar || ''
         };
         $('pfNameField').hidden = !teacherAuthenticated;
-        $('pfEmailField').hidden = !teacherAuthenticated;
+        $('pfEmailField').hidden = !(teacherAuthenticated && isAdmin);
         $('pfEmailInput').value = profile.recoveryEmail || '';
         $('pfNameInput').value = profileDraft.displayName;
         $('pfMottoInput').value = profileDraft.motto;
@@ -5590,7 +5719,7 @@
         const btn = this;
         profileDraft.displayName = $('pfNameInput').value.trim();
         profileDraft.motto = $('pfMottoInput').value.trim();
-        if (teacherAuthenticated) profileDraft.recoveryEmail = $('pfEmailInput').value.trim();
+        if (teacherAuthenticated && isAdmin) profileDraft.recoveryEmail = $('pfEmailInput').value.trim();
         btn.disabled = true;
         $('pfMsg').className = 'inline-status-msg';
         $('pfMsg').textContent = 'กำลังบันทึกโปรไฟล์...';
@@ -6009,6 +6138,8 @@
 
       function fillChatSettings(settings) {
         $('chatTeacherInput').value = settings.teacher || '';
+        // ครูทั่วไปตั้งได้เฉพาะเว็บฮุคของตัวเอง ส่วนอื่นเป็นของผู้ดูแล
+        document.querySelectorAll('[data-chat-admin]').forEach(function (el) { el.hidden = Boolean(settings.limited); });
         Object.keys(CHAT_EVENT_IDS).forEach(function (k) { $(CHAT_EVENT_IDS[k]).checked = settings.events[k] !== false; });
         const bot = settings.bot || {};
         $('chatWebAppInput').value = bot.webAppUrl || '';
@@ -6099,6 +6230,293 @@
           }
         });
       });
+      /* =========================================================
+       * รายวิชา: สลับวิชา สร้าง/แก้ไขวิชา และ (ผู้ดูแล) จัดการบัญชีครู
+       * ========================================================= */
+      const courseSelect = $('courseSelect');
+      const courseModal = $('courseModal');
+      const teachersModal = $('teachersModal');
+      let courseEditingId = '';
+      let courseArchiveArmed = false;
+
+      function courseText(c) {
+        return (c.code ? c.code + ' ' : '') + c.name;
+      }
+
+      function renderCourseBar(loggedIn, role) {
+        const bar = $('courseBar');
+        bar.hidden = !loggedIn;
+        if (!loggedIn) return;
+        const isTeacher = role === 'teacher';
+        document.body.classList.toggle('no-course', isTeacher && !currentCourseId);
+        courseSelect.innerHTML = '';
+        courses.forEach(function (c) {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          // ผู้ดูแลเห็นทุกวิชาจึงแสดงชื่อครู นักเรียนเห็นชื่อครูผู้สอน
+          opt.textContent = courseText(c) + ((isTeacher ? isAdmin && c.teacher !== myTeacherId : true) ? ' • ' + c.teacherName : '');
+          courseSelect.appendChild(opt);
+        });
+        if (courses.length === 0) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = isTeacher ? 'ยังไม่มีรายวิชา' : 'ยังไม่มีรายวิชาที่ลงทะเบียน';
+          courseSelect.appendChild(opt);
+        }
+        courseSelect.value = currentCourseId;
+        courseSelect.disabled = courses.length < 2;
+        $('courseEditBtn').hidden = !(isTeacher && currentCourseId);
+        $('courseNewBtn').hidden = !isTeacher;
+        $('teachersBtn').hidden = !(isTeacher && isAdmin);
+        const msg = $('courseBarMsg');
+        msg.className = 'inline-status-msg';
+        msg.textContent = courses.length ? '' : (isTeacher
+          ? 'กด "＋ วิชาใหม่" เพื่อสร้างรายวิชาแรก แล้วเลือกห้องที่เรียน'
+          : 'ครูยังไม่ได้เพิ่มห้องหรือชื่อของนักเรียนในรายวิชาใด');
+      }
+
+      function useCourseResult(res) {
+        if (!res || !res.ok) return;
+        startSession(res);
+      }
+
+      courseSelect.addEventListener('change', function () {
+        const id = courseSelect.value;
+        if (!id || id === currentCourseId) return;
+        if (saveDirty || saveInFlight) {
+          courseSelect.value = currentCourseId;
+          $('courseBarMsg').className = 'inline-status-msg is-error';
+          $('courseBarMsg').textContent = 'กำลังบันทึกข้อมูลของวิชานี้ กรุณาเลือกอีกครั้งในอีกสักครู่';
+          return;
+        }
+        courseSelect.disabled = true;
+        setSaveStatus('loading');
+        server('selectCourse', sessionToken, id).then(useCourseResult).catch(function (err) {
+          courseSelect.disabled = false;
+          courseSelect.value = currentCourseId;
+          handleServerError(err);
+        });
+      });
+
+      function setCourseMsg(kind, text) {
+        $('courseMsg').className = 'inline-status-msg' + (kind ? ' is-' + kind : '');
+        $('courseMsg').textContent = text;
+      }
+
+      function openCourseModal(id) {
+        const c = courses.find(function (x) { return x.id === id; }) || null;
+        courseEditingId = c ? c.id : '';
+        courseArchiveArmed = false;
+        $('courseTitle').textContent = c ? 'แก้ไขรายวิชา' : 'สร้างรายวิชาใหม่';
+        $('courseNameInput').value = c ? c.name : '';
+        $('courseCodeInput').value = c ? c.code : '';
+        $('courseTeacherField').hidden = !isAdmin;
+        const sel = $('courseTeacherSelect');
+        sel.innerHTML = '';
+        [{ key: 'teacher', displayName: 'ผู้ดูแลระบบ (ฉัน)' }].concat(teacherChoices).forEach(function (t) {
+          const opt = document.createElement('option');
+          opt.value = t.key;
+          opt.textContent = t.displayName + (t.key === 'teacher' ? '' : ' (' + t.key + ')');
+          sel.appendChild(opt);
+        });
+        sel.value = c ? c.teacher : 'teacher';
+        const pick = $('courseRoomPick');
+        pick.innerHTML = '';
+        const chosen = c ? c.rooms : [];
+        allRooms.forEach(function (room, i) {
+          const label = document.createElement('label');
+          label.className = 'att-check';
+          const box = document.createElement('input');
+          box.type = 'checkbox';
+          box.value = room;
+          box.id = 'courseRoom' + i;
+          box.checked = chosen.indexOf(room) !== -1;
+          const span = document.createElement('span');
+          span.textContent = room;
+          label.appendChild(box);
+          label.appendChild(span);
+          pick.appendChild(label);
+        });
+        $('courseRoomHint').textContent = allRooms.length
+          ? 'ห้องที่ยังไม่มีในรายการ เพิ่มได้ที่หน้า "ป้อนและส่งคะแนน" หลังสร้างรายวิชา (เพิ่มห้องเรียน หรือนำเข้ารายชื่อ)'
+          : 'ยังไม่มีห้องในทะเบียน สร้างรายวิชาก่อน แล้วเพิ่มห้องและรายชื่อที่หน้า "ป้อนและส่งคะแนน"';
+        $('courseArchiveBtn').hidden = !c;
+        $('courseArchiveBtn').textContent = 'เก็บรายวิชานี้เข้าคลัง';
+        setCourseMsg('', '');
+        courseModal.hidden = false;
+        $('courseNameInput').focus();
+      }
+
+      $('courseEditBtn').addEventListener('click', function () { openCourseModal(currentCourseId); });
+      $('courseNewBtn').addEventListener('click', function () { openCourseModal(''); });
+      $('courseSaveBtn').addEventListener('click', function () {
+        const name = $('courseNameInput').value.trim();
+        if (!name) {
+          setCourseMsg('error', 'กรุณาระบุชื่อรายวิชา');
+          return;
+        }
+        if (saveDirty || saveInFlight) {
+          setCourseMsg('error', 'กำลังบันทึกข้อมูลของวิชาที่เปิดอยู่ กรุณากดอีกครั้งในอีกสักครู่');
+          return;
+        }
+        const rooms = [];
+        $('courseRoomPick').querySelectorAll('input:checked').forEach(function (box) { rooms.push(box.value); });
+        const btn = this;
+        btn.disabled = true;
+        setCourseMsg('', 'กำลังบันทึก...');
+        const editing = courseEditingId;
+        server('saveCourse', sessionToken, {
+          id: editing, name: name, code: $('courseCodeInput').value.trim(), rooms: rooms,
+          teacher: isAdmin ? $('courseTeacherSelect').value : undefined
+        }).then(function (res) {
+          courseModal.hidden = true;
+          // แก้วิชาที่ไม่ได้เปิดอยู่: รายการวิชาเปลี่ยน แต่ยังอยู่ที่วิชาเดิม
+          useCourseResult(res);
+        }).catch(function (err) {
+          setCourseMsg('error', handleServerError(err));
+        }).then(function () { btn.disabled = false; });
+      });
+      $('courseArchiveBtn').addEventListener('click', function () {
+        if (!courseArchiveArmed) {
+          courseArchiveArmed = true;
+          this.textContent = 'กดอีกครั้งเพื่อยืนยัน (วิชาจะหายจากรายการของครูและนักเรียน)';
+          return;
+        }
+        const btn = this;
+        btn.disabled = true;
+        server('archiveCourse', sessionToken, courseEditingId).then(function (res) {
+          courseModal.hidden = true;
+          useCourseResult(res);
+        }).catch(function (err) {
+          setCourseMsg('error', handleServerError(err));
+        }).then(function () { btn.disabled = false; });
+      });
+      $('courseCloseBtn').addEventListener('click', function () { courseModal.hidden = true; });
+      courseModal.addEventListener('click', function (e) { if (e.target === courseModal) courseModal.hidden = true; });
+
+      function setTeachersMsg(kind, text) {
+        $('teachersMsg').className = 'inline-status-msg' + (kind ? ' is-' + kind : '');
+        $('teachersMsg').textContent = text;
+      }
+
+      function showTempPass(key, password) {
+        const box = $('teacherTempPass');
+        box.hidden = false;
+        box.textContent = '';
+        box.appendChild(document.createTextNode('ชื่อผู้ใช้ '));
+        const u = document.createElement('code');
+        u.textContent = key;
+        box.appendChild(u);
+        box.appendChild(document.createTextNode(' • รหัสผ่านชั่วคราว '));
+        const p = document.createElement('code');
+        p.textContent = password;
+        box.appendChild(p);
+        box.appendChild(document.createTextNode(' — จดหรือส่งให้ครูท่านนั้นตอนนี้ รหัสนี้แสดงเพียงครั้งเดียว'));
+      }
+
+      function renderTeachers(list) {
+        const wrap = $('teachersList');
+        wrap.innerHTML = '';
+        if (list.length === 0) {
+          const p = document.createElement('p');
+          p.className = 'subpanel-desc';
+          p.textContent = 'ยังไม่มีบัญชีครูท่านอื่น';
+          wrap.appendChild(p);
+        }
+        teacherChoices.length = 0;
+        list.forEach(function (t) {
+          if (t.active) teacherChoices.push({ key: t.key, displayName: t.displayName });
+          const row = document.createElement('div');
+          row.className = 'teacher-row' + (t.active ? '' : ' is-off');
+          const info = document.createElement('div');
+          info.className = 'teacher-row-info';
+          const name = document.createElement('strong');
+          name.textContent = t.displayName;
+          const meta = document.createElement('div');
+          meta.className = 'submission-meta';
+          meta.textContent = 'ชื่อผู้ใช้: ' + t.key + (t.email ? ' • ' + t.email : '') + ' • ' + t.courses + ' วิชา' + (t.active ? '' : ' • ปิดบัญชีอยู่');
+          info.appendChild(name);
+          info.appendChild(meta);
+          const actions = document.createElement('div');
+          actions.className = 'row-actions';
+          actions.style.flexWrap = 'wrap';
+          const resetBtn = document.createElement('button');
+          resetBtn.type = 'button';
+          resetBtn.className = 'btn btn-sm btn-secondary';
+          resetBtn.textContent = 'ออกรหัสผ่านใหม่';
+          resetBtn.addEventListener('click', function () {
+            resetBtn.disabled = true;
+            server('resetTeacherLogin', sessionToken, t.key).then(function (res) {
+              showTempPass(t.key, res.tempPassword);
+              setTeachersMsg('ok', 'ออกรหัสผ่านชั่วคราวใหม่ให้ ' + t.displayName + ' แล้ว');
+            }).catch(function (err) { setTeachersMsg('error', handleServerError(err)); })
+              .then(function () { resetBtn.disabled = false; });
+          });
+          const toggleBtn = document.createElement('button');
+          toggleBtn.type = 'button';
+          toggleBtn.className = 'btn btn-sm ' + (t.active ? 'btn-danger-ghost' : 'btn-secondary');
+          toggleBtn.textContent = t.active ? 'ปิดบัญชี' : 'เปิดบัญชี';
+          toggleBtn.addEventListener('click', function () {
+            toggleBtn.disabled = true;
+            server('saveTeacher', sessionToken, { key: t.key, displayName: t.displayName, email: t.email, active: !t.active }).then(function (res) {
+              renderTeachers(res.teachers);
+              setTeachersMsg('ok', (t.active ? 'ปิดบัญชี ' : 'เปิดบัญชี ') + t.displayName + ' แล้ว');
+            }).catch(function (err) {
+              toggleBtn.disabled = false;
+              setTeachersMsg('error', handleServerError(err));
+            });
+          });
+          actions.appendChild(resetBtn);
+          actions.appendChild(toggleBtn);
+          row.appendChild(info);
+          row.appendChild(actions);
+          wrap.appendChild(row);
+        });
+      }
+
+      $('teachersBtn').addEventListener('click', function () {
+        $('teacherTempPass').hidden = true;
+        $('teachersList').innerHTML = '';
+        setTeachersMsg('', 'กำลังโหลดรายชื่อครู...');
+        teachersModal.hidden = false;
+        server('getTeachers', sessionToken).then(function (list) {
+          renderTeachers(list);
+          setTeachersMsg('', '');
+        }).catch(function (err) { setTeachersMsg('error', handleServerError(err)); });
+      });
+      $('teacherAddBtn').addEventListener('click', function () {
+        const key = $('teacherKeyInput').value.trim().toLowerCase();
+        const name = $('teacherNameInput').value.trim();
+        if (!/^[a-z][a-z0-9._-]{2,29}$/.test(key) || key === 'teacher' || key === 'admin') {
+          setTeachersMsg('error', 'ชื่อผู้ใช้ต้องขึ้นต้นด้วยตัวอักษรอังกฤษ ยาว 3 ถึง 30 ตัว ใช้ได้เฉพาะ a-z ตัวเลข จุด ขีดล่าง และขีดกลาง');
+          return;
+        }
+        if (!name) {
+          setTeachersMsg('error', 'กรุณาระบุชื่อที่แสดงของครู');
+          return;
+        }
+        const btn = this;
+        btn.disabled = true;
+        setTeachersMsg('', 'กำลังเพิ่มครู...');
+        server('saveTeacher', sessionToken, { key: key, displayName: name, email: $('teacherEmailInput').value.trim(), isNew: true }).then(function (res) {
+          renderTeachers(res.teachers);
+          showTempPass(key, res.tempPassword);
+          setTeachersMsg('ok', 'เพิ่ม ' + name + ' แล้ว');
+          $('teacherKeyInput').value = '';
+          $('teacherNameInput').value = '';
+          $('teacherEmailInput').value = '';
+        }).catch(function (err) {
+          setTeachersMsg('error', handleServerError(err));
+        }).then(function () { btn.disabled = false; });
+      });
+      $('teachersCloseBtn').addEventListener('click', function () { teachersModal.hidden = true; });
+      teachersModal.addEventListener('click', function (e) { if (e.target === teachersModal) teachersModal.hidden = true; });
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        courseModal.hidden = true;
+        teachersModal.hidden = true;
+      });
+
       /* =========================================================
        * ครู: ตั้งค่า AI วิเคราะห์ผลงาน
        * ========================================================= */
