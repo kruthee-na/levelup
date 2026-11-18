@@ -2020,7 +2020,7 @@
       <div class="modal-header">
         <div>
           <h2 class="modal-title" id="aiTitle">AI วิเคราะห์ผลงานศิลปะ</h2>
-          <p class="section-subtitle">AI จะชี้จุดเด่นและจุดที่ควรแก้ไขตามหลักการจัดองค์ประกอบ หลักการใช้สี และทฤษฎีสี เฉพาะงานที่ครูเปิดไว้ตอนสั่งงาน ครูยังเป็นผู้ให้คะแนนเอง</p>
+          <p class="section-subtitle">AI จะชี้จุดเด่นและจุดที่ควรแก้ไขตามหลักการจัดองค์ประกอบ หลักการใช้สี และทฤษฎีสี เฉพาะงานที่ครูเปิดไว้ตอนสั่งงาน ครูยังเป็นผู้ให้คะแนนเอง โมเดลที่อ่านภาพได้จะวิเคราะห์จากภาพผลงาน โมเดลข้อความจะให้คำแนะนำจากคำอธิบายที่นักเรียนเขียนเท่านั้น</p>
         </div>
         <button type="button" class="btn btn-secondary btn-sm" id="aiCloseBtn">ปิด</button>
       </div>
@@ -2031,9 +2031,11 @@
         <div class="field">
           <label for="aiProvider0">ผู้ให้บริการ</label>
           <select id="aiProvider0" class="select-input">
+            <option value="thaillm">ThaiLLM (thaillm.or.th)</option>
             <option value="openrouter">OpenRouter</option>
-            <option value="custom">ThaiLLM หรือรายอื่น (API แบบเข้ากันได้กับ OpenAI)</option>
+            <option value="custom">รายอื่น (API แบบเข้ากันได้กับ OpenAI)</option>
           </select>
+          <p class="subpanel-desc" id="aiVisionNote0"></p>
         </div>
         <div class="field" id="aiBaseField0" hidden>
           <label for="aiBase0"><span>Base URL ของ API</span><span class="max-hint">ไม่ต้องใส่ /chat/completions</span></label>
@@ -2062,9 +2064,11 @@
         <div class="field">
           <label for="aiProvider1">ผู้ให้บริการ</label>
           <select id="aiProvider1" class="select-input">
+            <option value="thaillm">ThaiLLM (thaillm.or.th)</option>
             <option value="openrouter">OpenRouter</option>
-            <option value="custom">ThaiLLM หรือรายอื่น (API แบบเข้ากันได้กับ OpenAI)</option>
+            <option value="custom">รายอื่น (API แบบเข้ากันได้กับ OpenAI)</option>
           </select>
+          <p class="subpanel-desc" id="aiVisionNote1"></p>
         </div>
         <div class="field" id="aiBaseField1" hidden>
           <label for="aiBase1"><span>Base URL ของ API</span><span class="max-hint">ไม่ต้องใส่ /chat/completions</span></label>
@@ -2454,6 +2458,7 @@
         if (msg.indexOf('SUBMISSION_CLOSED') !== -1) return 'งานนี้ปิดรับแล้ว หากมีเหตุจำเป็นกรุณาติดต่อครูผู้สอน';
         if (msg.indexOf('AI_NOT_CONFIGURED') !== -1) return 'ยังไม่ได้ตั้งค่า AI (ผู้ให้บริการ ชื่อโมเดล และ API Key)';
         if (msg.indexOf('AI_NOT_ENABLED') !== -1) return 'งานนี้ไม่ได้เปิดการวิเคราะห์ด้วย AI';
+        if (msg.indexOf('AI_NO_VISION') !== -1) return 'โมเดล AI ที่ตั้งไว้อ่านภาพไม่ได้ และงานนี้ไม่มีคำอธิบายให้วิเคราะห์ ให้นักเรียนเขียนอธิบายผลงานตอนส่ง หรือให้ผู้ดูแลตั้งโมเดลที่อ่านภาพได้';
         if (msg.indexOf('AI_NO_IMAGE') !== -1) return 'AI วิเคราะห์ได้เฉพาะไฟล์รูปภาพ (JPG, PNG, WEBP, GIF)';
         if (msg.indexOf('AI_IMAGE_TOO_LARGE') !== -1) return 'ไฟล์ภาพใหญ่เกินไปสำหรับ AI กรุณาส่งภาพที่เล็กกว่า 4 MB';
         if (msg.indexOf('AI_DAILY_LIMIT') !== -1) return 'วันนี้ใช้ AI ครบจำนวนที่ครูกำหนดแล้ว ลองใหม่พรุ่งนี้';
@@ -4737,6 +4742,7 @@
         }
         let fb = null;
         try { fb = JSON.parse(sub.aiFeedback); } catch (e) { fb = { summary: String(sub.aiFeedback || '') }; }
+        if (fb.mode === 'text') addText('p', 'AI รุ่นนี้อ่านภาพไม่ได้ คำแนะนำนี้มาจากคำอธิบายที่นักเรียนเขียน ไม่ได้มาจากการดูผลงาน', 'ai-note');
         if (fb.summary) addText('p', fb.summary);
         const addList = function (title, items, className) {
           if (!Array.isArray(items) || items.length === 0) return;
@@ -7332,12 +7338,14 @@
       function fillAiSettings(s) {
         [0, 1].forEach(function (i) {
           const slot = (s.slots || [])[i] || {};
-          $('aiProvider' + i).value = slot.provider === 'custom' ? 'custom' : 'openrouter';
+          $('aiProvider' + i).value = ['custom', 'thaillm'].indexOf(slot.provider) !== -1 ? slot.provider : 'openrouter';
+          $('aiVisionNote' + i).textContent = !slot.model ? '' : (slot.vision === true ? 'โมเดลนี้อ่านภาพได้: วิเคราะห์จากภาพผลงาน'
+            : (slot.vision === false ? 'โมเดลนี้อ่านภาพไม่ได้: ให้คำแนะนำจากคำอธิบายที่นักเรียนเขียนเท่านั้น' : 'ยังไม่ได้ตรวจว่าโมเดลนี้อ่านภาพได้หรือไม่ กดปุ่มทดสอบเพื่อตรวจ'));
           $('aiBase' + i).value = slot.baseUrl || '';
           $('aiModel' + i).value = slot.model || '';
           $('aiKey' + i).value = '';
           $('aiClearKey' + i).checked = false;
-          $('aiKeyHint' + i).textContent = slot.hasKey ? 'ตั้งค่าแล้ว' : 'ยังไม่ได้ตั้งค่า';
+          $('aiKeyHint' + i).textContent = slot.builtInKey ? 'ใช้คีย์เริ่มต้นของระบบ' : (slot.hasKey ? 'ตั้งค่าแล้ว' : 'ยังไม่ได้ตั้งค่า');
           syncAiSlot(i);
         });
         $('aiDailyLimit').value = s.dailyLimit || 300;
@@ -7386,7 +7394,10 @@
           btn.disabled = true;
           setAiMsg('', 'กำลังส่งภาพทดสอบให้ AI...');
           server('testAi', sessionToken, Number(btn.getAttribute('data-ai-test'))).then(function (res) {
-            setAiMsg('ok', 'ใช้งานได้ โมเดลอ่านภาพทดสอบแล้วตอบว่า: ' + res.reply);
+            setAiMsg('ok', res.vision ? 'ใช้งานได้ โมเดลอ่านภาพทดสอบแล้วตอบว่า: ' + res.reply
+              : 'เชื่อมต่อได้ แต่โมเดลนี้อ่านภาพไม่ได้ ระบบจะให้คำแนะนำจากคำอธิบายที่นักเรียนเขียนเท่านั้น (คำตอบทดสอบ: ' + res.reply + ')');
+            const i = Number(btn.getAttribute('data-ai-test'));
+            $('aiVisionNote' + i).textContent = res.vision ? 'โมเดลนี้อ่านภาพได้: วิเคราะห์จากภาพผลงาน' : 'โมเดลนี้อ่านภาพไม่ได้: ให้คำแนะนำจากคำอธิบายที่นักเรียนเขียนเท่านั้น';
           }).catch(function (err) {
             setAiMsg('error', handleServerError(err));
           }).then(function () { btn.disabled = false; });
