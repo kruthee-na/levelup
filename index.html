@@ -7033,8 +7033,7 @@
                 $('teacherFormLegend').textContent = 'แก้ไขครู ' + t.key;
                 $('teacherAddBtn').textContent = 'บันทึกการแก้ไข';
                 $('teacherCancelBtn').hidden = false;
-                $('teacherKeyInput').value = t.key;
-                $('teacherKeyInput').disabled = true;
+                $('teacherKeyInput').value = t.key;   // แก้ชื่อผู้ใช้ได้ รหัสผ่านและรายวิชาเดิมยังใช้ต่อ
                 $('teacherNameInput').value = t.displayName;
                 $('teacherEmailInput').value = t.email || '';
                 $('teacherNameInput').focus();
@@ -7063,7 +7062,7 @@
       $('teacherAddBtn').addEventListener('click', function () {
         const key = $('teacherKeyInput').value.trim().toLowerCase();
         const name = $('teacherNameInput').value.trim();
-        if (!teacherEditing && (!/^[a-z][a-z0-9._-]{2,29}$/.test(key) || key === 'teacher' || key === 'admin' || key === adminLogin)) {
+        if (key !== teacherEditing && (!/^[a-z][a-z0-9._-]{2,29}$/.test(key) || key === 'teacher' || key === 'admin' || key === adminLogin)) {
           setTeachersMsg('error', 'ชื่อผู้ใช้ต้องขึ้นต้นด้วยตัวอักษรอังกฤษ ยาว 3 ถึง 30 ตัว ใช้ได้เฉพาะ a-z ตัวเลข จุด ขีดล่าง และขีดกลาง');
           return;
         }
@@ -7075,8 +7074,13 @@
         btn.disabled = true;
         const editing = teacherEditing;
         const old = adminData.teachers.find(function (t) { return t.key === editing; });
-        adminCall('saveTeacher', [{ key: editing || key, displayName: name, email: $('teacherEmailInput').value.trim(), isNew: !editing, active: old ? old.active : true }],
-          editing ? 'บันทึกการแก้ไข ' + name + ' แล้ว' : 'เพิ่ม ' + name + ' แล้ว').then(function (res) {
+        const email = $('teacherEmailInput').value.trim();
+        // เปลี่ยนชื่อผู้ใช้ก่อน (ถ้าแก้) แล้วจึงบันทึกชื่อที่แสดงและอีเมล
+        const renamed = editing && key !== editing ? adminCall('renameTeacher', [editing, key], 'เปลี่ยนชื่อผู้ใช้แล้ว') : Promise.resolve();
+        renamed.then(function () {
+          return adminCall('saveTeacher', [{ key: key, displayName: name, email: email, isNew: !editing, active: old ? old.active : true }],
+            editing ? 'บันทึกการแก้ไข ' + name + (key !== editing ? ' แล้ว • ชื่อผู้ใช้ใหม่คือ ' + key : ' แล้ว') : 'เพิ่ม ' + name + ' แล้ว');
+        }).then(function (res) {
           if (!editing) showTempPass(key, res.tempPassword);
           resetTeacherForm();
         }).catch(function () {}).then(function () { btn.disabled = false; });
