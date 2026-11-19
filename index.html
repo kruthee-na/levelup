@@ -3064,6 +3064,8 @@
         if (msg.indexOf('BAD_WEBHOOK') !== -1) return 'ลิงก์ Webhook ต้องขึ้นต้นด้วย https://chat.googleapis.com/v1/spaces/';
         if (msg.indexOf('BAD_EMAIL') !== -1) return 'รูปแบบอีเมลไม่ถูกต้อง';
         if (msg.indexOf('TALK_TOO_FAST') !== -1) return 'ส่งข้อความถี่เกินไป กรุณารอสักครู่แล้วลองใหม่';
+        if (msg.indexOf('TALK_ONE_ROOM') !== -1) return 'กลุ่มหนึ่งมีได้เฉพาะนักเรียนห้องเดียวกัน กรุณาเลือกสมาชิกจากห้องเดียว';
+        if (msg.indexOf('TALK_NOT_OWNER') !== -1) return 'แชทของรายวิชานี้เปิดได้เฉพาะครูผู้สอน';
         if (msg.indexOf('TALK_NO_MEMBERS') !== -1) return 'กรุณาเลือกสมาชิกที่เรียนรายวิชานี้อย่างน้อย 1 คน';
         if (msg.indexOf('AI_STUDENT_OFF') !== -1) return 'ครูผู้สอนยังไม่เปิดให้นักเรียนใช้ผู้ช่วย AI ในรายวิชานี้';
         if (msg.indexOf('AI_USER_LIMIT') !== -1) return 'วันนี้ถามผู้ช่วย AI ครบจำนวนแล้ว ลองใหม่พรุ่งนี้';
@@ -7689,7 +7691,14 @@
         const list = $('talkList');
         list.innerHTML = '';
         if (!talkData) return;
-        $('talkTools').hidden = talkData.role !== 'teacher';
+        $('talkTools').hidden = talkData.role !== 'teacher' || Boolean(talkData.notOwner);
+        if (talkData.notOwner) {
+          const note = document.createElement('p');
+          note.className = 'talk-empty';
+          note.id = 'talkNotOwner';
+          note.textContent = 'รายวิชานี้เป็นของครูท่านอื่น แชทของรายวิชาเปิดได้เฉพาะครูผู้สอน';
+          list.appendChild(note);
+        }
         const item = function (id, avatar, avatarClass, name, last, time, unread) {
           const btn = document.createElement('button');
           btn.type = 'button';
@@ -8081,12 +8090,17 @@
         $('talkFormMsg').textContent = mode === 'group' && chat ? 'เลือกแล้ว ' + Object.keys(talkPicked).length + ' คน' : '';
         const sel = $('talkPickRoom');
         sel.innerHTML = '';
-        [['ALL', 'ทุกห้องในรายวิชา']].concat(classrooms.map(function (r) { return [r, 'ห้อง ' + r]; })).forEach(function (o) {
+        /* กลุ่มมีได้เฉพาะนักเรียนห้องเดียวกัน จึงเลือกทีละห้อง */
+        (mode === 'group' ? [] : [['ALL', 'ทุกห้องในรายวิชา']]).concat(classrooms.map(function (r) { return [r, 'ห้อง ' + r]; })).forEach(function (o) {
           const opt = document.createElement('option');
           opt.value = o[0];
           opt.textContent = o[1];
           sel.appendChild(opt);
         });
+        if (mode === 'group' && chat) {
+          const first = students.find(function (s) { return talkPicked[s.studentId]; });
+          if (first) sel.value = first.classroom;
+        }
         renderTalkPicker();
         renderTalkList();
       }
@@ -8096,7 +8110,15 @@
         const chat = talkFind(talkOpenId);
         if (chat) openTalkForm('group', chat);
       });
-      $('talkPickRoom').addEventListener('change', renderTalkPicker);
+      $('talkPickRoom').addEventListener('change', function () {
+        if (talkFormMode === 'group') {   // เปลี่ยนห้อง: คงไว้เฉพาะคนที่อยู่ห้องที่เลือก
+          const room = $('talkPickRoom').value;
+          students.forEach(function (s) { if (s.classroom !== room) delete talkPicked[s.studentId]; });
+          $('talkFormMsg').className = 'inline-status-msg';
+          $('talkFormMsg').textContent = 'เลือกแล้ว ' + Object.keys(talkPicked).length + ' คน (กลุ่มหนึ่งมีได้เฉพาะนักเรียนห้องเดียวกัน)';
+        }
+        renderTalkPicker();
+      });
       $('talkPickSearch').addEventListener('input', renderTalkPicker);
       $('talkFormCancelBtn').addEventListener('click', closeTalkThread);
       $('talkGroupSaveBtn').addEventListener('click', function () {

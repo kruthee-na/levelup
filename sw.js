@@ -1,6 +1,6 @@
 /* LevelUp service worker — เก็บหน้าแอปไว้ในเครื่องเพื่อเปิดได้เร็วและเปิดได้แม้ออฟไลน์
  * ข้อมูลคะแนน/การส่งงานไม่ถูกเก็บในแคช: คำขอไปยัง Apps Script (POST) วิ่งตรงถึงเซิร์ฟเวอร์เสมอ */
-const VERSION = '3818e0037c';
+const VERSION = 'bd48f6c22b';
 const CACHE = 'levelup-' + VERSION;
 const SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 const CDN = [
