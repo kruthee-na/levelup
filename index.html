@@ -1398,6 +1398,7 @@
             <div class="sum-tabs" role="group" aria-label="มุมมองสรุป">
               <button type="button" class="sum-tab" id="sumModeRooms" aria-pressed="true">รายห้อง</button>
               <button type="button" class="sum-tab" id="sumModeStudents" aria-pressed="false">รายบุคคล</button>
+              <button type="button" class="sum-tab" id="sumModeSgs" aria-pressed="false">📤 เตรียมส่ง SGS / ปพ.5</button>
             </div>
             <select id="sumRoomFilter" class="select-input" aria-label="เลือกห้องเรียน" hidden></select>
             <select id="sumSort" class="select-input" aria-label="เรียงลำดับ" hidden>
@@ -1409,6 +1410,11 @@
             </select>
             <input type="search" id="sumSearch" class="input" placeholder="ค้นหารหัสหรือชื่อ" aria-label="ค้นหานักเรียน" hidden>
             <button type="button" class="btn btn-secondary btn-sm" id="sumExportBtn">⬇ ส่งออก CSV</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="sumXlsxBtn" hidden>⬇ ดาวน์โหลด Excel</button>
+          </div>
+          <div id="sumSgsBox" hidden style="display: grid; gap: 8px;">
+            <p class="pf-hint">ตารางนี้เรียงตามเลขประจำตัว ทีละห้อง เพื่อใช้กรอกคะแนนในระบบ SGS หรือแบบ ปพ.5 กดปุ่มด้านล่างเพื่อคัดลอกคะแนนทั้งคอลัมน์ แล้วนำไปวางในไฟล์ Excel หรือ ปพ.5 ของโรงเรียน ช่องว่างคือนักเรียนที่ยังไม่มีคะแนนส่วนนั้น</p>
+            <div class="btn-group" id="sumSgsCopyRow"></div>
           </div>
           <div class="inline-status-msg" id="sumMsg" aria-live="polite"></div>
           <div class="table-wrapper">
@@ -7032,6 +7038,23 @@
             foot: row(d.all, 'รวมทั้งรายวิชา')
           };
         }
+        if (summaryMode === 'sgs') {
+          /* เตรียมส่ง SGS / ปพ.5: ทีละห้อง เรียงตามเลขประจำตัว คะแนนเป็นตัวเลขล้วน ช่องที่ยังไม่มีคะแนนเว้นว่าง */
+          const sgsRoom = $('sumRoomFilter').value && $('sumRoomFilter').value !== 'ALL' ? $('sumRoomFilter').value : (d.rooms[0] ? d.rooms[0].classroom : '');
+          const raw = function (v) { return v === null || v === undefined ? '' : String(Math.round(v * 100) / 100); };
+          const sgsList = d.students.filter(function (r) { return r.classroom === sgsRoom; }).sort(function (a, b) {
+            return a.studentId.localeCompare(b.studentId, undefined, { numeric: true });
+          });
+          return {
+            room: sgsRoom,
+            head: ['ที่', 'เลขประจำตัว', 'ชื่อ-นามสกุล', 'ก่อนกลางภาค (30)', 'กลางภาค (20)', 'หลังกลางภาค (30)', 'ปลายภาค (20)', 'รวม (100)', 'เกรด', 'เวลาเรียน (%)'],
+            body: sgsList.map(function (r, i) {
+              return { id: r.studentId, cells: [i + 1, r.studentId, r.studentName, raw(r.preMid), raw(r.midterm), raw(r.postMid), raw(r.finalExam), raw(r.total),
+                r.grade === null ? '' : String(r.grade), raw(r.attendRate)], warn: {} };
+            }),
+            foot: null
+          };
+        }
         const room = $('sumRoomFilter').value || 'ALL';
         const q = $('sumSearch').value.trim().toLowerCase();
         const sort = $('sumSort').value;
@@ -7059,19 +7082,48 @@
         panel.hidden = !summaryData;
         if (!summaryData) return;
         const students = summaryMode === 'students';
-        $('sumModeRooms').setAttribute('aria-pressed', students ? 'false' : 'true');
+        const sgs = summaryMode === 'sgs';
+        $('sumModeRooms').setAttribute('aria-pressed', summaryMode === 'rooms' ? 'true' : 'false');
         $('sumModeStudents').setAttribute('aria-pressed', students ? 'true' : 'false');
-        ['sumRoomFilter', 'sumSort', 'sumSearch'].forEach(function (id) { $(id).hidden = !students; });
+        $('sumModeSgs').setAttribute('aria-pressed', sgs ? 'true' : 'false');
+        ['sumSort', 'sumSearch'].forEach(function (id) { $(id).hidden = !students; });
+        $('sumRoomFilter').hidden = !(students || sgs);
+        $('sumXlsxBtn').hidden = !sgs;
+        $('sumSgsBox').hidden = !sgs;
         const filter = $('sumRoomFilter');
         const keep = filter.value;
         filter.innerHTML = '';
-        [['ALL', 'ทุกห้องในรายวิชา']].concat(summaryData.rooms.map(function (r) { return [r.classroom, 'ห้อง ' + r.classroom]; })).forEach(function (o) {
+        (sgs ? [] : [['ALL', 'ทุกห้องในรายวิชา']]).concat(summaryData.rooms.map(function (r) { return [r.classroom, 'ห้อง ' + r.classroom]; })).forEach(function (o) {
           const opt = document.createElement('option');
           opt.value = o[0];
           opt.textContent = o[1];
           filter.appendChild(opt);
         });
         if (Array.prototype.some.call(filter.options, function (o) { return o.value === keep; })) filter.value = keep;
+        if (sgs) {
+          /* ปุ่มคัดลอกทีละคอลัมน์ (ค่าละบรรทัด วางลงคอลัมน์ของ Excel ได้ตรงแถว) */
+          const copyRow = $('sumSgsCopyRow');
+          copyRow.innerHTML = '';
+          const sgsData = summaryRows();
+          [3, 4, 5, 6, 7, 8].forEach(function (col) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-secondary btn-sm';
+            btn.textContent = '📋 ' + sgsData.head[col];
+            btn.setAttribute('aria-label', 'คัดลอกคอลัมน์ ' + sgsData.head[col] + ' ของห้อง ' + sgsData.room);
+            btn.addEventListener('click', function () {
+              const text = summaryRows().body.map(function (r) { return r.cells[col]; }).join('\n');
+              copyText(text).then(function () {
+                $('sumMsg').className = 'inline-status-msg is-ok';
+                $('sumMsg').textContent = 'คัดลอกคอลัมน์ "' + sgsData.head[col] + '" ของห้อง ' + sgsData.room + ' แล้ว (' + sgsData.body.length + ' คน เรียงตามเลขประจำตัว)';
+              }).catch(function () {
+                $('sumMsg').className = 'inline-status-msg is-error';
+                $('sumMsg').textContent = 'เบราว์เซอร์นี้คัดลอกอัตโนมัติไม่ได้ กรุณาใช้ปุ่มดาวน์โหลด Excel แทน';
+              });
+            });
+            copyRow.appendChild(btn);
+          });
+        }
         const data = summaryRows();
         const table = $('sumTable');
         const fill = function (section, rows, tag) {
@@ -7081,7 +7133,7 @@
             r.cells.forEach(function (c, i) {
               const cell = document.createElement(tag);
               cell.textContent = c;
-              if (i > (students ? 2 : 0)) cell.className = 'num';
+              if (i > (students || sgs ? 2 : 0)) cell.className = 'num';
               if (r.warn && r.warn[i]) cell.classList.add('sum-warn');
               tr.appendChild(cell);
             });
@@ -7114,7 +7166,7 @@
         fill(table.tFoot, data.foot ? [{ cells: data.foot }] : [], 'td');
         $('courseSummarySub').textContent = [summaryData.course.code, summaryData.course.name].filter(Boolean).join(' ') + ' • นักเรียน ' + summaryData.all.count + ' คน • งานที่สั่ง ' + summaryData.assignments + ' ชิ้น';
         $('sumMsg').className = 'inline-status-msg';
-        $('sumMsg').textContent = students && data.body.length === 0 ? 'ไม่พบนักเรียนตามเงื่อนไขที่เลือก' : '';
+        $('sumMsg').textContent = (students || sgs) && data.body.length === 0 ? 'ไม่พบนักเรียนตามเงื่อนไขที่เลือก' : '';
       }
 
       /* โหลดสรุปจากเซิร์ฟเวอร์ (ใช้ข้อมูลที่บันทึกแล้ว) โหลดซ้ำเมื่อเปิดแดชบอร์ดอีกครั้งหลังผ่านไป 30 วินาที */
@@ -7134,6 +7186,50 @@
       }
       $('sumModeRooms').addEventListener('click', function () { summaryMode = 'rooms'; renderCourseSummary(); });
       $('sumModeStudents').addEventListener('click', function () { summaryMode = 'students'; renderCourseSummary(); });
+      $('sumModeSgs').addEventListener('click', function () { summaryMode = 'sgs'; renderCourseSummary(); });
+
+      /* คัดลอกข้อความไปคลิปบอร์ด (มีทางสำรองสำหรับเบราว์เซอร์ที่ไม่อนุญาต navigator.clipboard) */
+      function copyText(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text).catch(function () { return copyTextFallback(text); });
+        }
+        return copyTextFallback(text);
+      }
+      function copyTextFallback(text) {
+        return new Promise(function (resolve, reject) {
+          const area = document.createElement('textarea');
+          area.value = text;
+          area.setAttribute('readonly', '');
+          area.style.position = 'fixed';
+          area.style.opacity = '0';
+          document.body.appendChild(area);
+          area.select();
+          let ok = false;
+          try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+          area.remove();
+          if (ok) resolve(); else reject(new Error('COPY_FAILED'));
+        });
+      }
+      $('sumXlsxBtn').addEventListener('click', function () {
+        if (!summaryData || typeof XLSX === 'undefined') {
+          $('sumMsg').className = 'inline-status-msg is-error';
+          $('sumMsg').textContent = 'ยังโหลดตัวสร้างไฟล์ Excel ไม่สำเร็จ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่ หรือใช้ปุ่มส่งออก CSV';
+          return;
+        }
+        /* สมุดงานเดียว แยกแผ่นงานตามห้อง คะแนนเป็นตัวเลขจริงเพื่อคำนวณต่อใน Excel ได้ */
+        const wb = XLSX.utils.book_new();
+        const keepRoom = $('sumRoomFilter').value;
+        summaryData.rooms.forEach(function (r) {
+          $('sumRoomFilter').value = r.classroom;
+          const data = summaryRows();
+          const rows = [data.head].concat(data.body.map(function (row) {
+            return row.cells.map(function (c, i) { return i >= 3 && c !== '' && !isNaN(Number(c)) ? Number(c) : c; });
+          }));
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), r.classroom.replace(/[\\\/\?\*\[\]:]/g, '-').slice(0, 31));
+        });
+        $('sumRoomFilter').value = keepRoom;
+        XLSX.writeFile(wb, 'คะแนนสำหรับ_SGS_' + (summaryData.course.code || summaryData.course.name || 'รายวิชา') + '.xlsx');
+      });
       ['sumRoomFilter', 'sumSort'].forEach(function (id) { $(id).addEventListener('change', renderCourseSummary); });
       $('sumSearch').addEventListener('input', renderCourseSummary);
       $('sumExportBtn').addEventListener('click', function () {
