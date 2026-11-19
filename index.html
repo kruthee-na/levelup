@@ -187,6 +187,29 @@
       .talk-pane-head { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
     }
     body.no-enroll .js-enroll { display: none !important; }   /* ครูทั่วไป: ผู้ดูแลเป็นผู้กำหนดห้องและรายชื่อนักเรียน */
+    .port-dialog { max-width: 980px; text-align: left; }
+    .port-pane { display: grid; gap: var(--space-4); }
+    .port-section { display: grid; gap: var(--space-3); padding: var(--space-4); border-radius: 20px; background: var(--tint); }
+    .port-section h3 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--brand-hover); }
+    .port-section textarea { width: 100%; min-height: 84px; resize: vertical; }
+    .port-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-3); }
+    .port-activity { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; gap: 8px; align-items: start; padding: 10px; border-radius: 14px; background: #ffffff; }
+    .port-activity textarea { grid-column: 1 / -1; min-height: 60px; }
+    .port-check { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 8px 10px; border-radius: 14px; background: #ffffff; font-size: 0.9rem; cursor: pointer; }
+    .port-check input[type="checkbox"] { flex: none; width: 22px; height: 22px; margin-top: 2px; accent-color: var(--brand); }
+    .port-work { display: grid; gap: 8px; padding: 10px; border-radius: 14px; background: #ffffff; }
+    .port-work-head { display: grid; grid-template-columns: auto 56px minmax(0, 1fr); gap: 10px; align-items: center; cursor: pointer; }
+    .port-work-head input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--brand); }
+    .port-work-thumb { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: var(--tint); display: grid; place-items: center; font-size: 1.3rem; }
+    .port-work-title { font-weight: 700; overflow-wrap: anywhere; }
+    .port-work-meta { font-size: 0.8rem; color: var(--muted); }
+    .port-frame { width: 100%; height: min(70vh, 760px); border: 1px solid var(--border-strong); border-radius: 16px; background: #ffffff; }
+    .port-actions { position: sticky; bottom: calc(-1 * var(--space-6)); margin: 0 calc(-1 * var(--space-2)); padding: var(--space-3) var(--space-2); background: rgba(255, 255, 255, 0.96); border-top: 1px solid var(--border-line); display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-items: center; }
+    @media (max-width: 640px) {
+      .port-activity { grid-template-columns: minmax(0, 1fr) auto; }
+      .port-activity input[data-k="year"] { grid-column: 1 / 2; }
+      .port-actions { bottom: calc(-1 * var(--space-4)); }
+    }
     .app-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 12px; padding: var(--space-2) var(--space-3); text-align: center; font-size: 0.8rem; font-weight: 500; color: var(--ink-secondary); }
     .container { max-width: 1180px; margin: 0 auto; padding: var(--space-6); display: grid; gap: var(--space-6); }
     .card { background: var(--surface); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: var(--space-6); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
@@ -1749,6 +1772,7 @@
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
             <span class="publish-pill is-draft" id="stuRoomStatusBadge">คะแนนระหว่างเรียน</span>
+            <button type="button" class="btn btn-primary btn-sm" id="portfolioBtn">📁 ePortfolio ของฉัน</button>
             <button type="button" class="btn btn-secondary btn-sm" id="stuLogoutBtn">ออกจากระบบ</button>
           </div>
         </div>
@@ -2542,6 +2566,82 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="portfolioModal" role="dialog" aria-modal="true" aria-labelledby="portTitle" hidden>
+    <div class="modal-dialog port-dialog">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="portTitle">ePortfolio ของฉัน</h2>
+          <p class="section-subtitle">รวมข้อมูล ผลการเรียน และผลงานของฉัน แล้วส่งออกเป็นแฟ้มสะสมผลงานเพื่อนำเสนอหรือส่งต่อ มีเพียงเจ้าของบัญชีที่เปิดหน้านี้ได้</p>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="portCloseBtn">ปิด</button>
+      </div>
+      <div class="sum-toolbar">
+        <div class="sum-tabs" role="group" aria-label="มุมมอง ePortfolio">
+          <button type="button" class="sum-tab" id="portTabEdit" aria-pressed="true">✏️ จัดเตรียมข้อมูล</button>
+          <button type="button" class="sum-tab" id="portTabPreview" aria-pressed="false">👁 ดูตัวอย่าง</button>
+        </div>
+        <label class="sr-only" for="portStyle">รูปแบบแฟ้ม</label>
+        <select id="portStyle" class="select-input">
+          <option value="classic">รูปแบบ: ทางการ (กรมท่า)</option>
+          <option value="modern">รูปแบบ: ทันสมัย (เขียวน้ำทะเล)</option>
+          <option value="pastel">รูปแบบ: พาสเทล (ม่วง)</option>
+          <option value="minimal">รูปแบบ: เรียบ (ขาวดำ)</option>
+        </select>
+      </div>
+      <div class="inline-status-msg" id="portMsg" aria-live="polite"></div>
+
+      <div class="port-pane" id="portEditPane">
+        <section class="port-section" aria-labelledby="portAboutH">
+          <h3 id="portAboutH">1. แนะนำตัว</h3>
+          <div class="field">
+            <label for="portAbout"><span>เกี่ยวกับฉัน</span><span class="max-hint">ไม่เกิน 800 ตัวอักษร</span></label>
+            <textarea id="portAbout" class="input" maxlength="800" placeholder="เล่าสั้น ๆ ว่าฉันเป็นใคร ชอบหรือถนัดอะไร"></textarea>
+          </div>
+          <div class="field">
+            <label for="portGoal"><span>เป้าหมายของฉัน</span><span class="max-hint">ไม่เกิน 400 ตัวอักษร</span></label>
+            <textarea id="portGoal" class="input" maxlength="400" placeholder="เช่น อยากเรียนต่อด้านการออกแบบ"></textarea>
+          </div>
+          <div class="field">
+            <label for="portSkills"><span>ทักษะและความสนใจ</span><span class="max-hint">คั่นด้วยเครื่องหมายจุลภาค ( , ) ไม่เกิน 15 รายการ</span></label>
+            <input type="text" id="portSkills" class="input" placeholder="เช่น วาดภาพสีน้ำ, ถ่ายภาพ, ตัดต่อวิดีโอ" autocomplete="off">
+          </div>
+          <p class="pf-hint">ชื่อ ห้อง รูป และคำประจำตัวมาจากโปรไฟล์ของฉัน เพื่อความปลอดภัยไม่ควรใส่ที่อยู่ เบอร์โทร หรือข้อมูลติดต่อส่วนตัว</p>
+        </section>
+        <section class="port-section" aria-labelledby="portActH">
+          <h3 id="portActH">2. กิจกรรม รางวัล และเกียรติบัตร</h3>
+          <div id="portActivities" style="display: grid; gap: 8px;"></div>
+          <div><button type="button" class="btn btn-secondary btn-sm" id="portAddActivity">＋ เพิ่มรายการ</button></div>
+        </section>
+        <section class="port-section" aria-labelledby="portCourseH">
+          <h3 id="portCourseH">3. ผลการเรียน</h3>
+          <div class="port-grid2">
+            <label class="port-check"><input type="checkbox" id="portShowScores"><span>แสดงคะแนนและเกรด</span></label>
+            <label class="port-check"><input type="checkbox" id="portShowAttendance"><span>แสดงการเข้าเรียนและการส่งงาน</span></label>
+          </div>
+          <p class="pf-hint">เลือกรายวิชาที่จะใส่ในแฟ้ม คะแนนดึงจากระบบโดยอัตโนมัติ แก้ไขเองไม่ได้</p>
+          <div id="portCourses" style="display: grid; gap: 8px;"></div>
+        </section>
+        <section class="port-section" aria-labelledby="portWorkH">
+          <h3 id="portWorkH">4. ผลงานของฉัน</h3>
+          <label class="port-check"><input type="checkbox" id="portShowFeedback"><span>แสดงคะแนนและคำแนะนำจากครูของแต่ละผลงาน</span></label>
+          <p class="pf-hint">เลือกผลงานที่ภูมิใจ แล้วเขียนสิ่งที่ได้เรียนรู้จากผลงานนั้น</p>
+          <div id="portWorks" style="display: grid; gap: 8px;"></div>
+        </section>
+      </div>
+
+      <div class="port-pane" id="portPreviewPane" hidden>
+        <iframe class="port-frame" id="portFrame" title="ตัวอย่าง ePortfolio"></iframe>
+      </div>
+
+      <div class="port-actions">
+        <span class="pf-hint" id="portSavedAt" style="margin-right: auto;"></span>
+        <button type="button" class="btn btn-secondary" id="portDownloadBtn">⬇ ดาวน์โหลดไฟล์</button>
+        <button type="button" class="btn btn-secondary" id="portPrintBtn">🖨 พิมพ์ / บันทึก PDF</button>
+        <button type="button" class="btn btn-primary" id="portSaveBtn">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="uiModal" role="dialog" aria-modal="true" aria-labelledby="uiModalTitle" hidden>
     <div class="modal-dialog ui-dialog">
       <div class="modal-header">
@@ -2786,6 +2886,7 @@
         if (msg.indexOf('TALK_NO_MEMBERS') !== -1) return 'กรุณาเลือกสมาชิกที่เรียนรายวิชานี้อย่างน้อย 1 คน';
         if (msg.indexOf('AI_STUDENT_OFF') !== -1) return 'ครูผู้สอนยังไม่เปิดให้นักเรียนใช้ผู้ช่วย AI ในรายวิชานี้';
         if (msg.indexOf('AI_USER_LIMIT') !== -1) return 'วันนี้ถามผู้ช่วย AI ครบจำนวนแล้ว ลองใหม่พรุ่งนี้';
+        if (msg.indexOf('PORTFOLIO_TOO_LARGE') !== -1) return 'ข้อความใน ePortfolio ยาวเกินไป กรุณาย่อข้อความหรือลดจำนวนผลงานที่เขียนคำอธิบาย';
         if (msg.indexOf('ADMIN_ONLY') !== -1) return 'เฉพาะผู้ดูแลระบบที่สร้างรายวิชาและกำหนดห้องเรียนได้';
         if (msg.indexOf('NOT_ENOUGH_POINTS') !== -1) return 'แต้มไม่พอสำหรับชุดตกแต่งนี้';
         if (msg.indexOf('LOCKED') !== -1) return 'ของตกแต่งที่เลือกยังไม่ปลดล็อก กรุณาเลือกชิ้นอื่น หรือปลดล็อกชุดตกแต่งก่อน';
@@ -4139,7 +4240,7 @@
         saveDirty = false;
         sessionToken = '';
         try { tokenStore.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ }
-        ['reportModal', 'profileModal', 'passwordModal', 'imagePreviewModal', 'chatModal', 'aiModal', 'courseModal', 'teachersModal'].forEach(function (id) { $(id).hidden = true; });
+        ['reportModal', 'profileModal', 'passwordModal', 'imagePreviewModal', 'chatModal', 'aiModal', 'courseModal', 'teachersModal', 'portfolioModal'].forEach(function (id) { $(id).hidden = true; });
         applyState({ role: 'none' });
         stagedStudentFile = null;
         loginUsernameInput.value = '';
@@ -7578,6 +7679,326 @@
       $('talkBackBtn').addEventListener('click', closeTalkThread);
       talkModal.addEventListener('click', function (e) { if (e.target === talkModal) closeTalkModal(); });
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !talkModal.hidden) closeTalkModal(); });
+
+      /* =========================================================
+       * ePortfolio ของนักเรียน: จัดเตรียมข้อมูล ดูตัวอย่าง และส่งออกเป็นไฟล์หรือ PDF
+       * คะแนนและผลงานดึงจากระบบ นักเรียนเลือกสิ่งที่จะแสดงและเขียนคำอธิบายเอง
+       * ========================================================= */
+      const portModal = $('portfolioModal');
+      var portData = null;    // ข้อมูลจากเซิร์ฟเวอร์ { student, courses, works, data, ... }
+      var portDraft = null;   // สิ่งที่นักเรียนกำลังแก้
+      const PORT_STYLES = {
+        classic: { main: '#1f3a5f', accent: '#b3842a', soft: '#eef2f8' },
+        modern: { main: '#0f766e', accent: '#f59e0b', soft: '#e9f6f4' },
+        pastel: { main: '#7c5cd6', accent: '#d65a96', soft: '#f3edff' },
+        minimal: { main: '#111827', accent: '#6b7280', soft: '#f3f4f6' }
+      };
+
+      function portEsc(v) {
+        return String(v === undefined || v === null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+      function portText(v) { return portEsc(v).replace(/\n/g, '<br>'); }
+      function portDate(iso) {
+        const d = new Date(iso);
+        return !iso || isNaN(d.getTime()) ? '' : d.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+      function portImage(url) { return /^data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+$/i.test(String(url || '')) ? url : ''; }
+      function portMsg(text, kind) {
+        $('portMsg').className = 'inline-status-msg' + (kind ? ' is-' + kind : '');
+        $('portMsg').textContent = text || '';
+      }
+
+      /* สร้างเอกสาร ePortfolio เป็น HTML ไฟล์เดียว (ใช้ทั้งดูตัวอย่าง ดาวน์โหลด และพิมพ์) ข้อความทุกส่วนถูกแปลงเป็นตัวอักษรธรรมดาก่อนใส่ */
+      function buildPortfolioHtml() {
+        const d = portData;
+        const p = portDraft;
+        const st = PORT_STYLES[p.style] || PORT_STYLES.classic;
+        const num = function (v) { return v === null || v === undefined ? '–' : formatScore(v); };
+        const avatar = portImage(profile.avatar);
+        const courses = d.courses.filter(function (c) { return p.hideCourses.indexOf(c.id) === -1; });
+        const works = d.works.filter(function (w) { return p.works[w.id] && p.works[w.id].show; });
+        const out = [];
+        out.push('<!doctype html><html lang="th"><head><meta charset="' + 'utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">');
+        out.push('<title>ePortfolio ' + portEsc(d.student.studentName) + '</title>');
+        out.push('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap">');
+        out.push('<style>@page{size:A4;margin:14mm}*{box-sizing:border-box}body{margin:0;font-family:"Sarabun","IBM Plex Sans Thai","Leelawadee UI",Tahoma,sans-serif;color:#1f2937;line-height:1.6;background:#fff;font-size:15px}' +
+          '.page{max-width:820px;margin:0 auto;padding:28px 24px}.cover{display:flex;gap:22px;align-items:center;padding:26px;border-radius:18px;background:' + st.main + ';color:#fff}' +
+          '.cover img,.cover .ph{width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #fff;flex:none}.cover .ph{display:grid;place-items:center;background:' + st.accent + ';font-size:40px;font-weight:700}' +
+          '.cover h1{margin:0 0 4px;font-size:28px;line-height:1.25}.cover .tag{display:inline-block;margin:6px 6px 0 0;padding:2px 12px;border-radius:999px;background:rgba(255,255,255,.18);font-size:13px}' +
+          '.cover .kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;opacity:.85}.motto{margin-top:8px;font-style:italic;opacity:.95}' +
+          'h2{margin:28px 0 10px;padding-bottom:6px;font-size:19px;color:' + st.main + ';border-bottom:3px solid ' + st.accent + '}p{margin:0 0 8px}' +
+          '.chips span{display:inline-block;margin:0 6px 6px 0;padding:3px 12px;border-radius:999px;background:' + st.soft + ';color:' + st.main + ';font-weight:600;font-size:13px}' +
+          '.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:7px 8px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}th{background:' + st.soft + ';color:' + st.main + '}td.n,th.n{text-align:right;white-space:nowrap}' +
+          '.act{padding:10px 14px;margin-bottom:8px;border-left:4px solid ' + st.accent + ';background:' + st.soft + ';border-radius:0 10px 10px 0;break-inside:avoid}.act b{color:' + st.main + '}' +
+          '.work{display:flex;gap:16px;padding:14px;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:14px;break-inside:avoid}.work img{width:180px;max-height:180px;object-fit:cover;border-radius:10px;flex:none}' +
+          '.work h3{margin:0 0 2px;font-size:16px;color:' + st.main + '}.meta{font-size:13px;color:#6b7280;margin-bottom:6px}.box{margin-top:6px;padding:8px 12px;border-radius:10px;background:' + st.soft + ';font-size:14px}.box b{color:' + st.main + '}' +
+          '.foot{margin-top:30px;padding-top:10px;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280;text-align:center}' +
+          '@media (max-width:560px){.page{padding:16px 12px}.cover,.work{flex-direction:column;align-items:flex-start}.cover h1{font-size:22px}.work img{width:100%;max-height:260px}}@media print{.page{padding:0;max-width:none}.cover{-webkit-print-color-adjust:exact;print-color-adjust:exact}th,.act,.box,.chips span{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><div class="page">');
+        out.push('<header class="cover">' + (avatar ? '<img src="' + avatar + '" alt="">' : '<div class="ph">' + portEsc(getInitials(d.student.studentName)) + '</div>') +
+          '<div><div class="kicker">ePortfolio • แฟ้มสะสมผลงาน</div><h1>' + portEsc(d.student.studentName) + '</h1>' +
+          '<span class="tag">ห้อง ' + portEsc(d.student.classroom) + '</span><span class="tag">เลขประจำตัว ' + portEsc(d.student.studentId) + '</span><span class="tag">โรงเรียนนิยมศิลป์อนุสรณ์</span>' +
+          (profile.motto ? '<div class="motto">“' + portEsc(profile.motto) + '”</div>' : '') + '</div></header>');
+        if (p.about) out.push('<h2>แนะนำตัว</h2><p>' + portText(p.about) + '</p>');
+        if (p.goal) out.push('<h2>เป้าหมายของฉัน</h2><p>' + portText(p.goal) + '</p>');
+        if (p.skills.length) out.push('<h2>ทักษะและความสนใจ</h2><div class="chips">' + p.skills.map(function (x) { return '<span>' + portEsc(x) + '</span>'; }).join('') + '</div>');
+        if (courses.length) {
+          out.push('<h2>ผลการเรียน</h2><div class="tw"><table><thead><tr><th>รายวิชา</th><th>ครูผู้สอน</th>' +
+            (p.showScores ? '<th class="n">ก่อนกลางภาค</th><th class="n">กลางภาค</th><th class="n">หลังกลางภาค</th><th class="n">ปลายภาค</th><th class="n">รวม</th><th class="n">เกรด</th>' : '') +
+            (p.showAttendance ? '<th class="n">ส่งงาน</th><th class="n">เข้าเรียน</th>' : '') + '</tr></thead><tbody>');
+          courses.forEach(function (c) {
+            out.push('<tr><td>' + portEsc([c.code, c.name].filter(Boolean).join(' ')) + '</td><td style="white-space:nowrap">' + portEsc(c.teacherName) + '</td>' +
+              (p.showScores ? '<td class="n">' + num(c.preMid) + '</td><td class="n">' + num(c.midterm) + '</td><td class="n">' + num(c.postMid) + '</td><td class="n">' + num(c.finalExam) + '</td><td class="n"><b>' + num(c.total) + '</b></td><td class="n"><b>' + num(c.grade) + '</b></td>' : '') +
+              (p.showAttendance ? '<td class="n">' + c.submitted + ' / ' + c.assigned + '</td><td class="n">' + (c.attendRate === null ? '–' : formatScore(c.attendRate) + '%') + '</td>' : '') + '</tr>');
+          });
+          out.push('</tbody></table></div>');
+        }
+        if (p.activities.length) {
+          out.push('<h2>กิจกรรม รางวัล และเกียรติบัตร</h2>');
+          p.activities.forEach(function (a) {
+            out.push('<div class="act"><b>' + portEsc(a.title) + '</b>' + (a.year ? ' <span class="meta">(' + portEsc(a.year) + ')</span>' : '') + (a.detail ? '<div>' + portText(a.detail) + '</div>' : '') + '</div>');
+          });
+        }
+        if (works.length) {
+          out.push('<h2>ผลงานของฉัน</h2>');
+          works.forEach(function (w) {
+            const img = portImage(w.thumb);
+            const note = p.works[w.id].note;
+            out.push('<article class="work">' + (img ? '<img src="' + img + '" alt="ภาพผลงาน ' + portEsc(w.title) + '">' : '') + '<div><h3>' + portEsc(w.title) + '</h3>' +
+              '<div class="meta">' + portEsc(w.courseName) + (w.submittedAt ? ' • ส่งเมื่อ ' + portEsc(portDate(w.submittedAt)) : '') +
+              (p.showFeedback && w.graded ? ' • คะแนน ' + formatScore(w.awardedScore) + ' / ' + formatScore(w.maxScore) : '') + '</div>' +
+              (w.detail ? '<p>' + portText(w.detail) + '</p>' : '') +
+              (note ? '<div class="box"><b>สิ่งที่ได้เรียนรู้:</b> ' + portText(note) + '</div>' : '') +
+              (p.showFeedback && w.feedback ? '<div class="box"><b>คำแนะนำจากครู:</b> ' + portText(w.feedback) + '</div>' : '') + '</div></article>');
+          });
+        }
+        out.push('<div class="foot">จัดทำด้วยระบบ LevelUp • โรงเรียนนิยมศิลป์อนุสรณ์ • ข้อมูล ณ วันที่ ' + portEsc(portDate(new Date().toISOString())) + '</div></div></body></html>');
+        return out.join('');
+      }
+
+      /* อ่านสิ่งที่พิมพ์ในหน้าจัดเตรียมกลับมาเก็บใน portDraft */
+      function collectPortDraft() {
+        if (!portDraft) return;
+        portDraft.style = $('portStyle').value;
+        portDraft.about = $('portAbout').value.trim();
+        portDraft.goal = $('portGoal').value.trim();
+        portDraft.skills = $('portSkills').value.split(/[,，\n]/).map(function (x) { return x.trim().slice(0, 40); }).filter(function (x, i, arr) { return x && arr.indexOf(x) === i; }).slice(0, 15);
+        portDraft.showScores = $('portShowScores').checked;
+        portDraft.showAttendance = $('portShowAttendance').checked;
+        portDraft.showFeedback = $('portShowFeedback').checked;
+        portDraft.activities = Array.prototype.map.call($('portActivities').children, function (row) {
+          const get = function (k) { return row.querySelector('[data-k="' + k + '"]').value.trim(); };
+          return { title: get('title'), year: get('year'), detail: get('detail') };
+        }).filter(function (a) { return a.title; });
+        portDraft.hideCourses = Array.prototype.filter.call($('portCourses').querySelectorAll('input[type="checkbox"]'), function (b) { return !b.checked; }).map(function (b) { return b.value; });
+        const works = {};
+        Array.prototype.forEach.call($('portWorks').querySelectorAll('.port-work'), function (row) {
+          const show = row.querySelector('input[type="checkbox"]').checked;
+          const note = row.querySelector('textarea').value.trim();
+          if (show || note) works[row.dataset.id] = { show: show, note: note };
+        });
+        portDraft.works = works;
+      }
+
+      function addPortActivity(a) {
+        const list = $('portActivities');
+        if (list.children.length >= 12) { portMsg('เพิ่มได้ไม่เกิน 12 รายการ', 'error'); return; }
+        a = a || {};
+        const row = document.createElement('div');
+        row.className = 'port-activity';
+        const field = function (tag, k, placeholder, max, value) {
+          const el = document.createElement(tag);
+          if (tag === 'input') el.type = 'text';
+          el.className = 'input';
+          el.dataset.k = k;
+          el.maxLength = max;
+          el.placeholder = placeholder;
+          el.setAttribute('aria-label', placeholder);
+          el.value = value || '';
+          return el;
+        };
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'btn btn-danger-ghost btn-sm';
+        del.textContent = 'ลบ';
+        del.setAttribute('aria-label', 'ลบรายการนี้');
+        del.addEventListener('click', function () { row.remove(); });
+        row.appendChild(field('input', 'title', 'ชื่อกิจกรรม / รางวัล', 100, a.title));
+        row.appendChild(field('input', 'year', 'ปีการศึกษา', 20, a.year));
+        row.appendChild(del);
+        row.appendChild(field('textarea', 'detail', 'รายละเอียดสั้น ๆ (ไม่บังคับ)', 400, a.detail));
+        list.appendChild(row);
+      }
+
+      function renderPortEditor() {
+        const d = portData;
+        const p = portDraft;
+        $('portStyle').value = p.style;
+        $('portAbout').value = p.about;
+        $('portGoal').value = p.goal;
+        $('portSkills').value = p.skills.join(', ');
+        $('portShowScores').checked = p.showScores;
+        $('portShowAttendance').checked = p.showAttendance;
+        $('portShowFeedback').checked = p.showFeedback;
+        $('portActivities').innerHTML = '';
+        p.activities.forEach(addPortActivity);
+        const courseBox = $('portCourses');
+        courseBox.innerHTML = '';
+        d.courses.forEach(function (c) {
+          const label = document.createElement('label');
+          label.className = 'port-check';
+          const box = document.createElement('input');
+          box.type = 'checkbox';
+          box.value = c.id;
+          box.checked = p.hideCourses.indexOf(c.id) === -1;
+          const text = document.createElement('span');
+          text.textContent = [c.code, c.name].filter(Boolean).join(' ') + ' • ' + c.teacherName + ' • รวม ' + (c.total === null ? '—' : formatScore(c.total)) + ' คะแนน' + (c.grade === null ? '' : ' (เกรด ' + c.grade + ')');
+          label.appendChild(box);
+          label.appendChild(text);
+          courseBox.appendChild(label);
+        });
+        if (!d.courses.length) courseBox.textContent = 'ยังไม่มีรายวิชาที่ลงทะเบียน';
+        const workBox = $('portWorks');
+        workBox.innerHTML = '';
+        d.works.forEach(function (w) {
+          const mine = p.works[w.id] || { show: false, note: '' };
+          const row = document.createElement('div');
+          row.className = 'port-work';
+          row.dataset.id = w.id;
+          const head = document.createElement('label');
+          head.className = 'port-work-head';
+          const box = document.createElement('input');
+          box.type = 'checkbox';
+          box.checked = Boolean(mine.show);
+          box.setAttribute('aria-label', 'ใส่ผลงาน ' + w.title + ' ในแฟ้ม');
+          let thumb;
+          if (portImage(w.thumb)) {
+            thumb = document.createElement('img');
+            thumb.src = w.thumb;
+            thumb.alt = '';
+          } else {
+            thumb = document.createElement('span');
+            thumb.textContent = '📄';
+            thumb.setAttribute('aria-hidden', 'true');
+          }
+          thumb.className = 'port-work-thumb';
+          const info = document.createElement('span');
+          info.style.minWidth = '0';
+          const title = document.createElement('span');
+          title.className = 'port-work-title';
+          title.textContent = w.title;
+          const meta = document.createElement('span');
+          meta.className = 'port-work-meta';
+          meta.style.display = 'block';
+          meta.textContent = w.courseName + (w.submittedAt ? ' • ' + portDate(w.submittedAt) : '') + (w.graded ? ' • ' + formatScore(w.awardedScore) + ' / ' + formatScore(w.maxScore) + ' คะแนน' : ' • รอตรวจ');
+          info.appendChild(title);
+          info.appendChild(meta);
+          head.appendChild(box);
+          head.appendChild(thumb);
+          head.appendChild(info);
+          const note = document.createElement('textarea');
+          note.className = 'input';
+          note.maxLength = 400;
+          note.placeholder = 'สิ่งที่ได้เรียนรู้หรือภูมิใจจากผลงานนี้ (ไม่บังคับ)';
+          note.setAttribute('aria-label', 'สิ่งที่ได้เรียนรู้จากผลงาน ' + w.title);
+          note.value = mine.note || '';
+          note.hidden = !box.checked;
+          box.addEventListener('change', function () { note.hidden = !box.checked; });
+          row.appendChild(head);
+          row.appendChild(note);
+          workBox.appendChild(row);
+        });
+        if (!d.works.length) workBox.textContent = 'ยังไม่มีผลงานที่ส่งในระบบ เมื่อส่งงานแล้วจะเลือกมาใส่แฟ้มได้ที่นี่';
+        $('portSavedAt').textContent = d.updatedAt ? 'บันทึกล่าสุด ' + formatThaiDateTime(d.updatedAt) : 'ยังไม่เคยบันทึก';
+      }
+
+      function showPortPane(preview) {
+        if (!portData) return;
+        collectPortDraft();
+        $('portTabEdit').setAttribute('aria-pressed', preview ? 'false' : 'true');
+        $('portTabPreview').setAttribute('aria-pressed', preview ? 'true' : 'false');
+        $('portEditPane').hidden = preview;
+        $('portPreviewPane').hidden = !preview;
+        if (preview) $('portFrame').srcdoc = buildPortfolioHtml();
+      }
+
+      function openPortfolio() {
+        if (!sessionToken || !currentStudentSession) return;
+        portData = null;
+        portDraft = null;
+        portModal.hidden = false;
+        $('portEditPane').hidden = true;
+        $('portPreviewPane').hidden = true;
+        ['portSaveBtn', 'portDownloadBtn', 'portPrintBtn'].forEach(function (id) { $(id).disabled = true; });
+        portMsg('กำลังรวบรวมข้อมูลของคุณ...');
+        $('portCloseBtn').focus();
+        server('getPortfolio', sessionToken).then(function (d) {
+          portData = d;
+          portDraft = JSON.parse(JSON.stringify(d.data));
+          renderPortEditor();
+          $('portTabEdit').setAttribute('aria-pressed', 'true');
+          $('portTabPreview').setAttribute('aria-pressed', 'false');
+          $('portEditPane').hidden = false;
+          ['portSaveBtn', 'portDownloadBtn', 'portPrintBtn'].forEach(function (id) { $(id).disabled = false; });
+          portMsg('');
+        }).catch(function (err) {
+          portMsg('เปิด ePortfolio ไม่สำเร็จ: ' + handleServerError(err), 'error');
+        });
+      }
+      function savePortfolio() {
+        if (!portData) return Promise.resolve(false);
+        collectPortDraft();
+        $('portSaveBtn').disabled = true;
+        portMsg('กำลังบันทึก...');
+        return server('savePortfolio', sessionToken, portDraft).then(function (r) {
+          portDraft = r.data;
+          portData.data = JSON.parse(JSON.stringify(r.data));
+          portData.updatedAt = r.updatedAt;
+          $('portSavedAt').textContent = 'บันทึกล่าสุด ' + formatThaiDateTime(r.updatedAt);
+          portMsg('บันทึก ePortfolio แล้ว', 'ok');
+          return true;
+        }).catch(function (err) {
+          portMsg('บันทึกไม่สำเร็จ: ' + handleServerError(err), 'error');
+          return false;
+        }).then(function (ok) {
+          $('portSaveBtn').disabled = false;
+          return ok;
+        });
+      }
+      $('portfolioBtn').addEventListener('click', openPortfolio);
+      $('portCloseBtn').addEventListener('click', function () { portModal.hidden = true; });
+      portModal.addEventListener('click', function (e) { if (e.target === portModal) portModal.hidden = true; });
+      $('portTabEdit').addEventListener('click', function () { showPortPane(false); });
+      $('portTabPreview').addEventListener('click', function () { showPortPane(true); });
+      $('portStyle').addEventListener('change', function () { if (!$('portPreviewPane').hidden) showPortPane(true); });
+      $('portAddActivity').addEventListener('click', function () { portMsg(''); addPortActivity(); });
+      $('portSaveBtn').addEventListener('click', savePortfolio);
+      $('portDownloadBtn').addEventListener('click', function () {
+        if (!portData) return;
+        collectPortDraft();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([buildPortfolioHtml()], { type: 'text/html;charset=utf-8' }));
+        a.download = 'ePortfolio_' + portData.student.studentId + '.html';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+        portMsg('ดาวน์โหลดไฟล์ ePortfolio แล้ว เปิดด้วยเบราว์เซอร์เพื่อนำเสนอ หรือส่งไฟล์นี้ให้ครูได้', 'ok');
+      });
+      $('portPrintBtn').addEventListener('click', function () {
+        if (!portData) return;
+        showPortPane(true);
+        const frame = $('portFrame');
+        const go = function () {
+          try {
+            frame.contentWindow.focus();
+            frame.contentWindow.print();
+            portMsg('ในหน้าต่างพิมพ์ เลือก "บันทึกเป็น PDF" เพื่อเก็บเป็นไฟล์ PDF', 'ok');
+          } catch (e) {
+            portMsg('เบราว์เซอร์นี้พิมพ์จากหน้านี้ไม่ได้ กรุณากด "ดาวน์โหลดไฟล์" แล้วเปิดไฟล์เพื่อพิมพ์', 'error');
+          }
+        };
+        frame.addEventListener('load', function once() { frame.removeEventListener('load', once); setTimeout(go, 300); });
+      });
 
       /* =========================================================
        * ธีมสีและฟอนต์ของเว็บ: เลือกได้รายเครื่อง เก็บใน localStorage ของเบราว์เซอร์ (ไม่ส่งขึ้นเซิร์ฟเวอร์)
