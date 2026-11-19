@@ -1918,14 +1918,9 @@
 
         <form id="studentSubmitWorkForm" novalidate style="display: flex; flex-direction: column; gap: var(--space-3);">
           <div class="field">
-            <label for="stuAssignSelect">หัวข้องานที่ต้องการส่ง</label>
+            <label for="stuAssignSelect"><span>งานที่ครูมอบหมาย</span><span class="max-hint">เลือกงานที่ต้องการส่ง</span></label>
             <select id="stuAssignSelect" class="select-input"></select>
             <div class="deadline-note" id="stuAssignInfo" aria-live="polite" hidden></div>
-          </div>
-          <div class="field" id="stuCustomTitleWrap" hidden>
-            <label for="stuCustomTitleInput">ระบุชื่อชิ้นงาน / การบ้าน</label>
-            <input type="text" id="stuCustomTitleInput" class="input" placeholder="เช่น ใบงานที่ 1 หรือ รายงานบทที่ 2" autocomplete="off">
-            <div class="field-error" id="errStuCustomTitle" aria-live="polite"></div>
           </div>
           <div class="field">
             <label for="stuWorkDetailInput"><span>รายละเอียดงาน / ข้อความถึงครู</span><span class="max-hint">ไม่บังคับหากแนบไฟล์</span></label>
@@ -2757,6 +2752,7 @@
         if (msg.indexOf('ROOM_NOT_EMPTY') !== -1) return 'ห้องนี้ยังมีนักเรียนในทะเบียน ย้ายหรือลบนักเรียนก่อนจึงจะลบห้องได้';
         if (msg.indexOf('COURSE_NOT_ARCHIVED') !== -1) return 'ต้องเก็บรายวิชาเข้าคลังก่อน จึงจะลบถาวรได้';
         if (msg.indexOf('NOT_FOUND') !== -1) return 'ไม่พบรายการนี้ อาจถูกลบไปแล้ว กรุณารีเฟรชข้อมูล';
+        if (msg.indexOf('ASSIGNMENT_REQUIRED') !== -1) return 'ส่งได้เฉพาะงานที่ครูมอบหมาย กรุณารีเฟรชแล้วเลือกงานจากรายการ';
         if (msg.indexOf('SUBMISSION_CLOSED') !== -1) return 'งานนี้ปิดรับแล้ว หากมีเหตุจำเป็นกรุณาติดต่อครูผู้สอน';
         if (msg.indexOf('AI_NOT_CONFIGURED') !== -1) return 'ยังไม่ได้ตั้งค่า AI (ผู้ให้บริการ ชื่อโมเดล และ API Key)';
         if (msg.indexOf('AI_NOT_ENABLED') !== -1) return 'งานนี้ไม่ได้เปิดการวิเคราะห์ด้วย AI';
@@ -5827,9 +5823,6 @@
        * นักเรียน: ตรวจคะแนนและส่งงาน
        * ========================================================= */
       const stuAssignSelect = $('stuAssignSelect');
-      const stuCustomTitleWrap = $('stuCustomTitleWrap');
-      const stuCustomTitleInput = $('stuCustomTitleInput');
-      const errStuCustomTitle = $('errStuCustomTitle');
       const stuWorkDetailInput = $('stuWorkDetailInput');
       const stuWorkDropzone = $('stuWorkDropzone');
       const stuWorkFileInput = $('stuWorkFileInput');
@@ -5858,12 +5851,15 @@
           opt.textContent = a.title + ' (เต็ม ' + formatScore(a.maxScore) + ' คะแนน)' + (isClosed(a) ? ' • ปิดรับแล้ว' : '');
           stuAssignSelect.appendChild(opt);
         });
-        const customOpt = document.createElement('option');
-        customOpt.value = '__CUSTOM__';
-        customOpt.textContent = assignments.length > 0 ? 'ระบุชื่อชิ้นงานอื่นด้วยตนเอง...' : 'ระบุชื่อชิ้นงานที่ต้องการส่ง...';
-        stuAssignSelect.appendChild(customOpt);
+        /* นักเรียนส่งได้เฉพาะงานที่ครูมอบหมาย ตั้งชื่องานหรือคะแนนเองไม่ได้ */
+        if (assignments.length === 0) {
+          const none = document.createElement('option');
+          none.value = '';
+          none.textContent = 'ยังไม่มีงานที่ครูมอบหมาย';
+          stuAssignSelect.appendChild(none);
+        }
+        stuAssignSelect.disabled = assignments.length === 0;
         if (previous && stuAssignSelect.querySelector('option[value="' + previous + '"]')) stuAssignSelect.value = previous;
-        stuCustomTitleWrap.hidden = stuAssignSelect.value !== '__CUSTOM__';
         updateStudentAssignInfo();
       }
 
@@ -5872,8 +5868,14 @@
         const info = $('stuAssignInfo');
         const a = assignments.find(function (x) { return x.id === stuAssignSelect.value; });
         const closed = isClosed(a);
-        $('stuSubmitWorkBtn').disabled = closed;
-        if (!a || (!a.dueAt && !a.closeAt)) {
+        $('stuSubmitWorkBtn').disabled = closed || !a;
+        if (!a) {
+          info.hidden = false;
+          info.className = 'deadline-note';
+          info.textContent = 'ยังไม่มีงานให้ส่งในรายวิชานี้ เมื่อครูมอบหมายงานแล้วจะเลือกส่งได้ที่นี่';
+          return;
+        }
+        if (!a.dueAt && !a.closeAt) {
           info.hidden = true;
           return;
         }
@@ -6080,7 +6082,6 @@
             btn.textContent = 'ส่งงานนี้';
             btn.addEventListener('click', function () {
               stuAssignSelect.value = a.id;
-              stuCustomTitleWrap.hidden = true;
               goToSubmitForm();
             });
             row.appendChild(label);
@@ -6325,10 +6326,8 @@
       });
 
       stuAssignSelect.addEventListener('change', function () {
-        stuCustomTitleWrap.hidden = stuAssignSelect.value !== '__CUSTOM__';
         updateStudentAssignInfo();
       });
-      stuCustomTitleInput.addEventListener('input', function () { setFieldError(stuCustomTitleInput, errStuCustomTitle, ''); });
 
       function stageStudentFile(f) {
         if (!f) return;
@@ -6351,9 +6350,9 @@
         e.preventDefault();
         if (!currentStudentSession) return;
         const assignmentId = stuAssignSelect.value;
-        const customTitle = stuCustomTitleInput.value.trim();
-        if (assignmentId === '__CUSTOM__' && !customTitle) {
-          setFieldError(stuCustomTitleInput, errStuCustomTitle, 'กรุณาระบุชื่อชิ้นงานที่ต้องการส่ง');
+        if (!assignments.some(function (a) { return a.id === assignmentId; })) {
+          stuSubmitWorkMsg.className = 'inline-status-msg is-error';
+          stuSubmitWorkMsg.textContent = 'กรุณาเลือกงานที่ครูมอบหมาย';
           return;
         }
         const detailVal = stuWorkDetailInput.value.trim();
@@ -6368,13 +6367,12 @@
         stuSubmitWorkMsg.textContent = 'กำลังส่งงาน...';
         (stagedStudentFile ? readFilePayload(stagedStudentFile) : Promise.resolve(null)).then(function (filePayload) {
           return server('submitWork', sessionToken, {
-            assignmentId: assignmentId, customTitle: customTitle, detail: detailVal, file: filePayload
+            assignmentId: assignmentId, detail: detailVal, file: filePayload
           });
         }).then(function (sub) {
           submissions.unshift(sub);
           stagedStudentFile = null;
           stuWorkFileInput.value = '';
-          stuCustomTitleInput.value = '';
           stuWorkDetailInput.value = '';
           stuWorkDropTitle.textContent = DROP_TITLE_DEFAULT;
           renderStudentPortal();
@@ -9101,7 +9099,6 @@
           if (res.state.role === 'student' && params.go === 'submit') {
             if (params.a && stuAssignSelect.querySelector('option[value="' + String(params.a).replace(/["\\]/g, '') + '"]')) {
               stuAssignSelect.value = params.a;
-              stuCustomTitleWrap.hidden = true;
             }
             goToSubmitForm();
           } else if (res.state.role === 'teacher' && teacherViews[params.go]) {
