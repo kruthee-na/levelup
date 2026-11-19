@@ -186,6 +186,7 @@
       .talk-back { display: grid; }
       .talk-pane-head { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
     }
+    body.no-enroll .js-enroll { display: none !important; }   /* ครูทั่วไป: ผู้ดูแลเป็นผู้กำหนดห้องและรายชื่อนักเรียน */
     .app-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 12px; padding: var(--space-2) var(--space-3); text-align: center; font-size: 0.8rem; font-weight: 500; color: var(--ink-secondary); }
     .container { max-width: 1180px; margin: 0 auto; padding: var(--space-6); display: grid; gap: var(--space-6); }
     .card { background: var(--surface); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: var(--space-6); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
@@ -1033,7 +1034,7 @@
 
     <!-- ครู: ป้อนและส่งคะแนน -->
     <div id="viewTeacherScores" style="display: grid; gap: var(--space-6);" hidden>
-      <section class="card" aria-labelledby="uploadHeading">
+      <section class="card js-enroll" aria-labelledby="uploadHeading">
         <div class="section-header">
           <h2 class="section-title" id="uploadHeading">จัดการห้องเรียนและอัปโหลดรายชื่อนักเรียน</h2>
         </div>
@@ -1096,7 +1097,7 @@
             <span class="classroom-tabs-label">ห้องเรียน:</span>
             <div id="classroomTabsList" class="classroom-tabs"></div>
           </div>
-          <div id="classroomDeleteArea"></div>
+          <div id="classroomDeleteArea" class="js-enroll"></div>
         </div>
 
         <div class="room-submit-banner" id="roomSubmitBanner" hidden>
@@ -2060,7 +2061,7 @@
         <label for="courseTeacherSelect">ครูผู้สอน</label>
         <select id="courseTeacherSelect" class="select-input"></select>
       </div>
-      <fieldset class="field">
+      <fieldset class="field js-enroll">
         <legend>ห้องที่เรียนวิชานี้ทั้งห้อง</legend>
         <div class="room-pick" id="courseRoomPick"></div>
         <p class="subpanel-desc" id="courseRoomHint"></p>
@@ -2785,6 +2786,7 @@
         if (msg.indexOf('TALK_NO_MEMBERS') !== -1) return 'กรุณาเลือกสมาชิกที่เรียนรายวิชานี้อย่างน้อย 1 คน';
         if (msg.indexOf('AI_STUDENT_OFF') !== -1) return 'ครูผู้สอนยังไม่เปิดให้นักเรียนใช้ผู้ช่วย AI ในรายวิชานี้';
         if (msg.indexOf('AI_USER_LIMIT') !== -1) return 'วันนี้ถามผู้ช่วย AI ครบจำนวนแล้ว ลองใหม่พรุ่งนี้';
+        if (msg.indexOf('ADMIN_ONLY') !== -1) return 'เฉพาะผู้ดูแลระบบที่สร้างรายวิชาและกำหนดห้องเรียนได้';
         if (msg.indexOf('NOT_ENOUGH_POINTS') !== -1) return 'แต้มไม่พอสำหรับชุดตกแต่งนี้';
         if (msg.indexOf('LOCKED') !== -1) return 'ของตกแต่งที่เลือกยังไม่ปลดล็อก กรุณาเลือกชิ้นอื่น หรือปลดล็อกชุดตกแต่งก่อน';
         if (msg.indexOf('PASSWORD_CHANGE_REQUIRED') !== -1) return 'กรุณาตั้งรหัสผ่านก่อนใช้งาน';
@@ -3232,13 +3234,24 @@
         event.preventDefault();
         const data = validateForm();
         if (!data) return;
-        const canonicalRoom = ensureClassroom(data.classroom);
         const wasEditing = editingRecordId !== null;
         let target = wasEditing ? students.find(function (s) { return s.id === editingRecordId; }) : null;
+        if (!canEnroll()) {
+          /* ครูทั่วไป: บันทึกคะแนนได้เฉพาะนักเรียนที่อยู่ในรายวิชาแล้ว เพิ่มหรือย้ายนักเรียนไม่ได้ */
+          target = target || students.find(function (s) { return s.studentId === data.studentId; });
+          if (!target) {
+            setFieldError(studentIdInput, errStudentId, 'ไม่พบเลขประจำตัวนี้ในรายวิชา การเพิ่มนักเรียนทำได้โดยผู้ดูแลระบบเท่านั้น');
+            return;
+          }
+          data.studentId = target.studentId;
+          data.studentName = target.studentName;
+          data.classroom = target.classroom;
+        }
         if (!target) {
           target = { id: newId() };
           students.push(target);
         }
+        const canonicalRoom = canEnroll() ? ensureClassroom(data.classroom) : data.classroom;
         target.classroom = canonicalRoom;
         target.studentId = data.studentId;
         target.studentName = data.studentName;
@@ -3436,7 +3449,7 @@
               renderTable();
             });
             actionsWrap.appendChild(editBtn);
-            actionsWrap.appendChild(delBtn);
+            if (canEnroll()) actionsWrap.appendChild(delBtn);
             actionTd.appendChild(actionsWrap);
           }
           tr.appendChild(actionTd);
@@ -8256,6 +8269,9 @@
       let courseEditingId = '';
       let courseArchiveArmed = false;
 
+      /* ผู้ดูแลเท่านั้นที่กำหนดห้องและรายชื่อนักเรียนของรายวิชา (เซิร์ฟเวอร์รุ่นก่อนหลายครู: ครูคนเดียวทำได้ทั้งหมด) */
+      function canEnroll() { return isAdmin || legacyServer; }
+
       function courseText(c) {
         return (c.code ? c.code + ' ' : '') + c.name;
       }
@@ -8264,9 +8280,11 @@
         const bar = $('courseBar');
         bar.hidden = !loggedIn || legacyServer;
         document.body.classList.remove('no-course');
+        document.body.classList.remove('no-enroll');
         if (!loggedIn || legacyServer) return;
         const isTeacher = role === 'teacher';
         document.body.classList.toggle('no-course', isTeacher && !currentCourseId);
+        document.body.classList.toggle('no-enroll', isTeacher && !isAdmin);
         courseSelect.innerHTML = '';
         courses.forEach(function (c) {
           const opt = document.createElement('option');
@@ -8284,12 +8302,12 @@
         courseSelect.value = currentCourseId;
         courseSelect.disabled = courses.length < 2;
         $('courseEditBtn').hidden = !(isTeacher && currentCourseId);
-        $('courseNewBtn').hidden = !isTeacher;
+        $('courseNewBtn').hidden = !(isTeacher && isAdmin);
         $('teachersBtn').hidden = !(isTeacher && isAdmin);
         const msg = $('courseBarMsg');
         msg.className = 'inline-status-msg';
         msg.textContent = courses.length ? '' : (isTeacher
-          ? 'กด "＋ วิชาใหม่" เพื่อสร้างรายวิชาแรก แล้วเลือกห้องที่เรียน'
+          ? (isAdmin ? 'กด "＋ วิชาใหม่" เพื่อสร้างรายวิชาแรก แล้วเลือกห้องที่เรียน' : 'ยังไม่มีรายวิชาที่ได้รับมอบหมาย กรุณาติดต่อผู้ดูแลระบบให้สร้างรายวิชาและกำหนดห้องเรียน')
           : 'ครูยังไม่ได้เพิ่มห้องหรือชื่อของนักเรียนในรายวิชาใด');
       }
 
