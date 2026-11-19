@@ -116,6 +116,76 @@
     .ui-sample strong { display: block; font-size: 1.1rem; color: var(--brand-hover); }
     .login-theme-link { align-self: center; background: none; border: none; font: inherit; font-size: 0.84rem; font-weight: 600; color: var(--brand-hover); cursor: pointer; min-height: 44px; padding: 0 12px; border-radius: 12px; }
     .login-theme-link:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+    .talk-btn { position: relative; }
+    .sum-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .sum-toolbar .select-input, .sum-toolbar .input { width: auto; flex: 1 1 150px; min-height: 40px; }
+    .sum-tabs { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--tint); gap: 4px; }
+    .sum-tab { font: inherit; font-size: 0.84rem; font-weight: 700; min-height: 36px; padding: 0 16px; border: none; border-radius: 999px; background: transparent; color: var(--ink-secondary); cursor: pointer; }
+    .sum-tab[aria-pressed="true"] { background: #ffffff; color: var(--brand-hover); box-shadow: var(--shadow-sm); }
+    .sum-tab:focus-visible, .talk-item:focus-visible, .talk-icon-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+    .sum-table td, .sum-table th { white-space: nowrap; }
+    .sum-table tfoot td { font-weight: 700; background: var(--tint); }
+    .sum-warn { color: var(--danger); font-weight: 700; }
+    .sum-actions { display: flex; gap: 4px; justify-content: flex-end; }
+    .talk-backdrop { padding: var(--space-4); }
+    .talk-dialog { display: grid; grid-template-columns: 320px minmax(0, 1fr); width: 100%; max-width: 940px; height: min(88vh, 720px); background: #ffffff; border-radius: var(--radius-lg); box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22); overflow: hidden; text-align: left; }
+    .talk-list-pane { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--border); }
+    .talk-pane-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border-line); min-height: 64px; }
+    .talk-pane-head h2 { margin: 0; font-size: 1.15rem; font-weight: 700; flex: 1; min-width: 0; }
+    .talk-icon-btn { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--tint); color: var(--ink); font: inherit; font-size: 1.05rem; cursor: pointer; }
+    .talk-tools { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border-line); }
+    .talk-list { flex: 1; min-height: 0; overflow-y: auto; padding: 6px; display: grid; gap: 2px; align-content: start; }
+    .talk-item { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 8px 10px; border: none; border-radius: 16px; background: transparent; font: inherit; color: var(--ink); text-align: left; cursor: pointer; }
+    .talk-item:hover, .talk-item.is-active { background: var(--tint); }
+    .talk-avatar { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; font-size: 1.05rem; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, var(--brand-light), var(--brand)); border: 3px solid #ffffff; box-shadow: 0 0 0 2px var(--border-strong); }
+    .talk-avatar.is-ai { background: linear-gradient(135deg, var(--accent), var(--brand)); font-size: 1.4rem; }
+    .talk-item.is-unread .talk-avatar, .talk-avatar.is-ring { box-shadow: 0 0 0 3px var(--accent); }
+    .talk-item-name { display: block; font-size: 0.92rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .talk-item-last { display: block; font-size: 0.8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .talk-item.is-unread .talk-item-name { font-weight: 700; }
+    .talk-item.is-unread .talk-item-last { color: var(--ink); font-weight: 600; }
+    .talk-item-side { display: grid; justify-items: end; gap: 6px; font-size: 0.72rem; color: var(--muted); }
+    .talk-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+    .talk-empty { padding: var(--space-6) var(--space-4); text-align: center; color: var(--muted); font-size: 0.9rem; }
+    .talk-thread-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: #ffffff; }
+    .talk-head-text { flex: 1; min-width: 0; }
+    .talk-head-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .talk-head-sub { font-size: 0.78rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .talk-pane-head .talk-avatar { width: 40px; height: 40px; font-size: 0.9rem; border-width: 2px; }
+    .talk-back { display: none; }
+    .talk-messages { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+    .talk-day { align-self: center; margin: 10px 0 6px; padding: 2px 12px; border-radius: 999px; background: var(--tint); color: var(--muted); font-size: 0.72rem; font-weight: 600; }
+    .talk-msg { display: flex; flex-direction: column; align-items: flex-start; max-width: 78%; }
+    .talk-msg.is-mine { align-self: flex-end; align-items: flex-end; }
+    .talk-msg-name { margin: 6px 12px 2px; font-size: 0.72rem; font-weight: 600; color: var(--muted); }
+    .talk-bubble { padding: 9px 14px; border: none; border-radius: 20px; background: var(--tint); color: var(--ink); font: inherit; font-size: 0.92rem; line-height: 1.45; text-align: left; white-space: pre-wrap; overflow-wrap: anywhere; cursor: default; }
+    button.talk-bubble { cursor: pointer; }
+    .talk-msg.is-mine .talk-bubble { background: linear-gradient(135deg, var(--accent), var(--brand)); color: #ffffff; }
+    .talk-msg.is-deleted .talk-bubble { background: transparent; border: 1px dashed var(--border-strong); color: var(--muted); font-style: italic; }
+    .talk-msg.is-teacher:not(.is-mine) .talk-bubble { box-shadow: inset 3px 0 0 var(--brand); }
+    .talk-msg-meta { display: flex; gap: 8px; align-items: center; margin: 2px 10px 0; font-size: 0.68rem; color: var(--muted); }
+    .talk-msg-del { border: none; background: none; font: inherit; font-size: 0.72rem; font-weight: 700; color: var(--danger); cursor: pointer; min-height: 28px; padding: 0 6px; }
+    .talk-note { margin: 0; padding: 8px 16px; font-size: 0.74rem; color: var(--muted); background: var(--tint); }
+    .talk-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 16px 0; }
+    .talk-chip { font: inherit; font-size: 0.8rem; font-weight: 600; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border-strong); background: #ffffff; color: var(--brand-hover); cursor: pointer; }
+    .talk-compose { display: flex; gap: 8px; align-items: flex-end; padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-line); }
+    .talk-compose textarea { flex: 1; min-height: 44px; max-height: 120px; padding: 10px 16px; border-radius: 22px; border: 1.5px solid var(--border-strong); background: var(--tint); font: inherit; font-size: 0.95rem; color: var(--ink); resize: none; }
+    .talk-compose textarea:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+    .talk-send { flex: none; min-height: 44px; padding: 0 18px; border-radius: 22px; }
+    .talk-status { padding: 0 16px 6px; font-size: 0.78rem; color: var(--danger); min-height: 0; }
+    .talk-form { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: grid; gap: var(--space-3); align-content: start; }
+    .talk-pick-list { display: grid; gap: 2px; max-height: 340px; overflow-y: auto; border: 1px solid var(--border); border-radius: 16px; padding: 6px; }
+    .talk-pick { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 10px; border-radius: 12px; border: none; background: transparent; font: inherit; font-size: 0.88rem; color: var(--ink); text-align: left; cursor: pointer; width: 100%; }
+    .talk-pick:hover { background: var(--tint); }
+    .talk-pick input { width: 20px; height: 20px; accent-color: var(--brand); }
+    @media (max-width: 767px) {
+      .talk-backdrop { padding: 0; }
+      .talk-dialog { grid-template-columns: minmax(0, 1fr); max-width: none; height: 100%; max-height: none; border-radius: 0; }
+      .talk-dialog:not(.is-thread) .talk-thread-pane, .talk-dialog.is-thread .talk-list-pane { display: none; }
+      .talk-list-pane { border-right: none; }
+      .talk-back { display: grid; }
+      .talk-pane-head { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
+    }
     .app-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 12px; padding: var(--space-2) var(--space-3); text-align: center; font-size: 0.8rem; font-weight: 500; color: var(--ink-secondary); }
     .container { max-width: 1180px; margin: 0 auto; padding: var(--space-6); display: grid; gap: var(--space-6); }
     .card { background: var(--surface); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: var(--space-6); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
@@ -731,6 +801,9 @@
       .status-chip span:last-child { overflow: hidden; text-overflow: ellipsis; }
       #refreshDataBtn { width: 40px; height: 40px; min-height: 40px; padding: 0; border-radius: 50%; }
       #refreshDataBtn .btn-text { display: none; }
+      #talkBtn { width: 40px; height: 40px; min-height: 40px; padding: 0; border-radius: 50%; }
+      #talkBtn .btn-text { display: none; }
+      #uiThemeBtn { display: none; }   /* จอเล็ก: เปลี่ยนธีมได้จากหน้าโปรไฟล์ */
       .notification-dropdown { position: fixed; left: 12px; right: 12px; top: 64px; width: auto; }
       .container { padding: var(--space-4); gap: var(--space-4); }
       .container > div { gap: var(--space-4) !important; }
@@ -869,6 +942,7 @@
         <button type="button" class="btn btn-secondary avatar-btn js-open-profile" id="profileBtn" aria-label="โปรไฟล์ของฉัน" title="โปรไฟล์ของฉัน" hidden>
           <span class="avatar-slot"><svg class="avatar-default" viewBox="0 0 120 120" aria-hidden="true"><use href="#mascotSym"/></svg><img class="avatar-img" alt="" hidden></span>
         </button>
+        <button type="button" class="btn btn-secondary btn-sm talk-btn" id="talkBtn" aria-label="แชท" title="แชท" hidden><span aria-hidden="true">💬</span><span class="btn-text">แชท</span><span class="notification-badge" id="talkBadge" hidden>0</span></button>
         <button type="button" class="btn btn-primary btn-sm" id="installBtn" hidden>ติดตั้งแอป</button>
         <button type="button" class="btn btn-secondary btn-sm js-open-ui" id="uiThemeBtn" aria-label="ธีมสีและฟอนต์" title="ธีมสีและฟอนต์"><span aria-hidden="true">🎨</span><span class="btn-text">ธีม</span></button>
         <button type="button" class="btn btn-secondary btn-sm" id="refreshDataBtn" aria-label="รีเฟรชข้อมูล" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg><span class="btn-text">รีเฟรชข้อมูล</span></button>
@@ -1293,6 +1367,33 @@
             </div>
           </div>
         </div>
+
+        <section class="chart-panel" id="courseSummaryPanel" aria-labelledby="courseSummaryTitle" hidden>
+          <div>
+            <h3 class="chart-panel-title" id="courseSummaryTitle">สรุปข้อมูลนักเรียนในรายวิชา</h3>
+            <p class="chart-panel-sub" id="courseSummarySub">คะแนน การส่งงาน และการเข้าเรียน แยกรายห้องและรายบุคคล</p>
+          </div>
+          <div class="sum-toolbar">
+            <div class="sum-tabs" role="group" aria-label="มุมมองสรุป">
+              <button type="button" class="sum-tab" id="sumModeRooms" aria-pressed="true">รายห้อง</button>
+              <button type="button" class="sum-tab" id="sumModeStudents" aria-pressed="false">รายบุคคล</button>
+            </div>
+            <select id="sumRoomFilter" class="select-input" aria-label="เลือกห้องเรียน" hidden></select>
+            <select id="sumSort" class="select-input" aria-label="เรียงลำดับ" hidden>
+              <option value="id">เรียงตามเลขประจำตัว</option>
+              <option value="total">คะแนนรวม มาก → น้อย</option>
+              <option value="low">คะแนนรวม น้อย → มาก</option>
+              <option value="missing">ค้างส่งงาน มาก → น้อย</option>
+              <option value="absent">ขาดเรียน มาก → น้อย</option>
+            </select>
+            <input type="search" id="sumSearch" class="input" placeholder="ค้นหารหัสหรือชื่อ" aria-label="ค้นหานักเรียน" hidden>
+            <button type="button" class="btn btn-secondary btn-sm" id="sumExportBtn">⬇ ส่งออก CSV</button>
+          </div>
+          <div class="inline-status-msg" id="sumMsg" aria-live="polite"></div>
+          <div class="table-wrapper">
+            <table class="sum-table" id="sumTable" style="min-width: 760px;"><thead></thead><tbody></tbody><tfoot></tfoot></table>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -2382,6 +2483,61 @@
     </div>
   </div>
 
+  <div class="modal-backdrop talk-backdrop" id="talkModal" role="dialog" aria-modal="true" aria-labelledby="talkTitle" hidden>
+    <div class="talk-dialog" id="talkDialog">
+      <div class="talk-list-pane">
+        <div class="talk-pane-head">
+          <h2 id="talkTitle">ข้อความ</h2>
+          <button type="button" class="talk-icon-btn" id="talkCloseBtn" aria-label="ปิดแชท">✕</button>
+        </div>
+        <div class="talk-tools" id="talkTools" hidden>
+          <button type="button" class="btn btn-secondary btn-sm" id="talkNewDmBtn">＋ แชทส่วนตัว</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="talkNewGroupBtn">＋ สร้างกลุ่ม</button>
+        </div>
+        <div class="talk-list" id="talkList"></div>
+      </div>
+      <div class="talk-thread-pane">
+        <div class="talk-pane-head">
+          <button type="button" class="talk-icon-btn talk-back" id="talkBackBtn" aria-label="กลับไปรายการแชท">←</button>
+          <span class="talk-avatar" id="talkHeadAvatar" aria-hidden="true">💬</span>
+          <div class="talk-head-text">
+            <div class="talk-head-name" id="talkHeadName">เลือกแชท</div>
+            <div class="talk-head-sub" id="talkHeadSub">เลือกห้องแชทจากรายการ</div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="talkGroupEditBtn" hidden>แก้ไขกลุ่ม</button>
+        </div>
+        <div id="talkThread" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+          <p class="talk-note" id="talkNote" hidden></p>
+          <div class="talk-messages" id="talkMessages" aria-live="polite"><div class="talk-empty">เลือกห้องแชทจากรายการเพื่อเริ่มคุย</div></div>
+          <div class="talk-chips" id="talkChips" hidden></div>
+          <div class="talk-status" id="talkStatus" aria-live="polite"></div>
+          <form class="talk-compose" id="talkForm" hidden>
+            <label class="sr-only" for="talkInput">พิมพ์ข้อความ</label>
+            <textarea id="talkInput" rows="1" maxlength="1000" placeholder="ส่งข้อความ..."></textarea>
+            <button type="submit" class="btn btn-primary talk-send" id="talkSendBtn">ส่ง</button>
+          </form>
+        </div>
+        <div class="talk-form" id="talkFormPane" hidden>
+          <div class="field" id="talkGroupNameField">
+            <label for="talkGroupName"><span>ชื่อกลุ่ม</span><span class="max-hint">ไม่เกิน 40 ตัวอักษร</span></label>
+            <input type="text" id="talkGroupName" class="input" maxlength="40" placeholder="เช่น กลุ่มโครงงานที่ 1" autocomplete="off">
+          </div>
+          <div class="sum-toolbar">
+            <select id="talkPickRoom" class="select-input" aria-label="เลือกห้องเรียน"></select>
+            <input type="search" id="talkPickSearch" class="input" placeholder="ค้นหารหัสหรือชื่อ" aria-label="ค้นหานักเรียน">
+          </div>
+          <div class="talk-pick-list" id="talkPickList"></div>
+          <div class="inline-status-msg" id="talkFormMsg" aria-live="polite"></div>
+          <div class="btn-group" style="justify-content: flex-end;">
+            <button type="button" class="btn btn-danger-ghost" id="talkGroupDeleteBtn" hidden>ลบกลุ่ม</button>
+            <button type="button" class="btn btn-secondary" id="talkFormCancelBtn">ยกเลิก</button>
+            <button type="button" class="btn btn-primary" id="talkGroupSaveBtn">บันทึกกลุ่ม</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="uiModal" role="dialog" aria-modal="true" aria-labelledby="uiModalTitle" hidden>
     <div class="modal-dialog ui-dialog">
       <div class="modal-header">
@@ -2621,6 +2777,9 @@
         if (msg.indexOf('BAD_SERVICE_ACCOUNT') !== -1) return 'คีย์ service account ไม่ถูกต้อง ต้องเป็นเนื้อหาไฟล์ JSON ที่มี client_email และ private_key';
         if (msg.indexOf('BAD_WEBHOOK') !== -1) return 'ลิงก์ Webhook ต้องขึ้นต้นด้วย https://chat.googleapis.com/v1/spaces/';
         if (msg.indexOf('BAD_EMAIL') !== -1) return 'รูปแบบอีเมลไม่ถูกต้อง';
+        if (msg.indexOf('TALK_TOO_FAST') !== -1) return 'ส่งข้อความถี่เกินไป กรุณารอสักครู่แล้วลองใหม่';
+        if (msg.indexOf('TALK_NO_MEMBERS') !== -1) return 'กรุณาเลือกสมาชิกที่เรียนรายวิชานี้อย่างน้อย 1 คน';
+        if (msg.indexOf('AI_USER_LIMIT') !== -1) return 'วันนี้ถามผู้ช่วย AI ครบจำนวนแล้ว ลองใหม่พรุ่งนี้';
         if (msg.indexOf('NOT_ENOUGH_POINTS') !== -1) return 'แต้มไม่พอสำหรับชุดตกแต่งนี้';
         if (msg.indexOf('LOCKED') !== -1) return 'ของตกแต่งที่เลือกยังไม่ปลดล็อก กรุณาเลือกชิ้นอื่น หรือปลดล็อกชุดตกแต่งก่อน';
         if (msg.indexOf('PASSWORD_CHANGE_REQUIRED') !== -1) return 'กรุณาตั้งรหัสผ่านก่อนใช้งาน';
@@ -3990,6 +4149,7 @@
         $('chatSettingsBtn').hidden = !(loggedIn && role === 'teacher');
         $('aiSettingsBtn').hidden = !(loggedIn && role === 'teacher' && (isAdmin || legacyServer));
         renderCourseBar(loggedIn, role);
+        syncTalk(loggedIn);
         applyProfile();
         document.body.classList.toggle('is-logged-out', !loggedIn);
         document.body.classList.toggle('has-sidebar', loggedIn && role === 'teacher');
@@ -4173,6 +4333,7 @@
 
       function renderDashboard() {
         const hour = new Date().getHours();
+        loadCourseSummary(false);
         const pendingReview = submissions.filter(function (w) { return w.status === 'pending'; }).length;
         $('heroGreeting').textContent = (hour < 12 ? 'สวัสดีตอนเช้า' : hour < 17 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น') + ' ' + (profile.displayName || 'คุณครู') + '! ☀️';
         $('heroSub').textContent = pendingReview > 0
@@ -6726,6 +6887,677 @@
           $('pfMsg').textContent = 'บันทึกไม่สำเร็จ: ' + handleServerError(err);
         }).then(function () { btn.disabled = false; });
       });
+
+      /* =========================================================
+       * สรุปข้อมูลนักเรียนในรายวิชา: รายห้อง / รายบุคคล (อยู่ในแท็บแดชบอร์ดของครู)
+       * ========================================================= */
+      var summaryData = null;
+      var summaryAt = 0;
+      var summaryBusy = false;
+      var summaryMode = 'rooms';
+
+      function sumNum(v, suffix) { return v === null || v === undefined ? '—' : formatScore(v) + (suffix || ''); }
+
+      /* หัวตารางและแถวของมุมมองปัจจุบัน (ใช้ทั้งแสดงผลและส่งออก CSV) */
+      function summaryRows() {
+        const d = summaryData;
+        if (summaryMode === 'rooms') {
+          const row = function (r, label) {
+            return [label, r.count, r.scored, sumNum(r.avg), sumNum(r.max), sumNum(r.min), r.passed, r.failed, sumNum(r.submitRate, '%'), r.missing, sumNum(r.attendRate, '%'), r.absent];
+          };
+          return {
+            head: ['ห้อง', 'นักเรียน', 'มีคะแนนแล้ว', 'คะแนนเฉลี่ย', 'สูงสุด', 'ต่ำสุด', 'ผ่าน', 'ไม่ผ่าน', 'ส่งงาน', 'ค้างส่ง (ชิ้น)', 'เข้าเรียน', 'ขาด (คาบ)'],
+            body: d.rooms.map(function (r) { return { cells: row(r, r.classroom), warn: { 7: r.failed > 0 } }; }),
+            foot: row(d.all, 'รวมทั้งรายวิชา')
+          };
+        }
+        const room = $('sumRoomFilter').value || 'ALL';
+        const q = $('sumSearch').value.trim().toLowerCase();
+        const sort = $('sumSort').value;
+        const list = d.students.filter(function (r) {
+          return (room === 'ALL' || r.classroom === room) && (!q || r.studentId.toLowerCase().indexOf(q) !== -1 || r.studentName.toLowerCase().indexOf(q) !== -1);
+        });
+        const low = function (v) { return v === null ? -1 : v; };
+        if (sort === 'total') list.sort(function (a, b) { return low(b.total) - low(a.total); });
+        else if (sort === 'low') list.sort(function (a, b) { return (a.total === null ? 999 : a.total) - (b.total === null ? 999 : b.total); });
+        else if (sort === 'missing') list.sort(function (a, b) { return b.missing - a.missing; });
+        else if (sort === 'absent') list.sort(function (a, b) { return b.absent - a.absent; });
+        return {
+          head: ['รหัส', 'ชื่อ-นามสกุล', 'ห้อง', 'ก่อนกลางภาค', 'กลางภาค', 'หลังกลางภาค', 'ปลายภาค', 'รวม', 'เกรด', 'ส่งงาน', 'ค้างส่ง', 'คุณภาพงาน', 'เข้าเรียน', 'ขาด (คาบ)'],
+          body: list.map(function (r) {
+            return { id: r.studentId, cells: [r.studentId, r.studentName, r.classroom, sumNum(r.preMid), sumNum(r.midterm), sumNum(r.postMid), sumNum(r.finalExam), sumNum(r.total),
+              r.grade === null ? '—' : String(r.grade), r.submitted + ' / ' + r.assigned, r.missing, sumNum(r.quality, '%'), sumNum(r.attendRate, '%'), r.absent],
+              warn: { 7: r.total !== null && r.total < 50, 10: r.missing > 0, 13: r.absent > 0 } };
+          }),
+          foot: null
+        };
+      }
+
+      function renderCourseSummary() {
+        const panel = $('courseSummaryPanel');
+        panel.hidden = !summaryData;
+        if (!summaryData) return;
+        const students = summaryMode === 'students';
+        $('sumModeRooms').setAttribute('aria-pressed', students ? 'false' : 'true');
+        $('sumModeStudents').setAttribute('aria-pressed', students ? 'true' : 'false');
+        ['sumRoomFilter', 'sumSort', 'sumSearch'].forEach(function (id) { $(id).hidden = !students; });
+        const filter = $('sumRoomFilter');
+        const keep = filter.value;
+        filter.innerHTML = '';
+        [['ALL', 'ทุกห้องในรายวิชา']].concat(summaryData.rooms.map(function (r) { return [r.classroom, 'ห้อง ' + r.classroom]; })).forEach(function (o) {
+          const opt = document.createElement('option');
+          opt.value = o[0];
+          opt.textContent = o[1];
+          filter.appendChild(opt);
+        });
+        if (Array.prototype.some.call(filter.options, function (o) { return o.value === keep; })) filter.value = keep;
+        const data = summaryRows();
+        const table = $('sumTable');
+        const fill = function (section, rows, tag) {
+          section.innerHTML = '';
+          rows.forEach(function (r) {
+            const tr = document.createElement('tr');
+            r.cells.forEach(function (c, i) {
+              const cell = document.createElement(tag);
+              cell.textContent = c;
+              if (i > (students ? 2 : 0)) cell.className = 'num';
+              if (r.warn && r.warn[i]) cell.classList.add('sum-warn');
+              tr.appendChild(cell);
+            });
+            if (students && tag === 'td') {
+              const act = document.createElement('td');
+              const box = document.createElement('div');
+              box.className = 'sum-actions';
+              [['📄 รายงาน', 'ดูรายงานรายบุคคลของ ' + r.cells[1], function () { openStudentReport(r.id); }],
+                ['💬', 'แชทส่วนตัวกับ ' + r.cells[1], function () { openTalkWith(r.id); }]].forEach(function (b) {
+                if (b[0] === '💬' && !talkAvailable) return;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-secondary btn-sm';
+                btn.textContent = b[0];
+                btn.setAttribute('aria-label', b[1]);
+                btn.title = b[1];
+                btn.addEventListener('click', b[2]);
+                box.appendChild(btn);
+              });
+              act.appendChild(box);
+              tr.appendChild(act);
+            } else if (students) {
+              tr.appendChild(document.createElement(tag));
+            }
+            section.appendChild(tr);
+          });
+        };
+        fill(table.tHead, [{ cells: data.head }], 'th');
+        fill(table.tBodies[0], data.body, 'td');
+        fill(table.tFoot, data.foot ? [{ cells: data.foot }] : [], 'td');
+        $('courseSummarySub').textContent = [summaryData.course.code, summaryData.course.name].filter(Boolean).join(' ') + ' • นักเรียน ' + summaryData.all.count + ' คน • งานที่สั่ง ' + summaryData.assignments + ' ชิ้น';
+        $('sumMsg').className = 'inline-status-msg';
+        $('sumMsg').textContent = students && data.body.length === 0 ? 'ไม่พบนักเรียนตามเงื่อนไขที่เลือก' : '';
+      }
+
+      /* โหลดสรุปจากเซิร์ฟเวอร์ (ใช้ข้อมูลที่บันทึกแล้ว) โหลดซ้ำเมื่อเปิดแดชบอร์ดอีกครั้งหลังผ่านไป 30 วินาที */
+      function loadCourseSummary(force) {
+        if (!teacherAuthenticated || legacyServer || !sessionToken) { $('courseSummaryPanel').hidden = true; return; }
+        if (summaryBusy || (!force && summaryData && Date.now() - summaryAt < 30000)) return;
+        summaryBusy = true;
+        const courseAtCall = currentCourseId;
+        server('getCourseSummary', sessionToken).then(function (d) {
+          if (courseAtCall !== currentCourseId) return;
+          summaryData = d;
+          summaryAt = Date.now();
+          renderCourseSummary();
+        }).catch(function () {
+          if (!summaryData) $('courseSummaryPanel').hidden = true;   // เซิร์ฟเวอร์รุ่นก่อนยังไม่มีสรุปนี้
+        }).then(function () { summaryBusy = false; });
+      }
+      $('sumModeRooms').addEventListener('click', function () { summaryMode = 'rooms'; renderCourseSummary(); });
+      $('sumModeStudents').addEventListener('click', function () { summaryMode = 'students'; renderCourseSummary(); });
+      ['sumRoomFilter', 'sumSort'].forEach(function (id) { $(id).addEventListener('change', renderCourseSummary); });
+      $('sumSearch').addEventListener('input', renderCourseSummary);
+      $('sumExportBtn').addEventListener('click', function () {
+        if (!summaryData) return;
+        const data = summaryRows();
+        const lines = [data.head].concat(data.body.map(function (r) { return r.cells; })).concat(data.foot ? [data.foot] : []);
+        const csv = lines.map(function (cells) {
+          return cells.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
+        }).join('\r\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
+        a.download = 'สรุป' + (summaryMode === 'rooms' ? 'รายห้อง' : 'รายบุคคล') + '_' + (summaryData.course.code || summaryData.course.name || 'รายวิชา') + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+      });
+
+      /* =========================================================
+       * แชทในระบบ: กลุ่มของห้อง กลุ่มที่ครูสร้าง แชทส่วนตัวครูกับนักเรียน และผู้ช่วย AI
+       * หน้าแอปถามข้อความใหม่จากเซิร์ฟเวอร์เป็นระยะ (ไม่ใช่แบบทันทีทุกตัวอักษร)
+       * ========================================================= */
+      const TALK_AI = 'ai';
+      const TALK_POLL_MS = 8000;        // ห้องแชทที่เปิดอยู่
+      const TALK_LIST_POLL_MS = 40000;  // รายการแชทขณะเปิดหน้าแชท
+      const TALK_BG_POLL_MS = 180000;   // ตรวจข้อความใหม่ขณะใช้หน้าอื่น
+      const talkModal = $('talkModal');
+      var talkData = null;
+      var talkAvailable = false;
+      var talkOpenId = '';
+      var talkShown = '';        // ลายเซ็นของข้อความที่แสดงอยู่ ใช้ข้ามการวาดซ้ำเมื่อไม่มีอะไรเปลี่ยน
+      var talkTimers = { thread: null, list: null, bg: null };
+      var talkSending = false;
+      var talkFormMode = '';     // 'dm' | 'group'
+      var talkEditId = '';
+      var talkPicked = {};
+      var aiHistory = [];
+      var aiLeft = null;
+
+      function talkTime(iso) {
+        const d = new Date(iso);
+        if (!iso || isNaN(d.getTime())) return '';
+        const now = new Date();
+        const two = function (n) { return (n < 10 ? '0' : '') + n; };
+        return d.toDateString() === now.toDateString() ? two(d.getHours()) + ':' + two(d.getMinutes()) : d.getDate() + '/' + (d.getMonth() + 1);
+      }
+      function talkDay(iso) {
+        const d = new Date(iso);
+        return isNaN(d.getTime()) ? '' : d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+      function talkAvatarText(chat) {
+        return chat.type === 'd' ? getInitials(chat.name) : '👥';
+      }
+      function talkFind(id) {
+        return talkData ? talkData.chats.filter(function (c) { return c.id === id; })[0] : null;
+      }
+      function talkStatus(text) { $('talkStatus').textContent = text || ''; }
+
+      function updateTalkBadge() {
+        const n = talkData ? talkData.chats.filter(function (c) { return c.unread; }).length : 0;
+        $('talkBadge').hidden = n === 0;
+        $('talkBadge').textContent = n > 9 ? '9+' : String(n);
+        $('talkBtn').setAttribute('aria-label', n ? 'แชท มีข้อความใหม่ ' + n + ' ห้อง' : 'แชท');
+      }
+
+      function renderTalkList() {
+        const list = $('talkList');
+        list.innerHTML = '';
+        if (!talkData) return;
+        $('talkTools').hidden = talkData.role !== 'teacher';
+        const item = function (id, avatar, avatarClass, name, last, time, unread) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'talk-item' + (unread ? ' is-unread' : '') + (id === talkOpenId ? ' is-active' : '');
+          btn.dataset.id = id;
+          const av = document.createElement('span');
+          av.className = 'talk-avatar' + (avatarClass ? ' ' + avatarClass : '');
+          av.setAttribute('aria-hidden', 'true');
+          av.textContent = avatar;
+          const mid = document.createElement('span');
+          mid.style.minWidth = '0';
+          const nm = document.createElement('span');
+          nm.className = 'talk-item-name';
+          nm.textContent = name;
+          const ls = document.createElement('span');
+          ls.className = 'talk-item-last';
+          ls.textContent = last;
+          mid.appendChild(nm);
+          mid.appendChild(ls);
+          const side = document.createElement('span');
+          side.className = 'talk-item-side';
+          const tm = document.createElement('span');
+          tm.textContent = time;
+          side.appendChild(tm);
+          if (unread) {
+            const dot = document.createElement('span');
+            dot.className = 'talk-dot';
+            dot.setAttribute('aria-label', 'มีข้อความใหม่');
+            side.appendChild(dot);
+          }
+          btn.appendChild(av);
+          btn.appendChild(mid);
+          btn.appendChild(side);
+          btn.addEventListener('click', function () { openTalk(id); });
+          list.appendChild(btn);
+        };
+        if (talkData.aiReady) item(TALK_AI, '🤖', 'is-ai is-ring', 'น้องเลเวล • ผู้ช่วย AI', 'ถามเรื่องเรียน งาน และคะแนนได้เลย', '', false);
+        talkData.chats.forEach(function (c) {
+          item(c.id, talkAvatarText(c), '', c.name, c.lastText ? (c.lastMine ? 'คุณ: ' : '') + c.lastText : c.sub, talkTime(c.lastAt), c.unread);
+        });
+        if (!list.children.length) {
+          const empty = document.createElement('div');
+          empty.className = 'talk-empty';
+          empty.textContent = 'ยังไม่มีห้องแชทในรายวิชานี้';
+          list.appendChild(empty);
+        }
+      }
+
+      function refreshTalks() {
+        if (!sessionToken || legacyServer) return Promise.resolve();
+        const tokenAtCall = sessionToken;
+        return server('getTalks', sessionToken).then(function (d) {
+          if (tokenAtCall !== sessionToken) return;
+          talkData = d;
+          talkAvailable = true;
+          $('talkBtn').hidden = false;
+          if (talkOpenId && talkOpenId !== TALK_AI && talkParseCourse(talkOpenId) !== d.courseId) closeTalkThread();
+          updateTalkBadge();
+          if (!talkModal.hidden) renderTalkList();
+        }).catch(function () {
+          if (!talkAvailable) $('talkBtn').hidden = true;   // เซิร์ฟเวอร์รุ่นก่อนยังไม่มีระบบแชท
+        });
+      }
+      function talkParseCourse(id) { return String(id).split('|')[1] || ''; }
+
+      function stopTalkTimers(names) {
+        names.forEach(function (n) {
+          clearInterval(talkTimers[n]);
+          talkTimers[n] = null;
+        });
+      }
+
+      /* เรียกทุกครั้งที่เข้าสู่ระบบ ออกจากระบบ หรือโหลดข้อมูลใหม่ */
+      function syncTalk(loggedIn) {
+        if (!loggedIn || legacyServer) {
+          stopTalkTimers(['thread', 'list', 'bg']);
+          talkModal.hidden = true;
+          $('talkBtn').hidden = true;
+          talkData = null;
+          talkAvailable = false;
+          talkOpenId = '';
+          aiHistory = [];
+          aiLeft = null;
+          summaryData = null;
+          return;
+        }
+        refreshTalks();
+        if (!talkTimers.bg) talkTimers.bg = setInterval(function () { if (!document.hidden && talkModal.hidden) refreshTalks(); }, TALK_BG_POLL_MS);
+      }
+
+      function showTalkPane(pane) {   // 'thread' | 'form'
+        $('talkThread').style.display = pane === 'thread' ? 'flex' : 'none';
+        $('talkFormPane').hidden = pane !== 'form';
+      }
+      function closeTalkThread() {
+        stopTalkTimers(['thread']);
+        talkOpenId = '';
+        talkShown = '';
+        $('talkDialog').classList.remove('is-thread');
+        showTalkPane('thread');
+        $('talkHeadName').textContent = 'เลือกแชท';
+        $('talkHeadSub').textContent = 'เลือกห้องแชทจากรายการ';
+        $('talkHeadAvatar').textContent = '💬';
+        $('talkHeadAvatar').className = 'talk-avatar';
+        $('talkGroupEditBtn').hidden = true;
+        $('talkForm').hidden = true;
+        $('talkNote').hidden = true;
+        $('talkChips').hidden = true;
+        talkStatus('');
+        $('talkMessages').innerHTML = '<div class="talk-empty">เลือกห้องแชทจากรายการเพื่อเริ่มคุย</div>';
+        renderTalkList();
+      }
+
+      /* วาดข้อความ: messages = [{ id, mine, name, role, text, at, deleted }] */
+      function renderTalkMessages(messages, opts) {
+        opts = opts || {};
+        const sig = messages.map(function (m) { return m.id + (m.deleted ? 'x' : ''); }).join(',') + '|' + (opts.typing ? 't' : '');
+        if (sig === talkShown && !opts.force) return;
+        const box = $('talkMessages');
+        const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+        talkShown = sig;
+        box.innerHTML = '';
+        if (!messages.length && !opts.typing) {
+          const empty = document.createElement('div');
+          empty.className = 'talk-empty';
+          empty.textContent = opts.empty || 'ยังไม่มีข้อความ เริ่มทักทายได้เลย 👋';
+          box.appendChild(empty);
+        }
+        const chat = talkFind(talkOpenId);
+        const showNames = talkOpenId !== TALK_AI && (!chat || chat.type !== 'd');
+        const canModerate = talkData && talkData.role === 'teacher' && talkOpenId !== TALK_AI;
+        let lastDay = '';
+        let lastSender = '';
+        messages.forEach(function (m) {
+          const day = m.at ? talkDay(m.at) : '';
+          if (day && day !== lastDay) {
+            const sep = document.createElement('div');
+            sep.className = 'talk-day';
+            sep.textContent = day;
+            box.appendChild(sep);
+            lastDay = day;
+            lastSender = '';
+          }
+          const wrap = document.createElement('div');
+          wrap.className = 'talk-msg' + (m.mine ? ' is-mine' : '') + (m.deleted ? ' is-deleted' : '') + (m.role === 'teacher' ? ' is-teacher' : '');
+          const senderKey = (m.mine ? 'me' : m.name) + '|' + m.role;
+          if (showNames && !m.mine && senderKey !== lastSender) {
+            const nm = document.createElement('div');
+            nm.className = 'talk-msg-name';
+            nm.textContent = (m.role === 'teacher' ? '👩‍🏫 ' : '') + m.name;
+            wrap.appendChild(nm);
+          }
+          lastSender = senderKey;
+          const deletable = !m.deleted && m.id && talkOpenId !== TALK_AI && (m.mine || canModerate);
+          const bubble = document.createElement(deletable ? 'button' : 'div');
+          if (deletable) bubble.type = 'button';
+          bubble.className = 'talk-bubble';
+          bubble.textContent = m.deleted ? 'ข้อความนี้ถูกลบแล้ว' : m.text;
+          wrap.appendChild(bubble);
+          const meta = document.createElement('div');
+          meta.className = 'talk-msg-meta';
+          const tm = document.createElement('span');
+          tm.textContent = m.at ? talkTime(m.at) : '';
+          meta.appendChild(tm);
+          if (deletable) {
+            bubble.setAttribute('aria-label', m.text + ' (แตะเพื่อแสดงตัวเลือกลบ)');
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'talk-msg-del';
+            del.textContent = 'ลบข้อความ';
+            del.hidden = true;
+            bubble.addEventListener('click', function () { del.hidden = !del.hidden; });
+            del.addEventListener('click', function () {
+              del.disabled = true;
+              server('deleteTalkMessage', sessionToken, talkOpenId, m.id).then(function (r) {
+                if (r.id === talkOpenId) renderTalkMessages(r.messages);
+              }).catch(function (err) { talkStatus('ลบไม่สำเร็จ: ' + handleServerError(err)); del.disabled = false; });
+            });
+            meta.appendChild(del);
+          }
+          wrap.appendChild(meta);
+          box.appendChild(wrap);
+        });
+        if (opts.typing) {
+          const wrap = document.createElement('div');
+          wrap.className = 'talk-msg';
+          const bubble = document.createElement('div');
+          bubble.className = 'talk-bubble';
+          bubble.textContent = 'กำลังพิมพ์...';
+          wrap.appendChild(bubble);
+          box.appendChild(wrap);
+        }
+        if (opts.scroll || nearBottom) box.scrollTop = box.scrollHeight;
+      }
+
+      function loadTalkMessages(scroll) {
+        const id = talkOpenId;
+        if (!id || id === TALK_AI || !sessionToken) return;
+        server('getTalkMessages', sessionToken, id).then(function (r) {
+          if (r.id !== talkOpenId) return;
+          renderTalkMessages(r.messages, { scroll: scroll });
+          const chat = talkFind(id);
+          if (chat && chat.unread) {
+            chat.unread = false;
+            updateTalkBadge();
+            renderTalkList();
+          }
+        }).catch(function (err) {
+          if (id === talkOpenId && scroll) talkStatus('โหลดข้อความไม่สำเร็จ: ' + handleServerError(err));
+        });
+      }
+
+      function renderAiThread(typing) {
+        renderTalkMessages(aiHistory.map(function (m, i) {
+          return { id: 'ai' + i, mine: m.role === 'user', name: 'น้องเลเวล', role: m.role === 'user' ? '' : 'ai', text: m.text, at: '' };
+        }), { typing: typing, scroll: true, force: true, empty: 'สวัสดี! ฉันคือน้องเลเวล ถามเรื่องเรียน งานที่ต้องส่ง หรือคะแนนได้เลย' });
+        $('talkChips').hidden = aiHistory.length > 0;
+        const limit = talkData && talkData.aiLimit;
+        $('talkHeadSub').textContent = aiLeft === null ? 'ถามได้วันละ ' + (limit || '-') + ' คำถาม' : 'วันนี้ถามได้อีก ' + aiLeft + ' คำถาม';
+      }
+
+      function openTalk(id, fallbackName) {
+        stopTalkTimers(['thread']);
+        talkOpenId = id;
+        talkShown = '';
+        talkStatus('');
+        showTalkPane('thread');
+        $('talkDialog').classList.add('is-thread');
+        $('talkForm').hidden = false;
+        $('talkInput').value = '';
+        const avatar = $('talkHeadAvatar');
+        if (id === TALK_AI) {
+          $('talkHeadName').textContent = 'น้องเลเวล • ผู้ช่วย AI';
+          avatar.textContent = '🤖';
+          avatar.className = 'talk-avatar is-ai';
+          $('talkGroupEditBtn').hidden = true;
+          $('talkNote').hidden = false;
+          $('talkNote').textContent = 'คำตอบจาก AI อาจผิดพลาดได้ ควรตรวจสอบกับครูอีกครั้ง • ระบบไม่ส่งชื่อหรือเลขประจำตัวให้ AI และไม่บันทึกบทสนทนานี้ (ปิดแอปแล้วหาย)';
+          const chips = $('talkChips');
+          chips.innerHTML = '';
+          (talkData && talkData.role === 'teacher'
+            ? ['สรุปภาพรวมของรายวิชานี้ให้หน่อย', 'ห้องไหนควรติดตามเป็นพิเศษ', 'ช่วยคิดกิจกรรมกระตุ้นการส่งงาน']
+            : ['งานไหนของฉันยังไม่ได้ส่ง', 'ช่วยวางแผนส่งงานให้ทันกำหนด', 'คะแนนของฉันตอนนี้เป็นอย่างไร']).forEach(function (q) {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'talk-chip';
+            chip.textContent = q;
+            chip.addEventListener('click', function () { sendTalk(q); });
+            chips.appendChild(chip);
+          });
+          $('talkInput').placeholder = 'ถามน้องเลเวล...';
+          renderAiThread(false);
+        } else {
+          const chat = talkFind(id) || { type: id.charAt(0), name: fallbackName || 'แชท', sub: 'ส่วนตัว', members: 2 };
+          $('talkHeadName').textContent = chat.name;
+          $('talkHeadSub').textContent = chat.type === 'd' ? chat.sub : chat.sub + ' • สมาชิก ' + chat.members + ' คน';
+          avatar.textContent = talkAvatarText(chat);
+          avatar.className = 'talk-avatar';
+          $('talkGroupEditBtn').hidden = !(chat.type === 'g' && talkData && talkData.role === 'teacher');
+          $('talkNote').hidden = chat.type === 'd';
+          $('talkNote').textContent = 'แชทกลุ่ม: ครูผู้สอนเห็นทุกข้อความและลบข้อความที่ไม่เหมาะสมได้';
+          $('talkChips').hidden = true;
+          $('talkInput').placeholder = 'ส่งข้อความ...';
+          $('talkMessages').innerHTML = '<div class="talk-empty">กำลังโหลดข้อความ...</div>';
+          loadTalkMessages(true);
+          talkTimers.thread = setInterval(function () { if (!document.hidden && !talkModal.hidden) loadTalkMessages(false); }, TALK_POLL_MS);
+        }
+        renderTalkList();
+        if (!window.matchMedia || !window.matchMedia('(pointer: coarse)').matches) $('talkInput').focus();
+      }
+
+      function sendTalk(preset) {
+        const input = $('talkInput');
+        const text = (preset || input.value).trim();
+        if (!text || talkSending || !talkOpenId) return;
+        talkSending = true;
+        $('talkSendBtn').disabled = true;
+        talkStatus('');
+        const id = talkOpenId;
+        const done = function () {
+          talkSending = false;
+          $('talkSendBtn').disabled = false;
+        };
+        if (id === TALK_AI) {
+          aiHistory.push({ role: 'user', text: text.slice(0, 1500) });
+          if (!preset) input.value = '';
+          renderAiThread(true);
+          server('askAi', sessionToken, aiHistory.slice(-12)).then(function (r) {
+            aiHistory.push({ role: 'assistant', text: r.reply });
+            aiLeft = r.left;
+            if (talkOpenId === TALK_AI) renderAiThread(false);
+          }).catch(function (err) {
+            aiHistory.pop();   // คำถามที่ยังไม่ได้คำตอบไม่เก็บไว้ในบทสนทนา
+            if (talkOpenId === TALK_AI) {
+              renderAiThread(false);
+              if (!preset) input.value = text;
+              talkStatus('ถาม AI ไม่สำเร็จ: ' + handleServerError(err));
+            }
+          }).then(done);
+          return;
+        }
+        server('sendTalkMessage', sessionToken, id, text).then(function (r) {
+          if (r.id === talkOpenId) {
+            input.value = '';
+            renderTalkMessages(r.messages, { scroll: true });
+          }
+          refreshTalks();
+        }).catch(function (err) {
+          talkStatus('ส่งไม่สำเร็จ: ' + handleServerError(err));
+        }).then(done);
+      }
+      $('talkForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        sendTalk();
+      });
+      $('talkInput').addEventListener('keydown', function (e) {
+        const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        if (e.key === 'Enter' && !e.shiftKey && !touch && !e.isComposing) {
+          e.preventDefault();
+          sendTalk();
+        }
+      });
+
+      /* ---------- ครู: เริ่มแชทส่วนตัว และสร้าง/แก้กลุ่ม ---------- */
+      function renderTalkPicker() {
+        const room = $('talkPickRoom').value || 'ALL';
+        const q = $('talkPickSearch').value.trim().toLowerCase();
+        const list = $('talkPickList');
+        list.innerHTML = '';
+        students.filter(function (st) {
+          return (room === 'ALL' || st.classroom === room) && (!q || st.studentId.toLowerCase().indexOf(q) !== -1 || st.studentName.toLowerCase().indexOf(q) !== -1);
+        }).forEach(function (st) {
+          const label = st.studentName + ' • ' + st.classroom + ' • ' + st.studentId;
+          if (talkFormMode === 'dm') {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'talk-pick';
+            btn.textContent = label;
+            btn.addEventListener('click', function () { openTalk('d|' + currentCourseId + '|' + st.studentId, st.studentName); });
+            list.appendChild(btn);
+          } else {
+            const row = document.createElement('label');
+            row.className = 'talk-pick';
+            const box = document.createElement('input');
+            box.type = 'checkbox';
+            box.checked = Boolean(talkPicked[st.studentId]);
+            box.addEventListener('change', function () {
+              if (box.checked) talkPicked[st.studentId] = true;
+              else delete talkPicked[st.studentId];
+              $('talkFormMsg').className = 'inline-status-msg';
+              $('talkFormMsg').textContent = 'เลือกแล้ว ' + Object.keys(talkPicked).length + ' คน';
+            });
+            const text = document.createElement('span');
+            text.textContent = label;
+            row.appendChild(box);
+            row.appendChild(text);
+            list.appendChild(row);
+          }
+        });
+        if (!list.children.length) {
+          const empty = document.createElement('div');
+          empty.className = 'talk-empty';
+          empty.textContent = 'ไม่พบนักเรียน';
+          list.appendChild(empty);
+        }
+      }
+      function openTalkForm(mode, chat) {
+        stopTalkTimers(['thread']);
+        talkOpenId = '';
+        talkFormMode = mode;
+        talkEditId = chat ? chat.id : '';
+        talkPicked = {};
+        if (chat) (chat.memberIds || []).forEach(function (id) { talkPicked[id] = true; });
+        $('talkDialog').classList.add('is-thread');
+        showTalkPane('form');
+        $('talkHeadAvatar').textContent = mode === 'dm' ? '✉️' : '👥';
+        $('talkHeadAvatar').className = 'talk-avatar';
+        $('talkHeadName').textContent = mode === 'dm' ? 'แชทส่วนตัวกับนักเรียน' : (chat ? 'แก้ไขกลุ่ม' : 'สร้างกลุ่มใหม่');
+        $('talkHeadSub').textContent = mode === 'dm' ? 'เลือกนักเรียนที่ต้องการคุยด้วย' : 'ตั้งชื่อกลุ่มและเลือกสมาชิก';
+        $('talkGroupEditBtn').hidden = true;
+        $('talkGroupNameField').hidden = mode === 'dm';
+        $('talkGroupSaveBtn').hidden = mode === 'dm';
+        $('talkGroupDeleteBtn').hidden = !chat;
+        $('talkGroupDeleteBtn').textContent = 'ลบกลุ่ม';
+        $('talkGroupDeleteBtn').dataset.armed = '';
+        $('talkGroupName').value = chat ? chat.name : '';
+        $('talkPickSearch').value = '';
+        $('talkFormMsg').className = 'inline-status-msg';
+        $('talkFormMsg').textContent = mode === 'group' && chat ? 'เลือกแล้ว ' + Object.keys(talkPicked).length + ' คน' : '';
+        const sel = $('talkPickRoom');
+        sel.innerHTML = '';
+        [['ALL', 'ทุกห้องในรายวิชา']].concat(classrooms.map(function (r) { return [r, 'ห้อง ' + r]; })).forEach(function (o) {
+          const opt = document.createElement('option');
+          opt.value = o[0];
+          opt.textContent = o[1];
+          sel.appendChild(opt);
+        });
+        renderTalkPicker();
+        renderTalkList();
+      }
+      $('talkNewDmBtn').addEventListener('click', function () { openTalkForm('dm'); });
+      $('talkNewGroupBtn').addEventListener('click', function () { openTalkForm('group'); });
+      $('talkGroupEditBtn').addEventListener('click', function () {
+        const chat = talkFind(talkOpenId);
+        if (chat) openTalkForm('group', chat);
+      });
+      $('talkPickRoom').addEventListener('change', renderTalkPicker);
+      $('talkPickSearch').addEventListener('input', renderTalkPicker);
+      $('talkFormCancelBtn').addEventListener('click', closeTalkThread);
+      $('talkGroupSaveBtn').addEventListener('click', function () {
+        const btn = this;
+        const msg = $('talkFormMsg');
+        const name = $('talkGroupName').value.trim();
+        const members = Object.keys(talkPicked);
+        if (!name || !members.length) {
+          msg.className = 'inline-status-msg is-error';
+          msg.textContent = !name ? 'กรุณาตั้งชื่อกลุ่ม' : 'กรุณาเลือกสมาชิกอย่างน้อย 1 คน';
+          return;
+        }
+        btn.disabled = true;
+        const before = talkData ? talkData.chats.map(function (c) { return c.id; }) : [];
+        server('saveTalkGroup', sessionToken, { id: talkEditId, name: name, members: members }).then(function (d) {
+          talkData = d;
+          const made = talkEditId || (d.chats.filter(function (c) { return c.type === 'g' && before.indexOf(c.id) === -1; })[0] || {}).id;
+          if (made) openTalk(made);
+          else closeTalkThread();
+        }).catch(function (err) {
+          msg.className = 'inline-status-msg is-error';
+          msg.textContent = 'บันทึกไม่สำเร็จ: ' + handleServerError(err);
+        }).then(function () { btn.disabled = false; });
+      });
+      $('talkGroupDeleteBtn').addEventListener('click', function () {
+        const btn = this;
+        if (!btn.dataset.armed) {   // กดครั้งแรกเป็นการถามยืนยัน
+          btn.dataset.armed = '1';
+          btn.textContent = 'ยืนยันลบกลุ่มและข้อความทั้งหมด';
+          return;
+        }
+        btn.disabled = true;
+        server('deleteTalkGroup', sessionToken, talkEditId).then(function (d) {
+          talkData = d;
+          updateTalkBadge();
+          closeTalkThread();
+        }).catch(function (err) {
+          $('talkFormMsg').className = 'inline-status-msg is-error';
+          $('talkFormMsg').textContent = 'ลบไม่สำเร็จ: ' + handleServerError(err);
+        }).then(function () { btn.disabled = false; });
+      });
+
+      function openTalkModal() {
+        if (!sessionToken || !talkAvailable) return;
+        talkModal.hidden = false;
+        renderTalkList();
+        refreshTalks();
+        if (!talkTimers.list) talkTimers.list = setInterval(function () { if (!document.hidden) refreshTalks(); }, TALK_LIST_POLL_MS);
+        if (talkOpenId && talkOpenId !== TALK_AI) openTalk(talkOpenId);
+        else $('talkCloseBtn').focus();
+      }
+      function closeTalkModal() {
+        talkModal.hidden = true;
+        stopTalkTimers(['thread', 'list']);
+        refreshTalks();
+      }
+      /* ครูเปิดแชทส่วนตัวกับนักเรียนจากตารางสรุป */
+      function openTalkWith(studentId) {
+        const st = students.filter(function (x) { return x.studentId === studentId; })[0];
+        if (!st || !talkAvailable) return;
+        openTalkModal();
+        openTalk('d|' + currentCourseId + '|' + studentId, st.studentName);
+      }
+      $('talkBtn').addEventListener('click', openTalkModal);
+      $('talkCloseBtn').addEventListener('click', closeTalkModal);
+      $('talkBackBtn').addEventListener('click', closeTalkThread);
+      talkModal.addEventListener('click', function (e) { if (e.target === talkModal) closeTalkModal(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !talkModal.hidden) closeTalkModal(); });
 
       /* =========================================================
        * ธีมสีและฟอนต์ของเว็บ: เลือกได้รายเครื่อง เก็บใน localStorage ของเบราว์เซอร์ (ไม่ส่งขึ้นเซิร์ฟเวอร์)
