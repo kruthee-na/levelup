@@ -214,6 +214,23 @@
     /* เนื้อหาการสอนรายคาบ */
     .modal-dialog.lesson-dialog { max-width: 860px; text-align: left; }
     .lesson-list { display: grid; gap: var(--space-3); max-height: 62vh; overflow-y: auto; padding-right: 2px; }
+    .lesson-week { display: flex; align-items: baseline; gap: 8px; padding: 6px 12px; margin-top: var(--space-2); border-radius: 10px; background: rgba(var(--brand-rgb, 45, 106, 79), 0.1); font-weight: 700; }
+    .lesson-week small { font-weight: 500; opacity: 0.75; }
+    .lesson-newwork { display: grid; gap: 8px; padding: 12px; border: 1px dashed rgba(var(--brand-rgb, 45, 106, 79), 0.4); border-radius: 12px; }
+    .prog-wrap { overflow-x: auto; }
+    .prog-meter { display: inline-block; width: 90px; height: 8px; border-radius: 999px; background: rgba(var(--brand-rgb, 45, 106, 79), 0.14); overflow: hidden; vertical-align: middle; margin-right: 6px; }
+    .prog-meter > span { display: block; height: 100%; background: var(--brand, #2d6a4f); border-radius: 999px; }
+    .prog-title { font-weight: 700; margin: var(--space-2) 0 4px; }
+    .family-checks { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+    .family-checks label { display: inline-flex; gap: 6px; align-items: center; }
+    .family-code { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.08em; padding: 8px 14px; border-radius: 12px; background: var(--brand-light, #d8f3dc); display: inline-block; user-select: all; }
+    .family-course { border: 1px solid rgba(var(--brand-rgb, 45, 106, 79), 0.18); border-radius: 14px; padding: 12px 14px; display: grid; gap: 6px; background: #fff; }
+    .family-course h3 { margin: 0; font-size: 1rem; }
+    .family-stats { display: flex; flex-wrap: wrap; gap: 6px; }
+    .family-stats span { font-size: 0.8rem; padding: 2px 10px; border-radius: 999px; background: rgba(0, 0, 0, 0.06); }
+    .family-stats span.is-warn { background: #fde2e1; color: #8a1c13; }
+    .family-pending { margin: 0; padding-left: 20px; font-size: 0.88rem; }
+    .family-form { display: grid; gap: 10px; max-width: 420px; }
     .lesson-day { font-weight: 700; font-size: 0.86rem; color: var(--brand-deep, #1b4332); margin-top: var(--space-2); }
     .lesson-card { border: 1px solid rgba(var(--brand-rgb, 45, 106, 79), 0.18); border-radius: 14px; background: #fff; overflow: hidden; }
     .lesson-head { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: none; border: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; }
@@ -1124,6 +1141,7 @@
       <a class="btn btn-secondary btn-sm" id="courseMeetLink" target="_blank" rel="noopener noreferrer" hidden>🎥 ห้องเรียนออนไลน์</a>
       <button type="button" class="btn btn-secondary btn-sm" id="lessonBtn" hidden>📚 เนื้อหารายคาบ</button>
       <button type="button" class="btn btn-secondary btn-sm" id="studentViewBtn" hidden>👀 มุมมองนักเรียน</button>
+      <button type="button" class="btn btn-secondary btn-sm" id="advisorBtn" hidden>🧑‍🏫 ห้องที่ปรึกษา</button>
       <button type="button" class="btn btn-secondary btn-sm" id="courseEditBtn" hidden>⚙️ แก้ไขวิชานี้</button>
       <button type="button" class="btn btn-primary btn-sm" id="courseNewBtn" hidden>＋ วิชาใหม่</button>
       <button type="button" class="btn btn-secondary btn-sm" id="teachersBtn" hidden>🛠 จัดการระบบ</button>
@@ -1183,6 +1201,7 @@
           <button type="button" class="btn btn-secondary login-install" id="installLoginBtn" hidden>📲 ติดตั้ง LevelUp ลงเครื่องนี้</button>
           <p class="login-hint" id="iosInstallHint" style="text-align: center; margin-top: 12px;" hidden>ติดตั้งบน iPhone/iPad: แตะปุ่มแชร์ของ Safari แล้วเลือก "เพิ่มไปยังหน้าจอโฮม"</p>
           <p class="login-foot">ครูใช้ชื่อผู้ใช้ที่ผู้ดูแลกำหนดให้ • <button type="button" class="link-btn" id="forgotBtn">ผู้ดูแลลืมรหัสผ่าน?</button></p>
+          <p class="login-foot"><button type="button" class="link-btn" id="parentBtn">👪 ผู้ปกครองดูผลการเรียนของบุตรหลาน</button></p>
         </section>
       </div>
     </div>
@@ -2354,6 +2373,12 @@
 
       <!-- ห้องเรียน -->
       <div data-admin-panel="rooms" style="display: flex; flex-direction: column; gap: var(--space-3);" hidden>
+        <fieldset class="field" id="familyBox">
+          <legend>ครูที่ปรึกษาและผู้ปกครอง</legend>
+          <label class="check-row" style="display:flex; gap:8px; align-items:flex-start;"><input type="checkbox" id="familyAdvisor"><span>เปิดหน้า "ห้องที่ปรึกษา": ครูที่ปรึกษาเห็นสรุปการส่งงานและการเข้าเรียนของนักเรียนในห้องตนทุกรายวิชา (คะแนนเห็นเฉพาะวิชาที่ครูผู้สอนยืนยันส่งคะแนนแล้ว)</span></label>
+          <label class="check-row" style="display:flex; gap:8px; align-items:flex-start;"><input type="checkbox" id="familyParent"><span>เปิดรหัสผู้ปกครอง: ครูที่ปรึกษาหรือผู้ดูแลออกรหัสให้ผู้ปกครองรายคน ผู้ปกครองดูสรุปของบุตรหลานได้จากหน้าเข้าสู่ระบบ</span></label>
+          <div class="btn-group" style="justify-content: flex-end;"><button type="button" class="btn btn-secondary btn-sm" id="familySave">บันทึกการตั้งค่านี้</button></div>
+        </fieldset>
         <div id="adminRoomList" class="admin-list"></div>
         <fieldset class="field">
           <legend id="adminRoomLegend">เพิ่มห้องเรียน</legend>
@@ -2366,6 +2391,11 @@
               <label for="adminRoomAdvisor"><span>ครูที่ปรึกษา</span><span class="max-hint">ไม่บังคับ</span></label>
               <input type="text" id="adminRoomAdvisor" class="input" maxlength="200" autocomplete="off">
             </div>
+          </div>
+          <div class="field">
+            <span class="field-label" style="font-weight:600;">บัญชีครูที่ปรึกษาของห้องนี้ (ไม่เกิน 4 คน)</span>
+            <div id="adminRoomAdvisorIds" class="family-checks"></div>
+            <p class="section-subtitle">ครูที่เลือกจะเปิดหน้า "ห้องที่ปรึกษา" ของห้องนี้ได้ เมื่อเปิดใช้ด้านล่าง</p>
           </div>
           <div class="btn-group" style="justify-content: flex-end;">
             <button type="button" class="btn btn-secondary" id="adminRoomCancel" hidden>ยกเลิกการแก้ไข</button>
@@ -2907,6 +2937,7 @@
           <p class="section-subtitle" id="lessonSub"></p>
         </div>
         <div class="btn-group">
+          <button type="button" class="btn btn-secondary btn-sm" id="lessonProgressBtn" hidden>📊 ความคืบหน้า</button>
           <button type="button" class="btn btn-primary btn-sm" id="lessonNewBtn" hidden>+ เพิ่มเนื้อหาคาบ</button>
           <button type="button" class="btn btn-secondary btn-sm" id="lessonCloseBtn">ปิด</button>
         </div>
@@ -2918,6 +2949,7 @@
         </div>
         <div class="lesson-list" id="lessonList"></div>
       </div>
+      <div class="lesson-list" id="lessonProgressPane" hidden></div>
       <form class="lesson-form" id="lessonForm" hidden novalidate>
         <div class="lesson-form-row">
           <div class="field"><label for="lessonDate">วันที่สอน</label><input type="date" id="lessonDate" class="input" required></div>
@@ -2941,6 +2973,20 @@
             <button type="button" class="btn btn-secondary btn-sm" data-lesson-add="info">+ ใบความรู้</button>
             <button type="button" class="btn btn-secondary btn-sm" data-lesson-add="link">+ ลิงก์</button>
             <button type="button" class="btn btn-secondary btn-sm" data-lesson-add="video">+ คลิปวิดีโอ</button>
+          </div>
+          <button type="button" class="link-btn" id="lessonNewWorkBtn">＋ สร้างงานใหม่แล้วแนบกับคาบนี้</button>
+          <div class="lesson-newwork" id="lessonNewWork" hidden>
+            <div class="field"><label for="lessonWorkTitle">หัวข้องาน</label><input type="text" id="lessonWorkTitle" class="input" maxlength="120" autocomplete="off"></div>
+            <div class="deadline-grid">
+              <div class="field"><label for="lessonWorkMax">คะแนนเต็ม</label><input type="number" id="lessonWorkMax" class="input" min="1" max="100" step="any" value="10"></div>
+              <div class="field"><label for="lessonWorkPeriod">เก็บคะแนนช่วง</label><select id="lessonWorkPeriod" class="select-input"><option value="pre_mid">ก่อนกลางภาค</option><option value="post_mid">หลังกลางภาค</option></select></div>
+              <div class="field"><label for="lessonWorkDue"><span>กำหนดส่ง</span><span class="max-hint">ไม่บังคับ</span></label><input type="datetime-local" id="lessonWorkDue" class="input"></div>
+            </div>
+            <div class="btn-group" style="justify-content: flex-end;">
+              <button type="button" class="btn btn-secondary btn-sm" id="lessonWorkCancel">ยกเลิก</button>
+              <button type="button" class="btn btn-primary btn-sm" id="lessonWorkAdd">สร้างงานและแนบ</button>
+            </div>
+            <p class="section-subtitle">งานนี้เป็นของห้องที่เลือกด้านบน แก้รายละเอียดเพิ่ม (คำชี้แจง เกณฑ์ แบบทดสอบ) ได้ที่แท็บงาน</p>
           </div>
           <p class="section-subtitle">ใบงาน ใบความรู้ และคลิป ใส่เป็นลิงก์ https (เช่น ลิงก์แชร์ Google Drive หรือ YouTube) ไฟล์ใน Drive ต้องเปิดแชร์ให้นักเรียนดูได้</p>
         </div>
@@ -3220,6 +3266,9 @@
         if (msg.indexOf('BAD_WEBHOOK') !== -1) return 'ลิงก์ Webhook ต้องขึ้นต้นด้วย https://chat.googleapis.com/v1/spaces/';
         if (msg.indexOf('BAD_EMAIL') !== -1) return 'รูปแบบอีเมลไม่ถูกต้อง';
         if (msg.indexOf('TALK_TOO_FAST') !== -1) return 'ส่งข้อความถี่เกินไป กรุณารอสักครู่แล้วลองใหม่';
+        if (msg.indexOf('PARENT_DENIED') !== -1) return 'เลขประจำตัวนักเรียนหรือรหัสผู้ปกครองไม่ถูกต้อง';
+        if (msg.indexOf('PARENT_LOCKED') !== -1) return 'ใส่รหัสผิดหลายครั้ง กรุณารอ 15 นาทีแล้วลองใหม่';
+        if (msg.indexOf('PARENT_OFF') !== -1) return 'โรงเรียนยังไม่ได้เปิดใช้หน้าสำหรับผู้ปกครอง';
         if (msg.indexOf('LESSON_LIMIT') !== -1) return 'รายวิชานี้มีเนื้อหารายคาบครบ 600 รายการแล้ว กรุณาลบรายการเก่าก่อน';
         if (msg.indexOf('TALK_ONE_ROOM') !== -1) return 'กลุ่มหนึ่งมีได้เฉพาะนักเรียนห้องเดียวกัน กรุณาเลือกสมาชิกจากห้องเดียว';
         if (msg.indexOf('TALK_NOT_OWNER') !== -1) return 'แชทของรายวิชานี้เปิดได้เฉพาะครูผู้สอน';
@@ -4506,6 +4555,7 @@
       let currentCourseId = '';
       let legacyServer = false;
       let isAdmin = false;
+      let advisorRooms = [];   // ห้องที่บัญชีครูนี้เป็นที่ปรึกษา (ว่าง = ไม่มี หรือผู้ดูแลยังไม่เปิดใช้)
       let adminLogin = '';
       let myTeacherId = '';
       const courses = [];
@@ -4524,6 +4574,7 @@
         // เซิร์ฟเวอร์ที่ยังไม่ได้อัปเดต Code.gs ไม่ส่งรายการรายวิชามา: ทำงานแบบวิชาเดียวเหมือนเดิม
         legacyServer = state.courses === undefined;
         isAdmin = Boolean(state.isAdmin);
+        advisorRooms = Array.isArray(state.advisorRooms) ? state.advisorRooms : [];
         adminLogin = state.adminLogin || '';
         myTeacherId = state.teacherId || '';
         courses.length = 0;
@@ -4585,6 +4636,7 @@
         try { tokenStore.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ }
         ['reportModal', 'profileModal', 'passwordModal', 'imagePreviewModal', 'chatModal', 'aiModal', 'courseModal', 'teachersModal', 'portfolioModal', 'pp5Modal', 'quizModal', 'lessonModal'].forEach(function (id) { $(id).hidden = true; });
         closeStudentView();
+        closeFamilyModal();
         applyState({ role: 'none' });
         stagedStudentFile = null;
         loginUsernameInput.value = '';
@@ -9608,6 +9660,7 @@
         if (!lessonData) return;
         const teacher = lessonData.role === 'teacher';
         $('lessonNewBtn').hidden = !teacher;
+        $('lessonProgressBtn').hidden = !teacher;
         $('lessonFilterBar').hidden = !teacher;
         const room = teacher ? ($('lessonFilterRoom').value || 'ALL') : 'ALL';
         const shown = lessonData.lessons.filter(function (l) { return room === 'ALL' || l.classroom === room || l.classroom === 'ALL'; });
@@ -9622,7 +9675,24 @@
           return;
         }
         let lastDate = '';
+        let lastWeek = '';
+        const weekNo = {};
+        lessonData.lessons.map(function (l) { return learnIso(learnMonday(l.date)); }).filter(function (k, i, all) { return all.indexOf(k) === i; }).sort()
+          .forEach(function (k, i) { weekNo[k] = i + 1; });
         shown.forEach(function (l) {
+          const mon = learnMonday(l.date);
+          const wk = learnIso(mon);
+          if (wk !== lastWeek) {
+            lastWeek = wk;
+            const sun = new Date(mon.getTime()); sun.setDate(sun.getDate() + 6);
+            const week = document.createElement('div');
+            week.className = 'lesson-week';
+            week.textContent = 'สัปดาห์ที่ ' + weekNo[wk];
+            const range = document.createElement('small');
+            range.textContent = learnShort(mon) + ' – ' + learnShort(sun) + ' • ' + shown.filter(function (x) { return learnIso(learnMonday(x.date)) === wk; }).length + ' คาบ';
+            week.appendChild(range);
+            list.appendChild(week);
+          }
           if (l.date !== lastDate) {
             lastDate = l.date;
             const day = document.createElement('div');
@@ -9699,7 +9769,13 @@
               edit.className = 'btn btn-secondary btn-sm js-lesson-edit';
               edit.textContent = 'แก้ไข';
               edit.addEventListener('click', function () { openLessonForm(l); });
+              const copy = document.createElement('button');
+              copy.type = 'button';
+              copy.className = 'btn btn-secondary btn-sm js-lesson-copy';
+              copy.textContent = 'คัดลอกไปคาบอื่น';
+              copy.addEventListener('click', function () { openLessonForm(l, true); });
               tools.appendChild(toggle);
+              tools.appendChild(copy);
               tools.appendChild(edit);
               body.appendChild(tools);
             }
@@ -9709,9 +9785,108 @@
         });
       }
       function showLessonPane(form) {
+        const teacher = Boolean(lessonData && lessonData.role === 'teacher');
         $('lessonForm').hidden = !form;
         $('lessonListPane').hidden = form;
-        $('lessonNewBtn').hidden = form || !(lessonData && lessonData.role === 'teacher');
+        $('lessonProgressPane').hidden = true;
+        $('lessonProgressPane').innerHTML = '';
+        $('lessonNewBtn').hidden = form || !teacher;
+        $('lessonProgressBtn').hidden = form || !teacher;
+        $('lessonProgressBtn').textContent = '📊 ความคืบหน้า';
+      }
+      /* รอให้การบันทึกข้อมูลของครูที่ค้างอยู่ (เช่น งานที่เพิ่งสร้างจากหน้าคาบ) ถึงเซิร์ฟเวอร์ก่อน ไม่เกิน 10 วินาที */
+      function whenTeacherStateSaved() {
+        return new Promise(function (resolve) {
+          if (!saveDirty && !saveInFlight) return resolve();
+          clearTimeout(saveTimer);
+          flushTeacherState();
+          let n = 0;
+          (function wait() { if ((!saveDirty && !saveInFlight) || ++n > 100) return resolve(); setTimeout(wait, 100); })();
+        });
+      }
+      /* ---------- ความคืบหน้าการเรียน: รายคาบและรายคน ของรายวิชาที่เปิดอยู่ ---------- */
+      function progCell(tr, text, cls) { const td = document.createElement('td'); if (cls) td.className = cls; td.textContent = text; tr.appendChild(td); return td; }
+      function progMeter(td, part, whole) {
+        const meter = document.createElement('span');
+        meter.className = 'prog-meter';
+        const fill = document.createElement('span');
+        fill.style.width = (whole ? Math.round(part / whole * 100) : 0) + '%';
+        meter.appendChild(fill);
+        td.textContent = '';
+        td.appendChild(meter);
+        td.appendChild(document.createTextNode(part + ' / ' + whole));
+      }
+      function progTable(heads) {
+        const wrap = document.createElement('div');
+        wrap.className = 'prog-wrap';
+        const table = document.createElement('table');
+        table.className = 'sum-table';
+        const tr = document.createElement('tr');
+        heads.forEach(function (h) { const th = document.createElement('th'); th.textContent = h; tr.appendChild(th); });
+        table.appendChild(document.createElement('thead')).appendChild(tr);
+        const body = table.appendChild(document.createElement('tbody'));
+        wrap.appendChild(table);
+        return { wrap: wrap, body: body };
+      }
+      function renderLessonProgress(d) {
+        const pane = $('lessonProgressPane');
+        pane.innerHTML = '';
+        const room = $('lessonFilterRoom').value || 'ALL';
+        const stu = d.students.filter(function (s) { return room === 'ALL' || s.classroom === room; });
+        const les = d.lessons.filter(function (l) { return room === 'ALL' || l.classroom === 'ALL' || l.classroom === room; });
+        const note = document.createElement('p');
+        note.className = 'section-subtitle';
+        note.textContent = 'นับจากรายการที่นักเรียนกดเปิดในหน้า "ห้องเรียนของฉัน" (เนื้อหา ใบงาน ใบความรู้ ลิงก์ คลิป) ส่วนงานที่มอบหมายดูจากการส่งงาน';
+        pane.appendChild(note);
+        const t1 = document.createElement('div'); t1.className = 'prog-title'; t1.textContent = 'รายคน (' + stu.length + ' คน)';
+        pane.appendChild(t1);
+        if (!stu.length) pane.appendChild(emptyNote('ยังไม่มีนักเรียนในรายวิชานี้'));
+        else {
+          const a = progTable(['ห้อง', 'เลขประจำตัว', 'ชื่อ', 'เปิดดูแล้ว', 'ส่งงานแล้ว', 'เปิดล่าสุด']);
+          stu.slice().sort(function (x, y) { return (x.total ? x.seen / x.total : 0) - (y.total ? y.seen / y.total : 0); }).forEach(function (s) {
+            const tr = document.createElement('tr');
+            tr.className = 'js-prog-student';
+            progCell(tr, s.classroom); progCell(tr, s.studentId); progCell(tr, s.studentName);
+            progMeter(progCell(tr, ''), s.seen, s.total);
+            progMeter(progCell(tr, ''), s.submitted, s.assigned);
+            progCell(tr, s.lastAt ? learnShort(new Date(s.lastAt)) : 'ยังไม่เคยเปิด');
+            a.body.appendChild(tr);
+          });
+          pane.appendChild(a.wrap);
+        }
+        const t2 = document.createElement('div'); t2.className = 'prog-title'; t2.textContent = 'รายคาบ (' + les.length + ' คาบ)';
+        pane.appendChild(t2);
+        if (!les.length) pane.appendChild(emptyNote('ยังไม่มีเนื้อหารายคาบ'));
+        else {
+          const b = progTable(['วันที่', 'คาบ', 'หัวข้อ', 'ห้อง', 'นักเรียนที่เปิดดู', 'เปิดครบทุกรายการ']);
+          les.forEach(function (l) {
+            const tr = document.createElement('tr');
+            tr.className = 'js-prog-lesson';
+            progCell(tr, learnShort(new Date(l.date + 'T00:00:00'))); progCell(tr, String(l.period)); progCell(tr, l.title);
+            progCell(tr, l.classroom === 'ALL' ? 'ทุกห้อง' : l.classroom);
+            if (!l.released) { progCell(tr, 'ยังไม่ถึงวันสอน'); progCell(tr, '–'); }
+            else { progMeter(progCell(tr, ''), l.opened, l.audience); progMeter(progCell(tr, ''), l.done, l.audience); }
+            b.body.appendChild(tr);
+          });
+          pane.appendChild(b.wrap);
+        }
+      }
+      var lessonProgressData = null;
+      function toggleLessonProgress() {
+        const pane = $('lessonProgressPane');
+        if (!pane.hidden) { showLessonPane(false); renderLessons(); return; }
+        $('lessonListPane').hidden = false;
+        $('lessonList').innerHTML = '';
+        pane.hidden = false;
+        $('lessonNewBtn').hidden = true;
+        $('lessonProgressBtn').textContent = '← กลับไปรายการคาบ';
+        lessonMsg('กำลังโหลดความคืบหน้า...');
+        server('getLessonProgress', sessionToken).then(function (d) {
+          if (pane.hidden) return;
+          lessonProgressData = d;
+          lessonMsg('');
+          renderLessonProgress(d);
+        }).catch(function (err) { lessonMsg('โหลดไม่สำเร็จ: ' + handleServerError(err), 'error'); });
       }
       function saveLessonData(payload, okText) {
         return server('saveLesson', sessionToken, payload).then(function (d) {
@@ -9791,8 +9966,9 @@
         row.appendChild(mkRemove('ลบรายการแนบนี้', function () { row.remove(); }));
         box.appendChild(row);
       }
-      function openLessonForm(l) {
-        lessonEditId = l ? l.id : '';
+      function openLessonForm(l, copy) {
+        lessonEditId = l && !copy ? l.id : '';
+        $('lessonNewWork').hidden = true;
         showLessonPane(true);
         lessonMsg('');
         $('lessonFormMsg').className = 'inline-status-msg';
@@ -9815,6 +9991,11 @@
         });
         const filterRoom = $('lessonFilterRoom').value;
         $('lessonDate').value = l ? l.date : (lessonData ? lessonData.today : todayIso());
+        if (l && copy) {   // คัดลอก: เสนอวันเดียวกันของสัปดาห์ถัดไป ครูเปลี่ยนวัน คาบ และห้องได้ก่อนบันทึก
+          const next = new Date(l.date + 'T00:00:00'); next.setDate(next.getDate() + 7);
+          $('lessonDate').value = learnIso(next);
+          $('lessonFormMsg').textContent = 'คัดลอกจาก "' + l.title + '" เลือกวัน คาบ และห้องของคาบใหม่ แล้วกดบันทึก (คาบเดิมไม่ถูกแก้)';
+        }
         per.value = String(l ? l.period : 1);
         room.value = l ? l.classroom : (filterRoom || 'ALL');
         if (!room.value) room.value = 'ALL';
@@ -9823,7 +10004,7 @@
         $('lessonReplay').checked = l ? Boolean(l.replay) : true;
         $('lessonItems').innerHTML = '';
         (l ? l.items : []).forEach(addLessonItemRow);
-        $('lessonDeleteBtn').hidden = !l;
+        $('lessonDeleteBtn').hidden = !l || Boolean(copy);
         $('lessonDeleteBtn').textContent = 'ลบเนื้อหาคาบนี้';
         $('lessonDeleteBtn').dataset.armed = '';
       }
@@ -9831,7 +10012,40 @@
       $('lessonCloseBtn').addEventListener('click', function () { $('lessonModal').hidden = true; $('lessonList').innerHTML = ''; });
       $('lessonNewBtn').addEventListener('click', function () { openLessonForm(null); });
       $('lessonCancelBtn').addEventListener('click', function () { showLessonPane(false); renderLessons(); });
-      $('lessonFilterRoom').addEventListener('change', renderLessons);
+      $('lessonFilterRoom').addEventListener('change', function () {
+        if (!$('lessonProgressPane').hidden && lessonProgressData) renderLessonProgress(lessonProgressData); else renderLessons();
+      });
+      $('lessonProgressBtn').addEventListener('click', toggleLessonProgress);
+      /* สร้างงานใหม่จากหน้าคาบ: เพิ่มเข้ารายการงานของรายวิชา (บันทึกทางเดียวกับแท็บงาน) แล้วแนบกับคาบนี้ */
+      $('lessonNewWorkBtn').addEventListener('click', function () {
+        $('lessonNewWork').hidden = !$('lessonNewWork').hidden;
+        if (!$('lessonNewWork').hidden) { $('lessonWorkTitle').value = $('lessonName').value.trim(); $('lessonWorkTitle').focus(); }
+      });
+      $('lessonWorkCancel').addEventListener('click', function () { $('lessonNewWork').hidden = true; });
+      $('lessonWorkAdd').addEventListener('click', function () {
+        const msg = $('lessonFormMsg');
+        const title = $('lessonWorkTitle').value.trim();
+        const max = Number($('lessonWorkMax').value);
+        const dueRaw = $('lessonWorkDue').value;
+        const due = dueRaw ? new Date(dueRaw) : null;
+        msg.className = 'inline-status-msg is-error';
+        if (!title) { msg.textContent = 'กรุณาระบุหัวข้องาน'; return; }
+        if (!(max > 0 && max <= 100)) { msg.textContent = 'คะแนนเต็มต้องมากกว่า 0 และไม่เกิน 100'; return; }
+        if (due && isNaN(due.getTime())) { msg.textContent = 'กำหนดส่งไม่ถูกต้อง'; return; }
+        if ($('lessonItems').children.length >= 12) { msg.textContent = 'คาบหนึ่งแนบได้ไม่เกิน 12 รายการ'; return; }
+        const a = { quiz: '', rubric: '', dueAt: due ? due.toISOString() : '', closeAt: '', lateType: '', lateValue: '', lateMax: '',
+          id: newId(), classroom: $('lessonRoom').value || 'ALL', period: $('lessonWorkPeriod').value === 'post_mid' ? 'post_mid' : 'pre_mid',
+          title: title.slice(0, 120), maxScore: max, desc: '', createdAt: new Date().toISOString(), aiReview: '', indicator: '' };
+        assignments.unshift(a);
+        persistStateBestEffort();
+        renderTeacherAssignmentsView();
+        addLessonItemRow({ k: 'work', a: a.id });
+        $('lessonNewWork').hidden = true;
+        $('lessonWorkTitle').value = '';
+        $('lessonWorkDue').value = '';
+        msg.className = 'inline-status-msg is-ok';
+        msg.textContent = 'สร้างงาน "' + a.title + '" และแนบกับคาบนี้แล้ว กดบันทึกเพื่อเก็บคาบ';
+      });
       $('lessonForm').querySelectorAll('[data-lesson-add]').forEach(function (btn) {
         btn.addEventListener('click', function () { addLessonItemRow({ k: btn.dataset.lessonAdd }); });
       });
@@ -9862,8 +10076,9 @@
         btn.disabled = true;
         msg.className = 'inline-status-msg';
         msg.textContent = 'กำลังบันทึก...';
-        saveLessonData({ id: lessonEditId, date: date, period: Number($('lessonPeriod').value), classroom: $('lessonRoom').value, title: title,
-          body: $('lessonBody').value, items: items, replay: $('lessonReplay').checked }, 'บันทึกเนื้อหาคาบแล้ว').then(function () { btn.disabled = false; });
+        const payload = { id: lessonEditId, date: date, period: Number($('lessonPeriod').value), classroom: $('lessonRoom').value, title: title,
+          body: $('lessonBody').value, items: items, replay: $('lessonReplay').checked };
+        whenTeacherStateSaved().then(function () { return saveLessonData(payload, 'บันทึกเนื้อหาคาบแล้ว'); }).then(function () { btn.disabled = false; });
       });
       $('lessonDeleteBtn').addEventListener('click', function () {
         const btn = this;
@@ -9893,8 +10108,34 @@
       const LEARN_ICON = { read: ['📖', 'อ่าน'], video: ['🎬', 'วิดีโอ'], sheet: ['📄', 'ใบงาน'], info: ['📘', 'ใบความรู้'], link: ['🔗', 'ลิงก์'], work: ['📝', 'งาน'], quiz: ['✅', 'แบบทดสอบ'] };
 
       function learnSeenKey() { return 'levelup_seen_' + LEARN_SCOPE + '_' + (currentStudentSession ? currentStudentSession.studentId : ''); }
-      function learnSeen() { try { return JSON.parse(localStorage.getItem(learnSeenKey()) || '{}') || {}; } catch (e) { return {}; } }
-      function learnMarkSeen(id) { const s = learnSeen(); if (s[id]) return; s[id] = 1; try { localStorage.setItem(learnSeenKey(), JSON.stringify(s)); } catch (e) { /* จำไม่ได้: ข้าม */ } }
+      /* รายการที่เปิดดูแล้ว: เก็บที่เซิร์ฟเวอร์ (ตามนักเรียนไปทุกเครื่อง และครูเห็นความคืบหน้า) สำเนาในเครื่องใช้ตอนออฟไลน์หรือเซิร์ฟเวอร์รุ่นเก่า */
+      var learnSrv = {};        // รายการของรายวิชาที่เปิดอยู่ ที่เซิร์ฟเวอร์บันทึกแล้ว
+      var learnQueue = [];
+      var learnQueueTimer = null;
+      function learnLocal() { try { return JSON.parse(localStorage.getItem(learnSeenKey()) || '{}') || {}; } catch (e) { return {}; } }
+      function learnSeen() { const s = learnLocal(); Object.keys(learnSrv).forEach(function (k) { s[k] = 1; }); return s; }
+      function learnFlush() {
+        learnQueueTimer = null;
+        if (!sessionToken || !currentStudentSession || !learnQueue.length) return;
+        const send = learnQueue.splice(0, 300);
+        const course = currentCourseId;
+        server('markSeen', sessionToken, send).then(function (d) {
+          if (course !== currentCourseId || !d || !Array.isArray(d.seen)) return;
+          learnSrv = {};
+          d.seen.forEach(function (k) { learnSrv[k] = 1; });
+        }).catch(function () { /* ออฟไลน์หรือเซิร์ฟเวอร์รุ่นเก่า: ยังจำไว้ในเครื่อง */ });
+      }
+      function learnPush(ids) {
+        ids.forEach(function (id) { if (!learnSrv[id] && learnQueue.indexOf(id) === -1) learnQueue.push(id); });
+        if (!learnQueue.length) return;
+        clearTimeout(learnQueueTimer);
+        learnQueueTimer = setTimeout(learnFlush, 400);
+      }
+      function learnMarkSeen(id) {
+        const s = learnLocal();
+        if (!s[id]) { s[id] = 1; try { localStorage.setItem(learnSeenKey(), JSON.stringify(s)); } catch (e) { /* จำไม่ได้: ข้าม */ } }
+        learnPush([id]);
+      }
       function learnEl(tag, cls, text) { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined && text !== null) el.textContent = text; return el; }
       function learnMonday(date) { const d = new Date(date + 'T00:00:00'); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d; }
       function learnShort(d) { try { return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); } catch (e) { return ''; } }
@@ -9924,6 +10165,7 @@
           const head = 'คาบ ' + l.period + ' • ' + learnShort(new Date(l.date + 'T00:00:00'));
           if (l.body) mod.items.push({ id: l.id + ':read', kind: 'read', title: l.title, meta: head, text: l.body, done: Boolean(seen[l.id + ':read']) });
           (l.items || []).forEach(function (it, i) {
+            i = it.i === undefined ? i : it.i;   // ลำดับเดิมจากเซิร์ฟเวอร์ (คงที่แม้งานของห้องอื่นถูกกรองออก)
             if (it.k === 'work') {
               const a = view.assignments.find(function (x) { return x.id === it.a; });
               if (a) { used[a.id] = true; mod.items.push(workItem(a, l.id + ':' + i)); }
@@ -10198,7 +10440,16 @@
         learn.key = key;
         learn.loading = true;
         if (!sameCourse) { learn.lessons = null; learn.mod = ''; learn.open = ''; }
-        const lessonsJob = currentCourseId ? server('getLessons', sessionToken).then(function (d) { learn.lessons = d.lessons || []; learn.today = d.today || ''; })
+        const lessonsJob = currentCourseId ? server('getLessons', sessionToken).then(function (d) {
+          learn.lessons = d.lessons || []; learn.today = d.today || '';
+          if (!Array.isArray(d.seen)) return;   // เซิร์ฟเวอร์รุ่นเก่า: ใช้ที่จำไว้ในเครื่องอย่างเดียว
+          learnSrv = {};
+          d.seen.forEach(function (k) { learnSrv[k] = 1; });
+          // รายการที่เคยเปิดบนเครื่องนี้ก่อนมีการเก็บที่เซิร์ฟเวอร์: ส่งขึ้นไปครั้งเดียว
+          const mine = {};
+          learn.lessons.forEach(function (l) { mine[l.id] = true; });
+          learnPush(Object.keys(learnLocal()).filter(function (k) { return mine[k.split(':')[0]]; }));
+        })
           .catch(function () { learn.lessons = learn.lessons || []; }) : Promise.resolve().then(function () { learn.lessons = []; });
         const cardsJob = server('getPortfolio', sessionToken).then(function (d) { const map = {}; (d.courses || []).forEach(function (c) { map[c.id] = c; }); learn.cards = map; })
           .catch(function () { learn.cards = learn.cards || {}; });
@@ -10286,6 +10537,243 @@
         }).catch(function (err) { $('studentViewNote').textContent = 'โหลดไม่สำเร็จ: ' + handleServerError(err); });
       }
       $('studentViewBtn').addEventListener('click', openStudentView);
+
+      /* =========================================================
+       * ครูที่ปรึกษาและผู้ปกครอง
+       * ครูที่ปรึกษา: สรุปของนักเรียนในห้องตนทุกรายวิชา (การส่งงาน การเข้าเรียน และคะแนนเฉพาะวิชาที่ยืนยันส่งคะแนนแล้ว) และออกรหัสผู้ปกครอง
+       * ผู้ปกครอง: ดูสรุปของบุตรหลานด้วยเลขประจำตัวนักเรียนและรหัสผู้ปกครอง จากหน้าเข้าสู่ระบบ (ดูได้อย่างเดียว ไม่มีการเข้าสู่ระบบ)
+       * ========================================================= */
+      var familyData = null;
+      function familyModal(title) {
+        let modal = $('familyModal');
+        if (!modal) {
+          modal = learnEl('div', 'modal-backdrop');
+          modal.id = 'familyModal';
+          modal.setAttribute('role', 'dialog');
+          modal.setAttribute('aria-modal', 'true');
+          modal.setAttribute('aria-labelledby', 'familyTitle');
+          const dialog = learnEl('div', 'modal-dialog lesson-dialog');
+          const head = learnEl('div', 'modal-header');
+          const box = learnEl('div');
+          const h = learnEl('h2', 'modal-title');
+          h.id = 'familyTitle';
+          const sub = learnEl('p', 'section-subtitle');
+          sub.id = 'familySub';
+          box.appendChild(h); box.appendChild(sub);
+          const tools = learnEl('div', 'btn-group');
+          tools.id = 'familyTools';
+          head.appendChild(box); head.appendChild(tools);
+          const msg = learnEl('div', 'inline-status-msg');
+          msg.id = 'familyMsg';
+          msg.setAttribute('aria-live', 'polite');
+          const body = learnEl('div', 'lesson-list');
+          body.id = 'familyBody';
+          dialog.appendChild(head); dialog.appendChild(msg); dialog.appendChild(body);
+          modal.appendChild(dialog);
+          document.body.appendChild(modal);
+        }
+        $('familyTitle').textContent = title;
+        $('familySub').textContent = '';
+        $('familyTools').innerHTML = '';
+        $('familyBody').innerHTML = '';
+        familyMsg('');
+        const close = learnEl('button', 'btn btn-secondary btn-sm', 'ปิด');
+        close.type = 'button';
+        close.id = 'familyClose';
+        close.addEventListener('click', closeFamilyModal);
+        $('familyTools').appendChild(close);
+        modal.hidden = false;
+        return modal;
+      }
+      function familyMsg(text, kind) {
+        const el = $('familyMsg');
+        if (!el) return;
+        el.className = 'inline-status-msg' + (kind ? ' is-' + kind : '');
+        el.textContent = text || '';
+      }
+      function closeFamilyModal() {
+        familyData = null;
+        const modal = $('familyModal');
+        if (modal) { modal.hidden = true; $('familyBody').innerHTML = ''; }
+      }
+      function familyPct(part, whole) { return whole ? Math.round(part / whole * 100) + '%' : '–'; }
+      function familyStat(box, text, warn) { box.appendChild(learnEl('span', warn ? 'is-warn' : '', text)); }
+      /* การ์ดของหนึ่งรายวิชา ใช้ทั้งหน้าครูที่ปรึกษาและหน้าผู้ปกครอง */
+      function familyCourseNode(c) {
+        const card = learnEl('div', 'family-course');
+        card.appendChild(learnEl('h3', '', [c.code, c.name].filter(Boolean).join(' ')));
+        if (c.teacherName) card.appendChild(learnEl('p', 'section-subtitle', 'ครูผู้สอน: ' + c.teacherName));
+        const stats = learnEl('div', 'family-stats');
+        const missing = c.assigned - c.submitted;
+        familyStat(stats, 'ส่งงาน ' + c.submitted + ' จาก ' + c.assigned + ' ชิ้น');
+        if (missing > 0) familyStat(stats, 'ยังไม่ส่ง ' + missing + ' ชิ้น', true);
+        familyStat(stats, c.periods ? 'มาเรียน ' + c.present + ' จาก ' + c.periods + ' คาบ (' + familyPct(c.present, c.periods) + ')' : 'ยังไม่มีการเช็กชื่อ');
+        if (c.absent) familyStat(stats, 'ขาด ' + c.absent + ' คาบ', true);
+        if (c.leave) familyStat(stats, 'ลา ' + c.leave + ' คาบ');
+        if (c.late) familyStat(stats, 'มาสาย ' + c.late + ' ครั้ง');
+        familyStat(stats, c.published ? (c.total === null ? 'ยืนยันส่งคะแนนแล้ว (ยังไม่มีคะแนน)' : 'คะแนนรวม ' + formatScore(c.total) + ' • เกรด ' + c.grade) : 'คะแนน: ครูยังไม่ยืนยันส่งคะแนน');
+        card.appendChild(stats);
+        if (c.pending && c.pending.length) {
+          const ul = learnEl('ul', 'family-pending');
+          c.pending.forEach(function (p) {
+            ul.appendChild(learnEl('li', '', p.title + (p.dueAt ? ' • กำหนดส่ง ' + formatThaiDateTime(p.dueAt) : '') + (p.closed ? ' • ปิดรับแล้ว' : '')));
+          });
+          card.appendChild(learnEl('p', 'section-subtitle', 'งานที่ยังไม่ส่ง'));
+          card.appendChild(ul);
+        }
+        return card;
+      }
+
+      /* ---------- ครูที่ปรึกษา ---------- */
+      function renderAdvisor() {
+        const body = $('familyBody');
+        body.innerHTML = '';
+        const d = familyData;
+        if (!d) return;
+        $('familySub').textContent = 'ห้อง ' + d.classroom + ' • ' + d.students.length + ' คน • คะแนนแสดงเฉพาะวิชาที่ครูผู้สอนยืนยันส่งคะแนนแล้ว';
+        if (!d.students.length) { body.appendChild(learnEl('p', 'talk-empty', 'ห้องนี้ยังไม่มีนักเรียนในทะเบียน')); return; }
+        d.students.forEach(function (s) {
+          const card = learnEl('div', 'lesson-card');
+          card.dataset.id = s.studentId;
+          const head = learnEl('button', 'lesson-head');
+          head.type = 'button';
+          head.setAttribute('aria-expanded', d.open === s.studentId ? 'true' : 'false');
+          head.appendChild(learnEl('span', 'lesson-period', s.no ? 'เลขที่ ' + s.no : s.studentId));
+          head.appendChild(learnEl('span', 'lesson-name', s.studentName));
+          const tags = learnEl('span', 'lesson-tags');
+          const missing = s.assigned - s.submitted;
+          tags.appendChild(learnEl('span', 'lesson-tag' + (missing > 0 ? ' is-off' : ''), missing > 0 ? 'ค้างส่ง ' + missing + ' ชิ้น' : 'ส่งงานครบ'));
+          tags.appendChild(learnEl('span', 'lesson-tag', s.periods ? 'มาเรียน ' + familyPct(s.present, s.periods) : 'ยังไม่เช็กชื่อ'));
+          if (s.absent) tags.appendChild(learnEl('span', 'lesson-tag is-off', 'ขาด ' + s.absent + ' คาบ'));
+          head.appendChild(tags);
+          head.addEventListener('click', function () { d.open = d.open === s.studentId ? '' : s.studentId; d.code = null; renderAdvisor(); });
+          card.appendChild(head);
+          if (d.open === s.studentId) {
+            const open = learnEl('div', 'lesson-body');
+            if (!s.courses.length) open.appendChild(learnEl('p', 'section-subtitle', 'ยังไม่ได้ลงทะเบียนรายวิชาใด'));
+            s.courses.forEach(function (c) { open.appendChild(familyCourseNode(c)); });
+            if (d.parentEnabled) {
+              const tools = learnEl('div', 'btn-group');
+              tools.style.justifyContent = 'flex-end';
+              tools.style.flexWrap = 'wrap';
+              tools.appendChild(learnEl('span', 'section-subtitle', s.parentCode ? 'ออกรหัสผู้ปกครองแล้ว' : 'ยังไม่ได้ออกรหัสผู้ปกครอง'));
+              const issue = learnEl('button', 'btn btn-secondary btn-sm js-parent-issue', s.parentCode ? 'ออกรหัสใหม่' : 'ออกรหัสผู้ปกครอง');
+              if (s.parentCode) issue.title = 'รหัสเดิมจะใช้ไม่ได้ทันที';
+              issue.type = 'button';
+              issue.addEventListener('click', function () {
+                issue.disabled = true;
+                server('issueParentCode', sessionToken, s.studentId).then(function (r) {
+                  s.parentCode = true;
+                  d.code = r;
+                  renderAdvisor();
+                }).catch(function (err) { issue.disabled = false; familyMsg('ออกรหัสไม่สำเร็จ: ' + handleServerError(err), 'error'); });
+              });
+              tools.appendChild(issue);
+              if (s.parentCode) {
+                const revoke = learnEl('button', 'btn btn-danger-ghost btn-sm js-parent-revoke', 'ยกเลิกรหัส');
+                revoke.type = 'button';
+                revoke.addEventListener('click', function () {
+                  revoke.disabled = true;
+                  server('revokeParentCode', sessionToken, s.studentId).then(function () { s.parentCode = false; d.code = null; renderAdvisor(); familyMsg('ยกเลิกรหัสผู้ปกครองของ ' + s.studentName + ' แล้ว', 'ok'); })
+                    .catch(function (err) { revoke.disabled = false; familyMsg('ยกเลิกไม่สำเร็จ: ' + handleServerError(err), 'error'); });
+                });
+                tools.appendChild(revoke);
+              }
+              open.appendChild(tools);
+              if (d.code && d.code.studentId === s.studentId) {
+                const box = learnEl('div', 'family-course');
+                box.appendChild(learnEl('p', 'section-subtitle', 'รหัสผู้ปกครองของ ' + s.studentName + ' (แสดงครั้งเดียว จดหรือส่งให้ผู้ปกครองตอนนี้)'));
+                const code = learnEl('span', 'family-code', d.code.code);
+                code.id = 'familyCode';
+                box.appendChild(code);
+                box.appendChild(learnEl('p', 'section-subtitle', 'ผู้ปกครองเปิด LevelUp กด "ผู้ปกครองดูผลการเรียนของบุตรหลาน" ที่หน้าเข้าสู่ระบบ แล้วใส่เลขประจำตัวนักเรียน ' + s.studentId + ' คู่กับรหัสนี้'));
+                open.appendChild(box);
+              }
+            }
+            card.appendChild(open);
+          }
+          body.appendChild(card);
+        });
+      }
+      function loadAdvisor(room) {
+        familyData = null;
+        $('familyBody').innerHTML = '';
+        familyMsg('กำลังโหลด...');
+        server('getAdvisorSummary', sessionToken, room).then(function (d) {
+          if (!$('familyModal') || $('familyModal').hidden) return;
+          familyData = d;
+          familyMsg('');
+          renderAdvisor();
+        }).catch(function (err) { familyMsg('โหลดไม่สำเร็จ: ' + handleServerError(err), 'error'); });
+      }
+      function openAdvisor() {
+        if (!sessionToken || !teacherAuthenticated || !advisorRooms.length) return;
+        familyModal('🧑‍🏫 ห้องที่ปรึกษา');
+        const sel = learnEl('select', 'select-input');
+        sel.id = 'familyRoom';
+        sel.setAttribute('aria-label', 'เลือกห้องที่ปรึกษา');
+        advisorRooms.forEach(function (r) { const o = learnEl('option', '', 'ห้อง ' + r); o.value = r; sel.appendChild(o); });
+        sel.addEventListener('change', function () { loadAdvisor(sel.value); });
+        $('familyTools').insertBefore(sel, $('familyTools').firstChild);
+        loadAdvisor(sel.value);
+      }
+      $('advisorBtn').addEventListener('click', openAdvisor);
+
+      /* ---------- ผู้ปกครอง ---------- */
+      function renderParentResult(d) {
+        const body = $('familyBody');
+        body.innerHTML = '';
+        $('familySub').textContent = d.studentName + ' • ห้อง ' + d.classroom + (d.advisor ? ' • ' + d.advisor : '') + (d.school ? ' • ' + d.school : '');
+        body.appendChild(learnEl('p', 'section-subtitle', 'ข้อมูล ณ ' + formatThaiDateTime(d.asOf) + ' • คะแนนแสดงเมื่อครูผู้สอนยืนยันส่งคะแนนแล้ว'));
+        if (!d.courses.length) body.appendChild(learnEl('p', 'talk-empty', 'ยังไม่มีรายวิชาที่ลงทะเบียน'));
+        d.courses.forEach(function (c) { body.appendChild(familyCourseNode(c)); });
+        const again = learnEl('button', 'btn btn-secondary btn-sm', 'ดูของนักเรียนคนอื่น');
+        again.type = 'button';
+        again.style.justifySelf = 'start';
+        again.addEventListener('click', openParent);
+        body.appendChild(again);
+      }
+      function openParent() {
+        familyModal('👪 สำหรับผู้ปกครอง');
+        $('familySub').textContent = 'ใส่เลขประจำตัวนักเรียนและรหัสผู้ปกครองที่ได้รับจากครูที่ปรึกษา';
+        const form = learnEl('form', 'family-form');
+        form.id = 'parentForm';
+        form.noValidate = true;
+        const mk = function (id, label, type, max, hint) {
+          const f = learnEl('div', 'field');
+          const l = learnEl('label', '', label);
+          l.htmlFor = id;
+          const input = document.createElement('input');
+          input.type = type; input.id = id; input.className = 'input'; input.maxLength = max; input.autocomplete = 'off';
+          if (hint) input.placeholder = hint;
+          f.appendChild(l); f.appendChild(input);
+          form.appendChild(f);
+          return input;
+        };
+        const idIn = mk('parentStudentId', 'เลขประจำตัวนักเรียน', 'text', 20, '');
+        const codeIn = mk('parentCode', 'รหัสผู้ปกครอง', 'text', 16, 'เช่น A1B2C-3D4E5');
+        const go = learnEl('button', 'btn btn-primary', 'ดูผลการเรียน');
+        go.type = 'submit';
+        go.id = 'parentSubmit';
+        form.appendChild(go);
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          const sid = idIn.value.trim(), code = codeIn.value.trim();
+          if (!sid || code.replace(/[^0-9A-Fa-f]/g, '').length !== 10) { familyMsg('กรุณาใส่เลขประจำตัวนักเรียน และรหัสผู้ปกครองให้ครบ 10 ตัว', 'error'); return; }
+          go.disabled = true;
+          familyMsg('กำลังตรวจสอบ...');
+          server('parentView', sid, code).then(function (d) {
+            if (!$('familyModal') || $('familyModal').hidden) return;
+            familyMsg('');
+            renderParentResult(d);
+          }).catch(function (err) { go.disabled = false; familyMsg(errorText(err), 'error'); });
+        });
+        $('familyBody').appendChild(form);
+        idIn.focus();
+      }
+      $('parentBtn').addEventListener('click', openParent);
+      /* ลิงก์ที่ลงท้ายด้วย #parent เปิดหน้าสำหรับผู้ปกครองทันที (ใช้ได้บน LevelUp Cloud และแอปที่ติดตั้ง ส่วนบน Apps Script ให้กดลิงก์ที่หน้าเข้าสู่ระบบ) */
+      try { if (/^#parent$/i.test(location.hash)) setTimeout(function () { if (!sessionToken) openParent(); }, 600); } catch (e) { /* ไม่มีผลกับส่วนอื่น */ }
 
       const baseRenderStudentPortal = renderStudentPortal;
       renderStudentPortal = function () {
@@ -11018,6 +11506,7 @@
         $('courseEditBtn').hidden = !(isTeacher && currentCourseId);
         $('lessonBtn').hidden = !currentCourseId;
         $('studentViewBtn').hidden = !(isTeacher && currentCourseId);
+        $('advisorBtn').hidden = !(isTeacher && advisorRooms.length);
         $('courseMeetLink').hidden = !courseMeet;
         if (courseMeet) $('courseMeetLink').href = courseMeet; else $('courseMeetLink').removeAttribute('href');
         $('courseNewBtn').hidden = !(isTeacher && isAdmin);
@@ -11467,14 +11956,46 @@
         $('adminRoomCancel').hidden = true;
         $('adminRoomName').value = '';
         $('adminRoomAdvisor').value = '';
+        renderAdvisorChecks([]);
       }
+      /* ช่องเลือกบัญชีครูที่ปรึกษาของห้อง (รวมบัญชีผู้ดูแล) */
+      function renderAdvisorChecks(selected) {
+        const box = $('adminRoomAdvisorIds');
+        box.innerHTML = '';
+        [{ key: 'teacher', displayName: 'ผู้ดูแลระบบ' }].concat((adminData.teachers || []).filter(function (t) { return t.active; })).forEach(function (t) {
+          const label = document.createElement('label');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = t.key;
+          cb.checked = selected.indexOf(t.key) !== -1;
+          label.appendChild(cb);
+          label.appendChild(document.createTextNode(t.displayName || t.key));
+          box.appendChild(label);
+        });
+      }
+      function advisorChecked() {
+        return Array.prototype.map.call($('adminRoomAdvisorIds').querySelectorAll('input:checked'), function (cb) { return cb.value; }).slice(0, 4);
+      }
+      $('familySave').addEventListener('click', function () {
+        const btn = this;
+        btn.disabled = true;
+        adminCall('saveFamilySettings', [{ advisor: $('familyAdvisor').checked, parent: $('familyParent').checked }], 'บันทึกการตั้งค่าครูที่ปรึกษาและผู้ปกครองแล้ว', btn)
+          .catch(function () {}).then(function () { btn.disabled = false; });
+      });
 
       function renderAdminRooms() {
         const wrap = $('adminRoomList');
         wrap.innerHTML = '';
+        $('familyBox').hidden = !adminData.family;   // เซิร์ฟเวอร์รุ่นเก่ายังไม่มีส่วนนี้
+        $('familyAdvisor').checked = Boolean(adminData.family && adminData.family.advisor);
+        $('familyParent').checked = Boolean(adminData.family && adminData.family.parent);
+        if (!adminRoomEditing) renderAdvisorChecks(advisorChecked());
+        const teacherNames = { teacher: 'ผู้ดูแลระบบ' };
+        (adminData.teachers || []).forEach(function (t) { teacherNames[t.key] = t.displayName || t.key; });
         if (adminData.rooms.length === 0) wrap.appendChild(emptyNote('ยังไม่มีห้องเรียนในทะเบียน'));
         adminData.rooms.forEach(function (r) {
-          wrap.appendChild(adminRow(r.classroom, r.students + ' คน' + (r.advisor ? ' • ' + r.advisor : ''), [
+          wrap.appendChild(adminRow(r.classroom, r.students + ' คน' + (r.advisor ? ' • ' + r.advisor : '') +
+            ((r.advisorIds || []).length ? ' • บัญชีที่ปรึกษา: ' + r.advisorIds.map(function (k) { return teacherNames[k] || k; }).join(', ') : ''), [
             smallButton('แก้ไข', function () {
               adminRoomEditing = r.classroom;
               $('adminRoomLegend').textContent = 'แก้ไขห้อง ' + r.classroom + ' (เปลี่ยนชื่อห้องได้)';
@@ -11482,6 +12003,7 @@
               $('adminRoomCancel').hidden = false;
               $('adminRoomName').value = r.classroom;
               $('adminRoomAdvisor').value = r.advisor || '';
+              renderAdvisorChecks(r.advisorIds || []);
               $('adminRoomName').focus();
             }),
             r.students === 0
@@ -11504,8 +12026,8 @@
         btn.disabled = true;
         const editing = adminRoomEditing;
         const payload = editing
-          ? { classroom: editing, newName: name, advisor: $('adminRoomAdvisor').value.trim() }
-          : { classroom: name, advisor: $('adminRoomAdvisor').value.trim(), isNew: true };
+          ? { classroom: editing, newName: name, advisor: $('adminRoomAdvisor').value.trim(), advisorIds: advisorChecked() }
+          : { classroom: name, advisor: $('adminRoomAdvisor').value.trim(), advisorIds: advisorChecked(), isNew: true };
         adminCall('saveRoom', [payload], editing
           ? (editing === name ? 'บันทึกห้อง ' + name + ' แล้ว' : 'เปลี่ยนชื่อห้อง ' + editing + ' เป็น ' + name + ' ในทุกรายวิชาแล้ว')
           : 'เพิ่มห้อง ' + name + ' แล้ว')
