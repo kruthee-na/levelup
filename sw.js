@@ -1,12 +1,11 @@
 /* LevelUp service worker — เก็บหน้าแอปไว้ในเครื่องเพื่อเปิดได้เร็วและเปิดได้แม้ออฟไลน์
  * ข้อมูลคะแนน/การส่งงานไม่ถูกเก็บในแคช: คำขอไปยัง Apps Script (POST) วิ่งตรงถึงเซิร์ฟเวอร์เสมอ */
-const VERSION = 'bf24351aef';
+const VERSION = '22026c7b2d';
 const CACHE = 'levelup-' + VERSION;
 const SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
-const CDN = [
-  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'
-];
+/* ไลบรารีจาก CDN (ตัวอ่าน Excel และกราฟ) ไม่ถูกโหลดไว้ล่วงหน้าอีกต่อไป
+ * หน้าเว็บโหลดเมื่อถึงเวลาใช้จริง และตัวจัดการ fetch ด้านล่างจะเก็บลงแคชให้เองตอนใช้ครั้งแรก */
+const CDN = [];
 
 self.addEventListener('install', event => {
   event.waitUntil(

@@ -20,8 +20,6 @@
   <script>/* ใช้ธีมสีและฟอนต์ที่เลือกไว้บนเครื่องนี้ตั้งแต่ก่อนวาดหน้า */
   (function(){try{var u=JSON.parse(localStorage.getItem('levelup_ui')||'{}'),e=document.documentElement;if(/^[a-z]{2,20}$/.test(u.theme||''))e.setAttribute('data-ui-theme',u.theme);if(/^[A-Za-z0-9 ]{2,40}$/.test(u.font||'')&&String(u.href||'').indexOf('https://fonts.googleapis.com/css2?family=')===0){var l=document.createElement('link');l.id='uiFontLink';l.rel='stylesheet';l.href=u.href;document.head.appendChild(l);e.style.setProperty('--font','"'+u.font+'", "IBM Plex Sans Thai", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif');}}catch(x){}})();
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <style>
     :root {
       --bg: #ece6fb;
@@ -224,6 +222,10 @@
     .today-row.is-soon { background: #fff3cd; }
     .today-ico { flex: none; }
     .today-text { flex: 1; min-width: 0; font-size: 0.92rem; overflow-wrap: anywhere; }
+    .copy-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .copy-list { display: grid; gap: 4px; max-height: 240px; overflow-y: auto; padding-right: 4px; }
+    .copy-list label { display: flex; gap: 8px; align-items: flex-start; font-size: 0.9rem; padding: 4px 6px; border-radius: 8px; }
+    .copy-list label:hover { background: rgba(var(--brand-rgb, 45, 106, 79), 0.08); }
     .gallery-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
     .gallery-card { border: 1px solid rgba(var(--brand-rgb, 45, 106, 79), 0.18); border-radius: 16px; overflow: hidden; background: #fff; display: flex; flex-direction: column; }
     .gallery-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; cursor: zoom-in; background: var(--tint); }
@@ -3019,6 +3021,7 @@
           <p class="section-subtitle" id="lessonSub"></p>
         </div>
         <div class="btn-group">
+          <button type="button" class="btn btn-secondary btn-sm" id="lessonCopyBtn" hidden>📋 คัดลอกไปวิชาอื่น</button>
           <button type="button" class="btn btn-secondary btn-sm" id="lessonProgressBtn" hidden>📊 ความคืบหน้า</button>
           <button type="button" class="btn btn-primary btn-sm" id="lessonNewBtn" hidden>+ เพิ่มเนื้อหาคาบ</button>
           <button type="button" class="btn btn-secondary btn-sm" id="lessonCloseBtn">ปิด</button>
@@ -3151,6 +3154,40 @@
       /* =========================================================
        * สถานะของแอป (โหลดจาก Google Sheets ผ่าน Apps Script)
        * ========================================================= */
+      /* =========================================================
+       * ไลบรารีภายนอก: โหลดเมื่อถึงเวลาใช้จริงเท่านั้น ไม่โหลดตอนเปิดหน้าเว็บ
+       * ตัวอ่าน/เขียน Excel ใช้เฉพาะตอนนำเข้ารายชื่อและส่งออก SGS ส่วนกราฟใช้เฉพาะหน้าที่มีแผนภูมิ
+       * นักเรียนส่วนใหญ่ไม่ได้ใช้ทั้งสองตัว หน้าเว็บจึงเปิดครั้งแรกเบาลงมาก
+       * ทุกจุดที่ใช้มีทางสำรองอยู่แล้วเมื่อโหลดไม่สำเร็จ (ตารางข้อความแทนกราฟ หรือแนะนำให้ใช้ CSV)
+       * ========================================================= */
+      const XLSX_URL = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+      const CHARTJS_URL = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
+      var scriptLoads = {};
+      function loadScriptOnce(url) {
+        if (!scriptLoads[url]) {
+          scriptLoads[url] = new Promise(function (resolve, reject) {
+            const el = document.createElement('script');
+            el.src = url;
+            el.onload = resolve;
+            el.onerror = function () { delete scriptLoads[url]; reject(new Error('SCRIPT_LOAD_FAILED')); };
+            document.head.appendChild(el);
+          });
+        }
+        return scriptLoads[url];
+      }
+      /* คืนค่า true เมื่อไลบรารีพร้อมใช้ (โหลดไม่สำเร็จจะได้ false ไม่โยนข้อผิดพลาด) */
+      function ensureLib(name, url) {
+        if (typeof window[name] !== 'undefined') return Promise.resolve(true);
+        return loadScriptOnce(url).then(function () { return typeof window[name] !== 'undefined'; }).catch(function () { return false; });
+      }
+      var chartRetry = {};
+      /* หน้าที่มีแผนภูมิ: วาดด้วยตารางข้อความไปก่อน แล้วโหลดไลบรารีกราฟและวาดใหม่หนึ่งครั้ง */
+      function ensureChartThen(key, redraw) {
+        if (typeof Chart !== 'undefined' || chartRetry[key]) return;
+        chartRetry[key] = true;
+        ensureLib('Chart', CHARTJS_URL).then(function (ok) { if (ok) redraw(); });
+      }
+
       const classrooms = [];
       const students = [];
       const assignments = [];
@@ -4275,7 +4312,12 @@
           let records = [];
           if (ext === 'xlsx' || ext === 'xls') {
             if (typeof XLSX === 'undefined') {
-              errUpload.textContent = 'ไม่สามารถโหลดตัวอ่านไฟล์ Excel ได้ กรุณาใช้ไฟล์นามสกุล .csv แทน';
+              // ยังไม่ได้โหลดตัวอ่านไฟล์ Excel: โหลดตอนนี้แล้วอ่านไฟล์เดิมอีกครั้ง
+              errUpload.textContent = 'กำลังเตรียมตัวอ่านไฟล์ Excel...';
+              ensureLib('XLSX', XLSX_URL).then(function (ok) {
+                errUpload.textContent = ok ? '' : 'ไม่สามารถโหลดตัวอ่านไฟล์ Excel ได้ กรุณาตรวจการเชื่อมต่อ หรือใช้ไฟล์นามสกุล .csv แทน';
+                if (ok) handleRosterFile(file);
+              });
               return;
             }
             try {
@@ -4722,6 +4764,7 @@
         closeStudentView();
         closeFamilyModal();
         galleryData = null;
+        copyData = null;
         applyState({ role: 'none' });
         stagedStudentFile = null;
         loginUsernameInput.value = '';
@@ -5005,6 +5048,7 @@
         const hasChart = typeof Chart !== 'undefined';
         canvases.forEach(function (c) { c.hidden = !hasChart; });
         fallbacks.forEach(function (f) { f.hidden = hasChart; });
+        ensureChartThen('dash', renderDashboard);
 
         if (hasChart) {
           if (chartGradeDist) chartGradeDist.destroy();
@@ -7018,6 +7062,7 @@
         }
         const enough = dims.length >= 3;
         const hasChart = typeof Chart !== 'undefined';
+        if (enough) ensureChartThen('stuRadar', function () { renderStudentInsights(me); });
         radarBox.hidden = !(enough && hasChart);
         radarFallback.hidden = !(enough && !hasChart);
         radarNote.hidden = enough;
@@ -7957,9 +8002,15 @@
         });
       }
       $('sumXlsxBtn').addEventListener('click', function () {
-        if (!summaryData || typeof XLSX === 'undefined') {
-          $('sumMsg').className = 'inline-status-msg is-error';
-          $('sumMsg').textContent = 'ยังโหลดตัวสร้างไฟล์ Excel ไม่สำเร็จ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่ หรือใช้ปุ่มส่งออก CSV';
+        if (!summaryData) return;
+        if (typeof XLSX === 'undefined') {
+          $('sumMsg').className = 'inline-status-msg';
+          $('sumMsg').textContent = 'กำลังเตรียมตัวสร้างไฟล์ Excel...';
+          ensureLib('XLSX', XLSX_URL).then(function (ok) {
+            if (ok) { $('sumMsg').textContent = ''; $('sumXlsxBtn').click(); return; }
+            $('sumMsg').className = 'inline-status-msg is-error';
+            $('sumMsg').textContent = 'โหลดตัวสร้างไฟล์ Excel ไม่สำเร็จ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่ หรือใช้ปุ่มส่งออก CSV';
+          });
           return;
         }
         /* สมุดงานเดียว แยกแผ่นงานตามห้อง คะแนนเป็นตัวเลขจริงเพื่อคำนวณต่อใน Excel ได้ */
@@ -9450,19 +9501,6 @@
         return wb;
       }
 
-      var scriptLoads = {};
-      function loadScriptOnce(url) {
-        if (!scriptLoads[url]) {
-          scriptLoads[url] = new Promise(function (resolve, reject) {
-            const el = document.createElement('script');
-            el.src = url;
-            el.onload = resolve;
-            el.onerror = function () { delete scriptLoads[url]; reject(new Error('SCRIPT_LOAD_FAILED')); };
-            document.head.appendChild(el);
-          });
-        }
-        return scriptLoads[url];
-      }
       function pp5TemplateBytes() {
         const raw = atob($('pp5Template').textContent.trim());
         const bytes = new Uint8Array(raw.length);
@@ -9805,6 +9843,7 @@
         const teacher = lessonData.role === 'teacher';
         $('lessonNewBtn').hidden = !teacher;
         $('lessonProgressBtn').hidden = !teacher;
+        $('lessonCopyBtn').hidden = !teacher;
         $('lessonFilterBar').hidden = !teacher;
         const room = teacher ? ($('lessonFilterRoom').value || 'ALL') : 'ALL';
         const shown = lessonData.lessons.filter(function (l) { return room === 'ALL' || l.classroom === room || l.classroom === 'ALL'; });
@@ -9936,6 +9975,7 @@
         $('lessonProgressPane').innerHTML = '';
         $('lessonNewBtn').hidden = form || !teacher;
         $('lessonProgressBtn').hidden = form || !teacher;
+        $('lessonCopyBtn').hidden = form || !teacher;
         $('lessonProgressBtn').textContent = '📊 ความคืบหน้า';
       }
       /* รอให้การบันทึกข้อมูลของครูที่ค้างอยู่ (เช่น งานที่เพิ่งสร้างจากหน้าคาบ) ถึงเซิร์ฟเวอร์ก่อน ไม่เกิน 10 วินาที */
@@ -11011,6 +11051,135 @@
       $('parentBtn').addEventListener('click', openParent);
 
       /* =========================================================
+       * คัดลอกงานและบทเรียนไปรายวิชาอื่นที่ครูคนเดียวกันสอน
+       * ใช้เมื่อสอนวิชาเดียวกันหลายรายวิชา หรือเริ่มภาคเรียนใหม่แล้วอยากใช้แผนการสอนเดิม
+       * ========================================================= */
+      var copyData = null;
+      function copyPicked(kind) {
+        return Array.prototype.map.call($('familyBody').querySelectorAll('.js-copy-' + kind + ':checked'), function (cb) { return cb.value; });
+      }
+      function copyCount() {
+        const n = copyPicked('a').length + copyPicked('l').length;
+        const btn = $('copyRunBtn');
+        if (btn) {
+          btn.disabled = n === 0;
+          btn.textContent = n ? 'คัดลอก ' + n + ' รายการ' : 'เลือกรายการที่จะคัดลอก';
+        }
+      }
+      function copySection(title, hint, kind, rows) {
+        const box = learnEl('div', 'family-course');
+        const head = learnEl('div', 'copy-head');
+        head.appendChild(learnEl('strong', '', title));
+        if (rows.length) {
+          const all = learnEl('button', 'link-btn js-copy-all', 'เลือกทั้งหมด');
+          all.type = 'button';
+          all.addEventListener('click', function () {
+            const list = $('familyBody').querySelectorAll('.js-copy-' + kind);
+            const turnOn = Array.prototype.some.call(list, function (cb) { return !cb.checked; });
+            Array.prototype.forEach.call(list, function (cb) { cb.checked = turnOn; });
+            all.textContent = turnOn ? 'ไม่เลือกเลย' : 'เลือกทั้งหมด';
+            copyCount();
+          });
+          head.appendChild(all);
+        }
+        box.appendChild(head);
+        if (hint) box.appendChild(learnEl('p', 'section-subtitle', hint));
+        if (!rows.length) { box.appendChild(learnEl('p', 'section-subtitle', 'ยังไม่มีรายการในวิชานี้')); return box; }
+        const list = learnEl('div', 'copy-list');
+        rows.forEach(function (r) {
+          const label = document.createElement('label');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.className = 'js-copy-' + kind;
+          cb.value = r.id;
+          cb.addEventListener('change', copyCount);
+          label.appendChild(cb);
+          label.appendChild(document.createTextNode(r.label));
+          list.appendChild(label);
+        });
+        box.appendChild(list);
+        return box;
+      }
+      function renderCopy() {
+        const body = $('familyBody');
+        body.innerHTML = '';
+        const d = copyData;
+        if (!d) return;
+        $('familySub').textContent = 'คัดลอกจาก ' + [d.from.code, d.from.name].filter(Boolean).join(' ');
+        if (!d.courses.length) {
+          body.appendChild(learnEl('p', 'talk-empty', 'ยังไม่มีรายวิชาปลายทาง ต้องมีรายวิชาที่คุณสอนอย่างน้อย 2 วิชาจึงจะคัดลอกได้'));
+          return;
+        }
+        const form = learnEl('div', 'family-course');
+        const f1 = learnEl('div', 'field');
+        const l1 = learnEl('label', '', 'คัดลอกไปรายวิชา');
+        l1.htmlFor = 'copyTarget';
+        const sel = learnEl('select', 'select-input');
+        sel.id = 'copyTarget';
+        d.courses.forEach(function (c) {
+          const o = learnEl('option', '', [c.code, c.name].filter(Boolean).join(' '));
+          o.value = c.id;
+          sel.appendChild(o);
+        });
+        f1.appendChild(l1); f1.appendChild(sel);
+        const f2 = learnEl('div', 'field');
+        const l2 = learnEl('label', '', 'เลื่อนวันที่ (วัน)');
+        l2.htmlFor = 'copyShift';
+        const shift = document.createElement('input');
+        shift.type = 'number';
+        shift.id = 'copyShift';
+        shift.className = 'input';
+        shift.value = '0';
+        shift.min = '-400';
+        shift.max = '400';
+        f2.appendChild(l2); f2.appendChild(shift);
+        const grid = learnEl('div', 'deadline-grid');
+        grid.appendChild(f1); grid.appendChild(f2);
+        form.appendChild(grid);
+        form.appendChild(learnEl('p', 'section-subtitle', 'ใส่ 0 เพื่อคงวันเดิม ใส่ 7 เพื่อเลื่อนไปอีกหนึ่งสัปดาห์ หรือใส่ค่าติดลบเพื่อย้อนหลัง มีผลกับกำหนดส่งของงานและวันที่ของคาบ'));
+        body.appendChild(form);
+        body.appendChild(copySection('งานที่มอบหมาย', 'งานที่คัดลอกไปจะเป็นของ "ทุกห้อง" ในวิชาปลายทาง และยังไม่แจ้งเตือนนักเรียน จนกว่าครูจะตรวจรายละเอียดและกำหนดส่งอีกครั้ง', 'a',
+          d.assignments.map(function (a) {
+            return { id: a.id, label: a.title + ' • เต็ม ' + formatScore(a.maxScore) + ' คะแนน' + (a.kind === 'quiz' ? ' • แบบทดสอบ' : (a.kind === 'rubric' ? ' • มีเกณฑ์ให้คะแนน' : '')) + (a.dueAt ? ' • กำหนดส่ง ' + formatThaiDateTime(a.dueAt) : '') };
+          })));
+        body.appendChild(copySection('เนื้อหารายคาบ', 'ถ้าคาบใดแนบงานไว้ ให้เลือกงานนั้นมาด้วย ระบบจะผูกให้กับงานชุดใหม่อัตโนมัติ', 'l',
+          d.lessons.map(function (l) {
+            return { id: l.id, label: 'คาบ ' + l.period + ' • ' + l.title + ' • ' + lessonDayLabel(l.date) + (l.items ? ' • แนบ ' + l.items : '') };
+          })));
+        const tools = learnEl('div', 'btn-group');
+        tools.style.justifyContent = 'flex-end';
+        const run = learnEl('button', 'btn btn-primary', 'เลือกรายการที่จะคัดลอก');
+        run.type = 'button';
+        run.id = 'copyRunBtn';
+        run.disabled = true;
+        run.addEventListener('click', function () {
+          const payload = { toCourseId: sel.value, shiftDays: Number(shift.value) || 0, assignmentIds: copyPicked('a'), lessonIds: copyPicked('l') };
+          run.disabled = true;
+          familyMsg('กำลังคัดลอก...');
+          server('copyToCourse', sessionToken, payload).then(function (r) {
+            familyMsg('คัดลอกไป ' + [r.to.code, r.to.name].filter(Boolean).join(' ') + ' แล้ว: งาน ' + r.assignments + ' ชิ้น • คาบ ' + r.lessons + ' คาบ เปิดวิชานั้นเพื่อตรวจรายละเอียดและกำหนดส่งอีกครั้ง', 'ok');
+            Array.prototype.forEach.call($('familyBody').querySelectorAll('.js-copy-a, .js-copy-l'), function (cb) { cb.checked = false; });
+            copyCount();
+          }).catch(function (err) { familyMsg('คัดลอกไม่สำเร็จ: ' + handleServerError(err), 'error'); run.disabled = false; });
+        });
+        tools.appendChild(run);
+        body.appendChild(tools);
+      }
+      function openCopyCourse() {
+        if (!sessionToken || !teacherAuthenticated || !currentCourseId) return;
+        copyData = null;
+        familyModal('📋 คัดลอกไปรายวิชาอื่น');
+        familyMsg('กำลังโหลด...');
+        server('getCopyOptions', sessionToken).then(function (d) {
+          if (!$('familyModal') || $('familyModal').hidden) return;
+          copyData = d;
+          familyMsg('');
+          renderCopy();
+        }).catch(function (err) { familyMsg('โหลดไม่สำเร็จ: ' + handleServerError(err), 'error'); });
+      }
+      $('lessonCopyBtn').addEventListener('click', openCopyCourse);
+
+      /* =========================================================
        * แกลเลอรีผลงานของห้อง: ผลงานที่ครูชื่นชมและเจ้าของอนุญาตให้เพื่อนในห้องเห็น
        * เจ้าของเท่านั้นที่ตัดสินใจว่าจะขึ้นหรือไม่ และนำออกได้ตลอดเวลา
        * ========================================================= */
@@ -11618,6 +11787,7 @@
         }
         const enough = dims.length >= 3;
         const hasChart = typeof Chart !== 'undefined';
+        if (enough) ensureChartThen('rpRadar', function () { renderStudentReport(stu, report); });
         $('rpRadarBox').hidden = !(enough && hasChart);
         $('rpRadarFallback').hidden = !(enough && !hasChart);
         $('rpRadarNote').hidden = enough;
