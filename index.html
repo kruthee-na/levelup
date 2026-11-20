@@ -954,6 +954,66 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
     }
+    /* ---------- ห้องเรียนของฉัน (หน้าเรียนแบบรายวิชา-โมดูล-รายการ) ---------- */
+    .learn { grid-column: 1 / -1; display: grid; gap: var(--space-4); min-width: 0; }
+    .learn-title { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--ink); }
+    .learn-resume { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); padding: var(--space-5); border-radius: 28px; color: #fff;
+      background: linear-gradient(120deg, var(--brand-deep), var(--brand) 55%, var(--accent)); box-shadow: 0 18px 36px rgba(var(--brand-deep-rgb), 0.25); }
+    .learn-resume-text { flex: 1; min-width: 220px; }
+    .learn-resume-text small { display: block; font-size: 0.85rem; opacity: 0.92; }
+    .learn-resume-text strong { display: block; font-size: 1.2rem; line-height: 1.4; overflow-wrap: anywhere; }
+    .learn-resume .btn { background: #fff; color: var(--brand-deep); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18); }
+    .learn-courses { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--space-3); }
+    .learn-course { display: grid; gap: 8px; text-align: left; font: inherit; color: var(--ink); cursor: pointer; padding: var(--space-4); border-radius: 22px; border: 2px solid transparent;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(var(--tint-rgb), 0.9)); box-shadow: var(--shadow-sm); }
+    .learn-course:hover { border-color: var(--border-strong); }
+    .learn-course:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+    .learn-course.is-current { border-color: var(--brand); }
+    .learn-course-code { font-size: 0.78rem; font-weight: 600; color: var(--brand); }
+    .learn-course-name { font-weight: 700; font-size: 1.02rem; line-height: 1.4; overflow-wrap: anywhere; }
+    .learn-course-teacher { font-size: 0.84rem; color: var(--muted); }
+    .learn-bar { height: 8px; border-radius: 999px; background: rgba(var(--brand-rgb), 0.14); overflow: hidden; }
+    .learn-bar > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--brand)); }
+    .learn-bar-label { font-size: 0.8rem; color: var(--ink-secondary); }
+    .learn-body { display: grid; grid-template-columns: minmax(220px, 290px) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+    .learn-rail { display: grid; gap: 6px; padding: var(--space-3); border-radius: 22px; background: var(--surface-strong); box-shadow: var(--shadow-sm); position: sticky; top: 96px; max-height: calc(100vh - 120px); overflow-y: auto; }
+    .learn-rail-head { font-size: 0.8rem; font-weight: 700; color: var(--muted); padding: 4px 8px; }
+    .learn-mod { display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: start; width: 100%; text-align: left; font: inherit; color: var(--ink-secondary); padding: 9px 10px; border-radius: 14px; border: 0; background: transparent; cursor: pointer; }
+    .learn-mod:hover { background: rgba(var(--brand-rgb), 0.08); }
+    .learn-mod:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+    .learn-mod.is-active { background: rgba(var(--brand-rgb), 0.14); color: var(--ink); font-weight: 600; }
+    .learn-mod small { display: block; font-size: 0.76rem; font-weight: 400; color: var(--muted); }
+    .learn-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border-strong); display: grid; place-items: center; font-size: 0.7rem; font-weight: 700; color: #fff; margin-top: 1px; }
+    .learn-dot.is-done { background: #16a34a; border-color: #16a34a; }
+    .learn-dot.is-part { border-color: var(--brand); background: conic-gradient(var(--brand) var(--p, 50%), transparent 0); }
+    .learn-main { display: grid; gap: var(--space-3); padding: var(--space-5); border-radius: 26px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(var(--tint-rgb), 0.9)); box-shadow: var(--shadow); min-width: 0; }
+    .learn-main h3 { margin: 0; font-size: 1.15rem; overflow-wrap: anywhere; }
+    .learn-main-sub { margin: 0; font-size: 0.86rem; color: var(--muted); }
+    .learn-item { border: 1px solid var(--border); border-radius: 18px; background: #fff; overflow: hidden; }
+    .learn-item-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; padding: 12px 14px; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; cursor: pointer; }
+    .learn-item-row:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+    .learn-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 1.15rem; background: rgba(var(--brand-rgb), 0.1); }
+    .learn-item.is-done .learn-ico { background: rgba(22, 163, 74, 0.14); }
+    .learn-item-name { font-weight: 600; overflow-wrap: anywhere; }
+    .learn-item-meta { display: block; font-size: 0.8rem; font-weight: 400; color: var(--muted); }
+    .learn-chip { font-size: 0.76rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; background: rgba(241, 245, 249, 0.95); color: var(--muted); }
+    .learn-chip.is-done { background: var(--success-soft); color: var(--success-ink); }
+    .learn-chip.is-due { background: var(--warning-soft); color: var(--warning-ink); }
+    .learn-open { display: grid; gap: var(--space-3); padding: 0 14px 14px; }
+    .learn-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.75; max-width: 72ch; }
+    .learn-frame { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 14px; background: #000; }
+    .learn-frame.is-doc { aspect-ratio: 4 / 5; max-height: 75vh; background: #f3f3f3; }
+    .learn-empty { margin: 0; padding: var(--space-5); text-align: center; color: var(--muted); }
+    @media (max-width: 860px) {
+      .learn-body { grid-template-columns: 1fr; }
+      .learn-rail { position: static; max-height: none; display: flex; overflow-x: auto; gap: 8px; }
+      .learn-rail-head { display: none; }
+      .learn-mod { flex: none; width: auto; max-width: 240px; background: rgba(var(--brand-rgb), 0.06); }
+      .learn-item-row { grid-template-columns: 36px minmax(0, 1fr); }
+      .learn-item-row .learn-chip { grid-column: 2; justify-self: start; }
+    }
+    .modal-dialog.learn-preview { max-width: 1100px; text-align: left; }
+    .modal-dialog.learn-preview .learn-rail { top: 0; max-height: 60vh; }
   </style>
 </head>
 <body class="is-logged-out">
@@ -1054,6 +1114,7 @@
       <select id="courseSelect" class="select-input" aria-label="เลือกรายวิชา"></select>
       <a class="btn btn-secondary btn-sm" id="courseMeetLink" target="_blank" rel="noopener noreferrer" hidden>🎥 ห้องเรียนออนไลน์</a>
       <button type="button" class="btn btn-secondary btn-sm" id="lessonBtn" hidden>📚 เนื้อหารายคาบ</button>
+      <button type="button" class="btn btn-secondary btn-sm" id="studentViewBtn" hidden>👀 มุมมองนักเรียน</button>
       <button type="button" class="btn btn-secondary btn-sm" id="courseEditBtn" hidden>⚙️ แก้ไขวิชานี้</button>
       <button type="button" class="btn btn-primary btn-sm" id="courseNewBtn" hidden>＋ วิชาใหม่</button>
       <button type="button" class="btn btn-secondary btn-sm" id="teachersBtn" hidden>🛠 จัดการระบบ</button>
@@ -4514,6 +4575,7 @@
         sessionToken = '';
         try { tokenStore.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ }
         ['reportModal', 'profileModal', 'passwordModal', 'imagePreviewModal', 'chatModal', 'aiModal', 'courseModal', 'teachersModal', 'portfolioModal', 'pp5Modal', 'quizModal', 'lessonModal'].forEach(function (id) { $(id).hidden = true; });
+        closeStudentView();
         applyState({ role: 'none' });
         stagedStudentFile = null;
         loginUsernameInput.value = '';
@@ -9810,6 +9872,364 @@
       });
 
       /* =========================================================
+       * ห้องเรียนของฉัน: หน้าเรียนของนักเรียนแบบ รายวิชา > สัปดาห์ > รายการเรียนรู้ 
+       * ใช้ข้อมูลเดิมของระบบ: เนื้อหารายคาบ งาน แบบทดสอบ และการส่งงาน ไม่เก็บข้อมูลใหม่บนเซิร์ฟเวอร์
+       * รายการที่เปิดดูแล้วจำไว้ในเครื่องของนักเรียน (localStorage)
+       * ========================================================= */
+      const LEARN_SCOPE = typeof CLOUD_ORG === 'string' ? CLOUD_ORG : '';   // บน LevelUp Cloud แยกตามหน่วยงาน
+      var learnView = null;   // มุมมองนักเรียนที่ครูเปิดดูตัวอย่าง: { lessons, assignments, submissions, seen, room } (null = หน้าเรียนจริงของนักเรียน)
+      function LV() { return learnView || { lessons: learn.lessons, assignments: assignments, submissions: submissions, seen: learnSeen() }; }
+      function learnRerender() { if (learnView) renderStudentView(); else renderLearn(); }
+      var learn = { key: '', lessons: null, today: '', cards: null, mod: '', open: '', loading: false };
+      const LEARN_ICON = { read: ['📖', 'อ่าน'], video: ['🎬', 'วิดีโอ'], sheet: ['📄', 'ใบงาน'], info: ['📘', 'ใบความรู้'], link: ['🔗', 'ลิงก์'], work: ['📝', 'งาน'], quiz: ['✅', 'แบบทดสอบ'] };
+
+      function learnSeenKey() { return 'levelup_seen_' + LEARN_SCOPE + '_' + (currentStudentSession ? currentStudentSession.studentId : ''); }
+      function learnSeen() { try { return JSON.parse(localStorage.getItem(learnSeenKey()) || '{}') || {}; } catch (e) { return {}; } }
+      function learnMarkSeen(id) { const s = learnSeen(); if (s[id]) return; s[id] = 1; try { localStorage.setItem(learnSeenKey(), JSON.stringify(s)); } catch (e) { /* จำไม่ได้: ข้าม */ } }
+      function learnEl(tag, cls, text) { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined && text !== null) el.textContent = text; return el; }
+      function learnMonday(date) { const d = new Date(date + 'T00:00:00'); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d; }
+      function learnShort(d) { try { return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); } catch (e) { return ''; } }
+      function learnIso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+
+      /* รายการเรียนรู้ของรายวิชาที่เปิดอยู่ จัดเป็นโมดูลรายสัปดาห์ */
+      function learnModules() {
+        const view = LV();
+        const seen = view.seen;
+        const sent = {};
+        view.submissions.forEach(function (w) { sent[w.assignmentId] = w; });
+        const used = {};
+        const workItem = function (a, id) {
+          const w = sent[a.id];
+          const quiz = quizOf(a);
+          const graded = w && w.status === 'graded';
+          return { id: id, kind: quiz ? 'quiz' : 'work', a: a, title: a.title, done: Boolean(w),
+            meta: (quiz ? quiz.q.length + ' ข้อ' + (quiz.timeMin ? ' • ' + quiz.timeMin + ' นาที' : '') + ' • ' : '') + 'เต็ม ' + formatScore(a.maxScore) + ' คะแนน' + (a.dueAt ? ' • กำหนดส่ง ' + formatThaiDateTime(a.dueAt) : ''),
+            chip: graded ? 'ได้ ' + formatScore(w.awardedScore) + ' / ' + formatScore(a.maxScore) : (w ? 'ส่งแล้ว รอตรวจ' : (isClosed(a) ? 'ปิดรับแล้ว' : 'ยังไม่ส่ง')), chipDue: !w };
+        };
+        const byWeek = {};
+        (view.lessons || []).slice().sort(function (x, y) { return x.date === y.date ? x.period - y.period : (x.date < y.date ? -1 : 1); }).forEach(function (l) {
+          const mon = learnMonday(l.date);
+          const key = learnIso(mon);
+          const mod = byWeek[key] || (byWeek[key] = { id: key, monday: mon, items: [], topics: [] });
+          mod.topics.push(l.title);
+          const head = 'คาบ ' + l.period + ' • ' + learnShort(new Date(l.date + 'T00:00:00'));
+          if (l.body) mod.items.push({ id: l.id + ':read', kind: 'read', title: l.title, meta: head, text: l.body, done: Boolean(seen[l.id + ':read']) });
+          (l.items || []).forEach(function (it, i) {
+            if (it.k === 'work') {
+              const a = view.assignments.find(function (x) { return x.id === it.a; });
+              if (a) { used[a.id] = true; mod.items.push(workItem(a, l.id + ':' + i)); }
+              return;
+            }
+            const id = l.id + ':' + i;
+            mod.items.push({ id: id, kind: LEARN_ICON[it.k] ? it.k : 'link', title: it.t || LEARN_ICON[it.k][1], meta: l.title + ' • ' + head, url: it.u, done: Boolean(seen[id]) });
+          });
+          if (!l.body && !(l.items || []).length) mod.items.push({ id: l.id + ':read', kind: 'read', title: l.title, meta: head, text: 'คาบนี้ยังไม่มีเนื้อหา', done: Boolean(seen[l.id + ':read']) });
+        });
+        const mods = Object.keys(byWeek).sort().map(function (k, i) {
+          const m = byWeek[k];
+          const fri = new Date(m.monday.getTime()); fri.setDate(fri.getDate() + 6);
+          m.name = 'สัปดาห์ที่ ' + (i + 1);
+          m.sub = learnShort(m.monday) + ' – ' + learnShort(fri);
+          m.topic = m.topics.filter(function (t, j, all) { return all.indexOf(t) === j; }).slice(0, 2).join(' • ');
+          return m;
+        });
+        const loose = view.assignments.filter(function (a) { return !used[a.id]; }).map(function (a) { return workItem(a, 'a:' + a.id); });
+        if (loose.length) mods.push({ id: 'loose', name: 'งานของรายวิชา', sub: loose.length + ' ชิ้น', topic: '', items: loose });
+        mods.forEach(function (m) { m.done = m.items.filter(function (x) { return x.done; }).length; });
+        return mods;
+      }
+
+      function learnGo(item) {
+        if (!item.a) return;
+        stuAssignSelect.value = item.a.id;
+        updateStudentAssignInfo();
+        if (item.kind === 'quiz' && !item.done && !isClosed(item.a)) { openQuiz(); return; }
+        $('studentSubmitWorkForm').scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
+
+      function learnItemNode(item) {
+        const ico = LEARN_ICON[item.kind] || LEARN_ICON.link;
+        const box = learnEl('div', 'learn-item' + (item.done ? ' is-done' : ''));
+        box.dataset.id = item.id;
+        const row = learnEl('button', 'learn-item-row');
+        row.type = 'button';
+        row.setAttribute('aria-expanded', learn.open === item.id ? 'true' : 'false');
+        const icon = learnEl('span', 'learn-ico', item.done ? '✓' : ico[0]);
+        icon.setAttribute('aria-hidden', 'true');
+        const name = learnEl('span', 'learn-item-name', item.title);
+        name.appendChild(learnEl('span', 'learn-item-meta', ico[1] + (item.meta ? ' • ' + item.meta : '')));
+        row.appendChild(icon);
+        row.appendChild(name);
+        row.appendChild(learnEl('span', 'learn-chip' + (item.done ? ' is-done' : (item.chipDue ? ' is-due' : '')), item.chip || (item.done ? 'เรียนแล้ว' : 'ยังไม่ได้เปิด')));
+        row.addEventListener('click', function () {
+          learn.open = learn.open === item.id ? '' : item.id;
+          if (learn.open && !item.a && !learnView) learnMarkSeen(item.id);
+          learnRerender();
+        });
+        box.appendChild(row);
+        if (learn.open !== item.id) return box;
+        const open = learnEl('div', 'learn-open');
+        if (item.text) open.appendChild(learnEl('p', 'learn-text', item.text));
+        if (item.url) {
+          const embed = lessonEmbed(item.url);
+          if (embed) {
+            const frame = document.createElement('iframe');
+            frame.className = 'learn-frame' + (embed.doc ? ' is-doc' : '');
+            frame.src = embed.src;
+            frame.title = item.title;
+            frame.loading = 'lazy';
+            frame.referrerPolicy = 'strict-origin-when-cross-origin';
+            frame.setAttribute('allow', 'fullscreen; picture-in-picture; encrypted-media');
+            frame.setAttribute('allowfullscreen', '');
+            open.appendChild(frame);
+          }
+          const link = learnEl('a', 'btn btn-secondary btn-sm', embed ? 'เปิดในแท็บใหม่' : 'เปิดลิงก์นี้');
+          link.href = /^https:\/\//.test(item.url) ? item.url : '#';
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.style.justifySelf = 'start';
+          open.appendChild(link);
+        }
+        if (item.a) {
+          if (item.a.desc) open.appendChild(learnEl('p', 'learn-text', item.a.desc));
+          const w = LV().submissions.find(function (x) { return x.assignmentId === item.a.id; });
+          if (w && w.status === 'graded' && w.feedback) open.appendChild(learnEl('p', 'learn-text', 'ครู: ' + w.feedback));
+          if (learnView) open.appendChild(learnEl('p', 'learn-main-sub', isClosed(item.a) ? 'งานนี้ปิดรับแล้ว นักเรียนจะไม่เห็นปุ่มส่ง' : 'นักเรียนจะเห็นปุ่ม "' + (item.kind === 'quiz' ? 'เริ่มทำแบบทดสอบ' : 'ไปส่งงานนี้') + '" ตรงนี้'));
+          else if (!w && !isClosed(item.a)) {
+            const go = learnEl('button', 'btn btn-primary', item.kind === 'quiz' ? 'เริ่มทำแบบทดสอบ' : 'ไปส่งงานนี้');
+            go.type = 'button';
+            go.style.justifySelf = 'start';
+            go.addEventListener('click', function () { learnGo(item); });
+            open.appendChild(go);
+          }
+        }
+        box.appendChild(open);
+        return box;
+      }
+
+      function renderLearn() {
+        const host = $('viewStudentPortal');
+        let root = $('learnRoot');
+        if (!host || !currentStudentSession || legacyServer) { if (root) root.hidden = true; return; }
+        if (!root) {
+          root = learnEl('section', 'learn');
+          root.id = 'learnRoot';
+          root.setAttribute('aria-label', 'ห้องเรียนของฉัน');
+          host.insertBefore(root, host.firstChild);
+        }
+        root.hidden = false;
+        learnFill(root, true);
+      }
+
+      /* วาดหน้าเรียนลงใน root: ใช้ทั้งหน้าเรียนจริงของนักเรียน และมุมมองนักเรียนที่ครูเปิดดูตัวอย่าง */
+      function learnFill(root, withCourses) {
+        const view = LV();
+        root.innerHTML = '';
+        const mods = view.lessons ? learnModules() : [];
+        const total = mods.reduce(function (n, m) { return n + m.items.length; }, 0);
+        const done = mods.reduce(function (n, m) { return n + m.done; }, 0);
+        const course = courses.find(function (c) { return c.id === currentCourseId; });
+
+        /* เรียนต่อ: รายการแรกที่ยังไม่เสร็จของวิชาที่เปิดอยู่ */
+        let next = null, nextMod = null;
+        mods.forEach(function (m) { m.items.forEach(function (x) { if (!next && !x.done && !(x.a && isClosed(x.a))) { next = x; nextMod = m; } }); });
+        if (course) {
+          const banner = learnEl('div', 'learn-resume');
+          const text = learnEl('div', 'learn-resume-text');
+          text.appendChild(learnEl('small', '', [course.code, course.name].filter(Boolean).join(' ') + (total ? ' • เรียนแล้ว ' + done + ' จาก ' + total + ' รายการ' : '')));
+          text.appendChild(learnEl('strong', '', !view.lessons ? 'กำลังโหลดบทเรียน...' : (next ? 'เรียนต่อ: ' + next.title : (total ? 'เรียนครบทุกรายการแล้ว 🎉' : 'ครูยังไม่ได้เพิ่มบทเรียนในวิชานี้'))));
+          banner.appendChild(text);
+          if (next) {
+            const go = learnEl('button', 'btn', 'เรียนต่อ');
+            go.type = 'button';
+            go.id = 'learnResumeBtn';
+            go.addEventListener('click', function () {
+              learn.mod = nextMod.id; learn.open = next.id;
+              if (!next.a && !learnView) learnMarkSeen(next.id);
+              learnRerender();
+              const node = root.querySelector('.learn-item[data-id="' + next.id.replace(/[^A-Za-z0-9:_-]/g, '') + '"]');
+              if (node) node.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            });
+            banner.appendChild(go);
+          }
+          if (courseMeet) {
+            const meet = learnEl('a', 'btn', '🎥 เข้าห้องเรียนออนไลน์');
+            meet.href = courseMeet; meet.target = '_blank'; meet.rel = 'noopener noreferrer';
+            banner.appendChild(meet);
+          }
+          root.appendChild(banner);
+        }
+
+        /* รายวิชาของฉัน */
+        if (withCourses && courses.length) {
+          root.appendChild(learnEl('h2', 'learn-title', 'รายวิชาของฉัน'));
+          const grid = learnEl('div', 'learn-courses');
+          courses.forEach(function (c) {
+            const info = (learn.cards || {})[c.id] || {};
+            const card = learnEl('button', 'learn-course' + (c.id === currentCourseId ? ' is-current' : ''));
+            card.type = 'button';
+            card.dataset.id = c.id;
+            if (c.id === currentCourseId) card.setAttribute('aria-current', 'true');
+            if (c.code) card.appendChild(learnEl('span', 'learn-course-code', c.code));
+            card.appendChild(learnEl('span', 'learn-course-name', c.name));
+            card.appendChild(learnEl('span', 'learn-course-teacher', c.teacherName ? 'ครู' + (/^ครู/.test(c.teacherName) ? c.teacherName.replace(/^ครู/, '') : ' ' + c.teacherName) : ''));
+            const assigned = Number(info.assigned) || 0, submitted = Math.min(assigned, Number(info.submitted) || 0);
+            const bar = learnEl('span', 'learn-bar');
+            const fill = learnEl('span');
+            fill.style.width = (assigned ? Math.round(submitted / assigned * 100) : 0) + '%';
+            bar.appendChild(fill);
+            card.appendChild(bar);
+            card.appendChild(learnEl('span', 'learn-bar-label', assigned ? 'ส่งงานแล้ว ' + submitted + ' จาก ' + assigned + ' ชิ้น' : (learn.cards ? 'ยังไม่มีงานในวิชานี้' : ' ')));
+            card.addEventListener('click', function () {
+              if (c.id === currentCourseId) { const b = root.querySelector('.learn-body'); if (b) b.scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
+              courseSelect.value = c.id;
+              courseSelect.dispatchEvent(new Event('change'));
+            });
+            grid.appendChild(card);
+          });
+          root.appendChild(grid);
+        }
+
+        /* เนื้อหาของรายวิชา: โมดูลรายสัปดาห์ทางซ้าย รายการเรียนรู้ทางขวา */
+        if (!course || !view.lessons) return;
+        root.appendChild(learnEl('h2', 'learn-title', 'บทเรียนของ ' + course.name));
+        if (!mods.length) { root.appendChild(learnEl('p', 'learn-empty', 'ครูยังไม่ได้เพิ่มบทเรียนหรืองานในวิชานี้')); return; }
+        if (!mods.some(function (m) { return m.id === learn.mod; })) {
+          const cur = mods.filter(function (m) { return m.monday && learnIso(m.monday) === learnIso(learnMonday(learn.today || learnIso(new Date()))); })[0];
+          learn.mod = (nextMod || cur || mods[mods.length - 1]).id;
+        }
+        const body = learnEl('div', 'learn-body');
+        const rail = learnEl('nav', 'learn-rail');
+        rail.setAttribute('aria-label', 'สัปดาห์ของรายวิชา');
+        rail.appendChild(learnEl('div', 'learn-rail-head', 'เนื้อหารายวิชา • ' + done + ' / ' + total));
+        mods.forEach(function (m) {
+          const btn = learnEl('button', 'learn-mod' + (m.id === learn.mod ? ' is-active' : ''));
+          btn.type = 'button';
+          btn.dataset.id = m.id;
+          if (m.id === learn.mod) btn.setAttribute('aria-current', 'true');
+          const all = m.items.length && m.done === m.items.length;
+          const dot = learnEl('span', 'learn-dot' + (all ? ' is-done' : (m.done ? ' is-part' : '')), all ? '✓' : '');
+          dot.setAttribute('aria-hidden', 'true');
+          if (m.done && !all) dot.style.setProperty('--p', Math.round(m.done / m.items.length * 100) + '%');
+          const label = learnEl('span', '', m.name);
+          label.appendChild(learnEl('small', '', m.sub + ' • ' + m.done + '/' + m.items.length));
+          btn.appendChild(dot);
+          btn.appendChild(label);
+          btn.addEventListener('click', function () { learn.mod = m.id; learn.open = ''; learnRerender(); });
+          rail.appendChild(btn);
+        });
+        const active = mods.filter(function (m) { return m.id === learn.mod; })[0];
+        const main = learnEl('div', 'learn-main');
+        main.appendChild(learnEl('h3', '', active.name + (active.topic ? ': ' + active.topic : '')));
+        main.appendChild(learnEl('p', 'learn-main-sub', active.sub + ' • เสร็จแล้ว ' + active.done + ' จาก ' + active.items.length + ' รายการ'));
+        active.items.forEach(function (item) { main.appendChild(learnItemNode(item)); });
+        body.appendChild(rail);
+        body.appendChild(main);
+        root.appendChild(body);
+      }
+
+      /* โหลดบทเรียนของวิชาที่เปิดอยู่และความคืบหน้าของทุกวิชา เมื่อเปลี่ยนวิชาหรือมีการส่งงานใหม่ */
+      function loadLearn() {
+        if (!currentStudentSession || !sessionToken || legacyServer) return;
+        const key = currentStudentSession.studentId + '|' + currentCourseId + '|' + submissions.length;
+        if (key === learn.key || learn.loading) return;
+        const sameCourse = learn.key.split('|').slice(0, 2).join('|') === key.split('|').slice(0, 2).join('|');
+        learn.key = key;
+        learn.loading = true;
+        if (!sameCourse) { learn.lessons = null; learn.mod = ''; learn.open = ''; }
+        const lessonsJob = currentCourseId ? server('getLessons', sessionToken).then(function (d) { learn.lessons = d.lessons || []; learn.today = d.today || ''; })
+          .catch(function () { learn.lessons = learn.lessons || []; }) : Promise.resolve().then(function () { learn.lessons = []; });
+        const cardsJob = server('getPortfolio', sessionToken).then(function (d) { const map = {}; (d.courses || []).forEach(function (c) { map[c.id] = c; }); learn.cards = map; })
+          .catch(function () { learn.cards = learn.cards || {}; });
+        Promise.all([lessonsJob, cardsJob]).then(function () { learn.loading = false; renderLearn(); loadLearn(); });
+      }
+      /* ---------- มุมมองนักเรียน: ครูดูตัวอย่างหน้าเรียนของรายวิชาที่เปิดอยู่ ตามที่นักเรียนห้องที่เลือกจะเห็น ----------
+       * ใช้กติกาเดียวกับที่เซิร์ฟเวอร์ใช้กับนักเรียน: เฉพาะคาบของห้องนั้นที่ถึงวันสอนแล้ว คาบของวันก่อนเฉพาะที่เปิดให้ดูย้อนหลัง
+       * เป็นการดูตัวอย่างเท่านั้น ไม่มีข้อมูลของนักเรียนคนใด และส่งงานจากหน้านี้ไม่ได้ */
+      var studentViewData = null;   // { today, lessons } ของรายวิชาที่เปิดอยู่ (ฉบับที่ครูเห็น)
+      function studentViewFor(room) {
+        const today = studentViewData.today;
+        const mine = assignments.filter(function (a) { return a.classroom === 'ALL' || a.classroom === room; });
+        const ids = {};
+        mine.forEach(function (a) { ids[a.id] = true; });
+        const lessons = studentViewData.lessons.filter(function (l) {
+          return (l.classroom === 'ALL' || l.classroom === room) && l.date <= today && (l.date === today || l.replay);
+        }).map(function (l) {
+          return { id: l.id, date: l.date, period: l.period, title: l.title, body: l.body, replay: l.replay, items: (l.items || []).filter(function (x) { return x.k !== 'work' || ids[x.a]; }) };
+        });
+        return { lessons: lessons, assignments: mine, submissions: [], seen: {}, room: room };
+      }
+      function renderStudentView() {
+        const body = $('studentViewBody');
+        if (!body || !learnView) return;
+        learnFill(body, false);
+        const hidden = studentViewData.lessons.filter(function (l) { return l.classroom === 'ALL' || l.classroom === learnView.room; }).length - learnView.lessons.length;
+        $('studentViewNote').textContent = 'กำลังดูแบบนักเรียนห้อง ' + learnView.room + (hidden > 0 ? ' • มี ' + hidden + ' คาบที่นักเรียนยังไม่เห็น (ยังไม่ถึงวันสอน หรือปิดการดูย้อนหลัง)' : '');
+      }
+      function closeStudentView() {
+        learnView = null; learn.mod = ''; learn.open = '';
+        const modal = $('studentViewModal');
+        if (modal) { modal.hidden = true; $('studentViewBody').innerHTML = ''; }
+      }
+      function openStudentView() {
+        if (!sessionToken || !teacherAuthenticated || !currentCourseId) return;
+        let modal = $('studentViewModal');
+        if (!modal) {
+          modal = learnEl('div', 'modal-backdrop');
+          modal.id = 'studentViewModal';
+          modal.setAttribute('role', 'dialog');
+          modal.setAttribute('aria-modal', 'true');
+          modal.setAttribute('aria-labelledby', 'studentViewTitle');
+          const dialog = learnEl('div', 'modal-dialog learn-preview');
+          const head = learnEl('div', 'modal-header');
+          const titleBox = learnEl('div');
+          const title = learnEl('h2', 'modal-title', '👀 มุมมองนักเรียน');
+          title.id = 'studentViewTitle';
+          const note = learnEl('p', 'section-subtitle');
+          note.id = 'studentViewNote';
+          titleBox.appendChild(title); titleBox.appendChild(note);
+          const tools = learnEl('div', 'btn-group');
+          const sel = learnEl('select', 'select-input');
+          sel.id = 'studentViewRoom';
+          sel.setAttribute('aria-label', 'เลือกห้องที่ต้องการดูแบบนักเรียน');
+          sel.addEventListener('change', function () { learnView = studentViewFor(sel.value); learn.mod = ''; learn.open = ''; renderStudentView(); });
+          const close = learnEl('button', 'btn btn-secondary btn-sm', 'ปิด');
+          close.type = 'button';
+          close.id = 'studentViewClose';
+          close.addEventListener('click', closeStudentView);
+          tools.appendChild(sel); tools.appendChild(close);
+          head.appendChild(titleBox); head.appendChild(tools);
+          const body = learnEl('div', 'learn');
+          body.id = 'studentViewBody';
+          dialog.appendChild(head); dialog.appendChild(body);
+          modal.appendChild(dialog);
+          document.body.appendChild(modal);
+        }
+        const sel = $('studentViewRoom');
+        sel.innerHTML = '';
+        classrooms.forEach(function (r) { const o = learnEl('option', '', 'ห้อง ' + r); o.value = r; sel.appendChild(o); });
+        if (activeClassroom && classrooms.indexOf(activeClassroom) !== -1) sel.value = activeClassroom;
+        modal.hidden = false;
+        $('studentViewBody').innerHTML = '';
+        $('studentViewNote').textContent = classrooms.length ? 'กำลังโหลด...' : 'รายวิชานี้ยังไม่มีห้องเรียน';
+        if (!classrooms.length) return;
+        server('getLessons', sessionToken).then(function (d) {
+          if (modal.hidden) return;
+          studentViewData = { today: d.today || '', lessons: d.lessons || [] };
+          learn.today = studentViewData.today; learn.mod = ''; learn.open = '';
+          learnView = studentViewFor(sel.value);
+          renderStudentView();
+        }).catch(function (err) { $('studentViewNote').textContent = 'โหลดไม่สำเร็จ: ' + handleServerError(err); });
+      }
+      $('studentViewBtn').addEventListener('click', openStudentView);
+
+      const baseRenderStudentPortal = renderStudentPortal;
+      renderStudentPortal = function () {
+        baseRenderStudentPortal.apply(this, arguments);
+        try { renderLearn(); loadLearn(); } catch (err) { /* หน้าเรียนมีปัญหา: ส่วนอื่นของระบบยังใช้งานได้ */ }
+      };
+
+      /* =========================================================
        * ธีมสีและฟอนต์ของเว็บ: เลือกได้รายเครื่อง เก็บใน localStorage ของเบราว์เซอร์ (ไม่ส่งขึ้นเซิร์ฟเวอร์)
        * ========================================================= */
       const UI_KEY = 'levelup_ui';
@@ -10533,6 +10953,7 @@
         courseSelect.disabled = courses.length < 2;
         $('courseEditBtn').hidden = !(isTeacher && currentCourseId);
         $('lessonBtn').hidden = !currentCourseId;
+        $('studentViewBtn').hidden = !(isTeacher && currentCourseId);
         $('courseMeetLink').hidden = !courseMeet;
         if (courseMeet) $('courseMeetLink').href = courseMeet; else $('courseMeetLink').removeAttribute('href');
         $('courseNewBtn').hidden = !(isTeacher && isAdmin);
