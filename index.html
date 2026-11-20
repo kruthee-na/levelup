@@ -1012,6 +1012,15 @@
       .learn-item-row { grid-template-columns: 36px minmax(0, 1fr); }
       .learn-item-row .learn-chip { grid-column: 2; justify-self: start; }
     }
+    .learn-cal-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .learn-cal { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--space-2); }
+    .learn-cal-day { display: grid; gap: 6px; align-content: start; padding: var(--space-3); border-radius: 18px; background: var(--surface-strong); box-shadow: var(--shadow-sm); border: 2px solid transparent; min-width: 0; }
+    .learn-cal-day.is-today { border-color: var(--brand); }
+    .learn-cal-date { font-weight: 700; font-size: 0.86rem; color: var(--ink); }
+    .learn-cal-none { font-size: 0.8rem; color: var(--muted); }
+    .learn-cal-ev { font-size: 0.82rem; line-height: 1.45; padding: 6px 9px; border-radius: 10px; background: rgba(var(--brand-rgb), 0.1); color: var(--ink); overflow-wrap: anywhere; }
+    .learn-cal-ev.is-due { background: var(--warning-soft); color: var(--warning-ink); font-weight: 600; }
+    .learn-cal-ev.is-done { background: var(--success-soft); color: var(--success-ink); }
     .modal-dialog.learn-preview { max-width: 1100px; text-align: left; }
     .modal-dialog.learn-preview .learn-rail { top: 0; max-height: 60vh; }
   </style>
@@ -9880,7 +9889,7 @@
       var learnView = null;   // มุมมองนักเรียนที่ครูเปิดดูตัวอย่าง: { lessons, assignments, submissions, seen, room } (null = หน้าเรียนจริงของนักเรียน)
       function LV() { return learnView || { lessons: learn.lessons, assignments: assignments, submissions: submissions, seen: learnSeen() }; }
       function learnRerender() { if (learnView) renderStudentView(); else renderLearn(); }
-      var learn = { key: '', lessons: null, today: '', cards: null, mod: '', open: '', loading: false };
+      var learn = { key: '', lessons: null, today: '', cards: null, mod: '', open: '', loading: false, cal: null, week: 0 };
       const LEARN_ICON = { read: ['📖', 'อ่าน'], video: ['🎬', 'วิดีโอ'], sheet: ['📄', 'ใบงาน'], info: ['📘', 'ใบความรู้'], link: ['🔗', 'ลิงก์'], work: ['📝', 'งาน'], quiz: ['✅', 'แบบทดสอบ'] };
 
       function learnSeenKey() { return 'levelup_seen_' + LEARN_SCOPE + '_' + (currentStudentSession ? currentStudentSession.studentId : ''); }
@@ -10090,6 +10099,8 @@
           root.appendChild(grid);
         }
 
+        if (withCourses) learnCalendar(root);
+
         /* เนื้อหาของรายวิชา: โมดูลรายสัปดาห์ทางซ้าย รายการเรียนรู้ทางขวา */
         if (!course || !view.lessons) return;
         root.appendChild(learnEl('h2', 'learn-title', 'บทเรียนของ ' + course.name));
@@ -10128,6 +10139,56 @@
         root.appendChild(body);
       }
 
+      /* ปฏิทินของฉัน: คาบเรียนตามตารางสอนและกำหนดส่งงานของทุกวิชาที่เรียน แสดงทีละสัปดาห์ */
+      function learnCalendar(root) {
+        const cal = learn.cal;
+        if (!cal) return;
+        const names = {};
+        cal.courses.forEach(function (c) { names[c.id] = c.name; });
+        const base = learnMonday(cal.today || learnIso(new Date()));
+        base.setDate(base.getDate() + learn.week * 7);
+        const head = learnEl('div', 'learn-cal-head');
+        head.appendChild(learnEl('h2', 'learn-title', 'ปฏิทินของฉัน'));
+        const nav = learnEl('div', 'btn-group');
+        [['‹ สัปดาห์ก่อน', -1, 'learnCalPrev'], ['สัปดาห์นี้', 0, 'learnCalNow'], ['สัปดาห์ถัดไป ›', 1, 'learnCalNext']].forEach(function (b) {
+          const btn = learnEl('button', 'btn btn-secondary btn-sm', b[0]);
+          btn.type = 'button';
+          btn.id = b[2];
+          if (b[1] === 0) btn.disabled = learn.week === 0;
+          btn.addEventListener('click', function () { learn.week = b[1] === 0 ? 0 : Math.max(-26, Math.min(26, learn.week + b[1])); renderLearn(); });
+          nav.appendChild(btn);
+        });
+        head.appendChild(nav);
+        root.appendChild(head);
+        const grid = learnEl('div', 'learn-cal');
+        const dayNames = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์', 'อาทิตย์'];
+        let any = false;
+        for (let i = 0; i < 7; i++) {
+          const day = new Date(base.getTime()); day.setDate(day.getDate() + i);
+          const iso = learnIso(day);
+          const events = [];
+          cal.slots.forEach(function (sl) {
+            if (sl.d === i) events.push({ sort: PERIOD_TIMES[sl.p - 1] || '00:00', kind: 'class', text: (PERIOD_TIMES[sl.p - 1] || '') + ' คาบ ' + sl.p + ' • ' + (names[sl.courseId] || '') + (sl.place ? ' • ' + sl.place : '') });
+          });
+          cal.due.forEach(function (d) {
+            const at = new Date(d.dueAt);
+            if (isNaN(at.getTime()) || learnIso(at) !== iso) return;
+            const time = ('0' + at.getHours()).slice(-2) + ':' + ('0' + at.getMinutes()).slice(-2);
+            events.push({ sort: time, kind: d.done ? 'done' : 'due', text: time + ' ส่งงาน: ' + d.title + ' • ' + (names[d.courseId] || '') + (d.done ? ' (ส่งแล้ว)' : ''), due: d });
+          });
+          if (i > 4 && !events.length) continue;
+          events.sort(function (x, y) { return x.sort < y.sort ? -1 : (x.sort > y.sort ? 1 : 0); });
+          const col = learnEl('div', 'learn-cal-day' + (iso === cal.today ? ' is-today' : ''));
+          col.dataset.date = iso;
+          col.appendChild(learnEl('div', 'learn-cal-date', dayNames[i] + ' ' + learnShort(day) + (iso === cal.today ? ' • วันนี้' : '')));
+          if (!events.length) col.appendChild(learnEl('div', 'learn-cal-none', 'ไม่มีรายการ'));
+          events.forEach(function (ev) { any = true; col.appendChild(learnEl('div', 'learn-cal-ev is-' + ev.kind, ev.text)); });
+          grid.appendChild(col);
+        }
+        root.appendChild(grid);
+        if (!any && !cal.slots.length && !cal.due.length) root.appendChild(learnEl('p', 'learn-main-sub', 'ยังไม่มีตารางสอนหรืองานที่มีกำหนดส่ง เมื่อครูตั้งตารางสอนหรือกำหนดส่งงาน รายการจะขึ้นที่นี่'));
+      }
+
       /* โหลดบทเรียนของวิชาที่เปิดอยู่และความคืบหน้าของทุกวิชา เมื่อเปลี่ยนวิชาหรือมีการส่งงานใหม่ */
       function loadLearn() {
         if (!currentStudentSession || !sessionToken || legacyServer) return;
@@ -10141,7 +10202,10 @@
           .catch(function () { learn.lessons = learn.lessons || []; }) : Promise.resolve().then(function () { learn.lessons = []; });
         const cardsJob = server('getPortfolio', sessionToken).then(function (d) { const map = {}; (d.courses || []).forEach(function (c) { map[c.id] = c; }); learn.cards = map; })
           .catch(function () { learn.cards = learn.cards || {}; });
-        Promise.all([lessonsJob, cardsJob]).then(function () { learn.loading = false; renderLearn(); loadLearn(); });
+        const calJob = Promise.all([server('getTimetable', sessionToken), server('getMyDue', sessionToken)]).then(function (d) {
+          learn.cal = { today: d[1].today || '', courses: d[0].courses || [], slots: d[0].slots || [], due: d[1].due || [] };
+        }).catch(function () { /* เซิร์ฟเวอร์รุ่นเก่ายังไม่มีปฏิทินรวม: ไม่แสดงส่วนนี้ */ });
+        Promise.all([lessonsJob, cardsJob, calJob]).then(function () { learn.loading = false; renderLearn(); loadLearn(); });
       }
       /* ---------- มุมมองนักเรียน: ครูดูตัวอย่างหน้าเรียนของรายวิชาที่เปิดอยู่ ตามที่นักเรียนห้องที่เลือกจะเห็น ----------
        * ใช้กติกาเดียวกับที่เซิร์ฟเวอร์ใช้กับนักเรียน: เฉพาะคาบของห้องนั้นที่ถึงวันสอนแล้ว คาบของวันก่อนเฉพาะที่เปิดให้ดูย้อนหลัง
